@@ -40,8 +40,6 @@ class NAILS_Tracker extends NAILS_Email_Controller
 		// --------------------------------------------------------------------------
 
 		//	Fetch the email
-		$this->load->library( 'emailer' );
-
 		$this->emailer->track_open( $_ref, $_guid, $_hash );
 
 		// --------------------------------------------------------------------------
@@ -100,8 +98,6 @@ class NAILS_Tracker extends NAILS_Email_Controller
 		// --------------------------------------------------------------------------
 
 		//	Fetch the email
-		$this->load->library( 'emailer' );
-
 		$_url = $this->emailer->track_link( $_ref, $_guid, $_hash, $_link_id );
 
 		switch ( $_url ) :

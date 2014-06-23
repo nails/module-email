@@ -50,8 +50,6 @@ class NAILS_View_Online extends NAILS_Email_Controller
 		// --------------------------------------------------------------------------
 
 		//	Fetch the email
-		$this->load->library( 'emailer' );
-
 		$_email = $this->emailer->get_by_ref( $_ref, $_guid, $_hash );
 
 		if ( ! $_email || $_email == 'BAD_HASH' ) :

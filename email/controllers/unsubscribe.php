@@ -61,7 +61,6 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
 
 		endif;
 
-		$this->load->library( 'emailer' );
 		$_email = $this->emailer->get_by_ref( $_token[1] );
 
 		if ( ! $_email ) :
