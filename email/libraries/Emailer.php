@@ -411,7 +411,7 @@ class Emailer
 		$_send->data['ci']				=& get_instance();
 
 		//	Check login URLs are allowed
-		get_instance()->config->load( 'auth' );
+		get_instance()->config->load( 'auth/auth' );
 
 		if ( ! get_instance()->config->item( 'auth_enable_hashed_login' ) ) :
 
