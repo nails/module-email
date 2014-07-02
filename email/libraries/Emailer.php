@@ -609,11 +609,28 @@ class Emailer
 
 			foreach ( $_send->data['attachments'] AS $file ) :
 
-				if ( ! $this->_add_attachment( $file ) ) :
+				//	Has a "new name" beens et for the file?
+				//	This requires the Email library be extended, suppossedly fixed in v3.0 CI branch
+				//	Wodner if it'll ever be released.
+				//	TODO: Make sure this still works if CI is ever updated.
+
+				if ( is_array( $file ) ) :
+
+					$_file		= isset( $file[0] ) ? $file[0] : NULL;
+					$_filename	= isset( $file[1] ) ? $file[1] : NULL;
+
+				else :
+
+					$_file		= $file;
+					$_filename	= NULL;
+
+				endif;
+
+				if ( ! $this->_add_attachment( $_file, $_filename ) ) :
 
 					if ( ! $graceful ) :
 
-						show_error( 'EMAILER: Failed to add attachment: ' . $file );
+						show_error( 'EMAILER: Failed to add attachment: ' . $_file );
 
 					else :
 
@@ -859,7 +876,7 @@ class Emailer
 	 * @param	string	file to add
 	 * @return	boolean
 	 **/
-	private function _add_attachment( $file )
+	private function _add_attachment( $file, $filename = NULL )
 	{
 		if ( ! file_exists( $file ) ) :
 
@@ -867,7 +884,7 @@ class Emailer
 
 		endif;
 
-		if ( ! $this->ci->email->attach( $file ) ) :
+		if ( ! $this->ci->email->attach( $file, 'attachment', $filename ) ) :
 
 			return FALSE;
 
