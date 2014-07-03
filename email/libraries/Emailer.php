@@ -609,10 +609,9 @@ class Emailer
 
 			foreach ( $_send->data['attachments'] AS $file ) :
 
-				//	Has a "new name" beens et for the file?
-				//	This requires the Email library be extended, suppossedly fixed in v3.0 CI branch
-				//	Wodner if it'll ever be released.
-				//	TODO: Make sure this still works if CI is ever updated.
+				//	TODO: Support for when custom names can be set.
+				//	IT's in the CI 3.0 dev branch, wonder if it'll ever be
+				//	released.
 
 				if ( is_array( $file ) ) :
 
@@ -626,6 +625,7 @@ class Emailer
 
 				endif;
 
+				//	In case custom names support is added
 				if ( ! $this->_add_attachment( $_file, $_filename ) ) :
 
 					if ( ! $graceful ) :
