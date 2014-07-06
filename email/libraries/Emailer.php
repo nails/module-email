@@ -60,22 +60,6 @@ class Emailer
 		$_email_config['smtp_password']	= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_password', 'email' );
 		$_email_config['smtp_port']		= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_port', 'email' );
 
-		if ( empty( $_email_config['smtp_host'] ) || empty( $_email_config['smtp_port'] ) ) :
-
-			$_error = 'EMAILER: SMTP not configured';
-
-			if ( ! empty( $config['graceful_startup'] ) ) :
-
-				$this->_set_error( $_error );
-
-			else :
-
-				show_error( $_error );
-
-			endif;
-
-		endif;
-
 		// --------------------------------------------------------------------------
 
 		//	Load and configure the Email library
