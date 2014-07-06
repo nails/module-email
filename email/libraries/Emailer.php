@@ -473,7 +473,7 @@ class Emailer
 		//	If we're not on a production server, never send out to any live addresses
 		$_send_to = $_send->to->email;
 
-		if ( ENVIRONMENT != 'production' || EMAIL_OVERRIDE ) :
+		if ( strtoupper( ENVIRONMENT ) != 'PRODUCTION' || EMAIL_OVERRIDE ) :
 
 			if ( EMAIL_OVERRIDE ) :
 
@@ -568,7 +568,7 @@ class Emailer
 
 		$this->track_link_cache = array();
 
-		if ( ENVIRONMENT == 'production' ) :
+		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
 
 			if ( $_send->to->id && ! $_send->to->email_verified ) :
 
@@ -602,7 +602,7 @@ class Emailer
 		// --------------------------------------------------------------------------
 
 		//	Parse the body for URLs and replace with a tracking URL (production only)
-		if ( ENVIRONMENT == 'production' ) :
+		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
 
 			$plaintext = $this->_parse_links( $plaintext, $_email->id, $_email->ref, FALSE, $_needs_verified );
 
@@ -714,7 +714,7 @@ class Emailer
 			$_message	.= '' . "\n";
 			$_message	.= print_r( $_send, TRUE ) . "\n";
 
-			if ( ENVIRONMENT == 'production' ) :
+			if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
 
 				$this->_set_error( 'Email failed to send at SMTP time, developers informed' );
 				send_developer_mail( $_subject, $_message );
