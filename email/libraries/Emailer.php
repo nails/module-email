@@ -35,13 +35,16 @@ class Emailer
 
 		//	Set email related settings
 		$this->from			= new stdClass();
-		$this->from->name	= APP_EMAIL_FROM_NAME;
+		$this->from->name	= app_setting( 'from_name', 'email' );
+		$this->from->email	= app_setting( 'from_email', 'email' );
 
-		if ( APP_EMAIL_FROM_EMAIL ) :
+		if ( empty( $this->from->name ) ) :
 
-			$this->from->email = APP_EMAIL_FROM_EMAIL;
+			$this->from->name = APP_NAME;
 
-		else :
+		endif;
+
+		if ( empty( $this->from->email ) ) :
 
 			$_url = parse_url( site_url() );
 			$this->from->email = 'nobody@' . $_url['host'];
@@ -50,27 +53,14 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Load the Email library
-		$this->ci->load->library( 'email' );
+		//	Check configurations
+		$_email_config = array();
+		$_email_config['smtp_host']		= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_host', 'email' );
+		$_email_config['smtp_username']	= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_username', 'email' );
+		$_email_config['smtp_password']	= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_password', 'email' );
+		$_email_config['smtp_port']		= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_port', 'email' );
 
-		// --------------------------------------------------------------------------
-
-		//	Load helpers
-		$this->ci->load->helper( 'email' );
-		$this->ci->load->helper( 'typography' );
-		$this->ci->load->helper( 'string' );
-
-		// --------------------------------------------------------------------------
-
-		//	Set defaults
-		$this->email_type		= array();
-		$this->track_link_cache	= array();
-		$this->_errors			= array();
-
-		// --------------------------------------------------------------------------
-
-		//	Check SMTP is configured
-		if ( ! DEPLOY_SMTP_HOST || ! DEPLOY_SMTP_PORT ) :
+		if ( empty( $_email_config['smtp_host'] ) || empty( $_email_config['smtp_port'] ) ) :
 
 			$_error = 'EMAILER: SMTP not configured';
 
@@ -85,6 +75,26 @@ class Emailer
 			endif;
 
 		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Load and configure the Email library
+		$this->ci->load->library( 'email' );
+		$this->ci->email->initialize( $_email_config );
+
+		// --------------------------------------------------------------------------
+
+		//	Load helpers
+		$this->ci->load->helper( 'email' );
+		$this->ci->load->helper( 'typography' );
+		$this->ci->load->helper( 'string' );
+
+		// --------------------------------------------------------------------------
+
+		//	Set defaults
+		$this->email_type		= array();
+		$this->track_link_cache	= array();
+		$this->_errors			= array();
 	}
 
 
