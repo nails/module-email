@@ -61,7 +61,7 @@
 		// --------------------------------------------------------------------------
 
 		//	Tracker, production only
-		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' && ! $ci->user->is_admin() && ! $ci->user->was_admin() ) :
+		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' && ! $ci->user_model->is_admin() && ! $ci->user_model->was_admin() ) :
 
 			$_time = time();
 			echo '<img src="' . site_url( 'email/tracker/' . $email_ref . '/' . $_time . '/' . md5( $_time . $secret . $email_ref ) ) . '/tracker.gif" width="0" height="0" style="width:0px;height:0px;"">';
