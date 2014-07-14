@@ -31,7 +31,6 @@ If it was not you who made this change, or you didn't request it, please IMMEDIA
 
 		// --------------------------------------------------------------------------
 
-		case 'BOTH' :
 		default :
 
 			$_identifier = $sent_to->email;
