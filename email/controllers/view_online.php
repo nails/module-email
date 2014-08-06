@@ -95,9 +95,9 @@ class NAILS_View_Online extends NAILS_Email_Controller
 		if ( $this->input->get( 'pt' ) ) :
 
 			$_out  = '<html><head><title>' . $_email->subject . '</title></head><body><pre>';
-			$_out .= $this->load->view( 'email/structure/header_plaintext',	$_data, TRUE );
-			$_out .= $this->load->view( 'email/' . $_email->template_file . '_plaintext',	$_data, TRUE );
-			$_out .= $this->load->view( 'email/structure/footer_plaintext',	$_data, TRUE );
+			$_out .= $this->load->view( 'email/structure/header_plaintext',		$_data, TRUE );
+			$_out .= $this->load->view( $_email->template_file . '_plaintext',	$_data, TRUE );
+			$_out .= $this->load->view( 'email/structure/footer_plaintext',		$_data, TRUE );
 			$_out .= '</pre></body></html>';
 
 			//	Sanitise a little
@@ -105,20 +105,21 @@ class NAILS_View_Online extends NAILS_Email_Controller
 
 		else :
 
-			$_out = '';
+			$_out  = '';
+			$_out .= $this->load->view( 'email/structure/header',	$_data, TRUE );
+			$_out .= $this->load->view(  $_email->template_file,	$_data, TRUE );
+			$_out .= $this->load->view( 'email/structure/footer',	$_data, TRUE );
 
 			if ( $this->user_model->is_superuser() && $this->input->get( 'show_vars' ) ) :
 
-				$_out .= '<div style="max-width:600px;border:1px solid #CCC;margin:10px;padding:10px;background:#EFEFEF;white-space:pre;">';
-				$_out .= '<p style="margin-top:0;border-bottom:1px solid #CCC;padding-bottom:10px;"><strong>Superusers only: Email Variables</strong></p>';
-				$_out .= print_r( $_email->email_vars, TRUE );
-				$_out .= '</div>';
+				$_vars  = '<div style="max-width:600px;border:1px solid #CCC;margin:10px;padding:10px;background:#EFEFEF;white-space:pre;">';
+				$_vars .= '<p style="margin-top:0;border-bottom:1px solid #CCC;padding-bottom:10px;"><strong>Superusers only: Email Variables</strong></p>';
+				$_vars .= print_r( $_email->email_vars, TRUE );
+				$_vars .= '</div>';
+
+				$_out = preg_replace( '/<body.*?>/', '$0' . $_vars, $_out );
 
 			endif;
-
-			$_out .= $this->load->view( 'email/structure/header',			$_data, TRUE );
-			$_out .= $this->load->view( 'email/' . $_email->template_file,	$_data, TRUE );
-			$_out .= $this->load->view( 'email/structure/footer',			$_data, TRUE );
 
 		endif;
 

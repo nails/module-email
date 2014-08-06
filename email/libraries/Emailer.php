@@ -492,9 +492,9 @@ class Emailer
 		$_error->clear_errors();
 
 		//	Load the template
-		$body  = $this->ci->load->view( 'email/structure/header',		$_send->data, TRUE );
-		$body .= $this->ci->load->view( 'email/' . $_send->template,	$_send->data, TRUE );
-		$body .= $this->ci->load->view( 'email/structure/footer',		$_send->data, TRUE );
+		$body  = $this->ci->load->view( 'email/structure/header',	$_send->data, TRUE );
+		$body .= $this->ci->load->view( $_send->template,			$_send->data, TRUE );
+		$body .= $this->ci->load->view( 'email/structure/footer',	$_send->data, TRUE );
 
 		//	If any errors occurred while attempting to generate the body of this email
 		//	then abort the sending and log it
@@ -580,7 +580,7 @@ class Emailer
 
 		//	Set the plain text version
 		$plaintext  = $this->ci->load->view( 'email/structure/header_plaintext',	$_send->data, TRUE );
-		$plaintext .= $this->ci->load->view( 'email/' . $_send->template_pt,		$_send->data, TRUE );
+		$plaintext .= $this->ci->load->view( $_send->template_pt,					$_send->data, TRUE );
 		$plaintext .= $this->ci->load->view( 'email/structure/footer_plaintext',	$_send->data, TRUE );
 
 		// --------------------------------------------------------------------------
@@ -1366,6 +1366,19 @@ class Emailer
 		else :
 
 			$email->subject = 'An E-mail from ' . APP_NAME;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Same deal with the template
+		if ( isset( $email->email_vars['email_template'] ) ) :
+
+			$email->template_file = $email->email_vars['email_template'];
+
+		else :
+
+			$email->template_file = 'email/' . $email->template_file;
 
 		endif;
 
