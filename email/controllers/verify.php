@@ -73,7 +73,6 @@ class NAILS_Verify extends NAILS_Email_Controller
 
 						//	Send user on their merry way
 						redirect( 'auth/reset_password/' . $_u->id . '/' . md5( $_u->salt ) );
-						return;
 
 					else :
 
@@ -84,7 +83,6 @@ class NAILS_Verify extends NAILS_Email_Controller
 
 						//	Where are we redirecting too?
 						redirect( $_u->group_homepage );
-						return;
 
 					endif;
 
@@ -98,7 +96,6 @@ class NAILS_Verify extends NAILS_Email_Controller
 
 					//	And bounce, bounce, c'mon, bounce.
 					redirect( $_u->group_homepage );
-					return;
 
 				endif;
 
