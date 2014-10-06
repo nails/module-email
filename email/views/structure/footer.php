@@ -29,7 +29,7 @@
 
 		do
 		{
-			$_token = $this->encrypt->encode( $email_type_id . '|' . $email_ref . '|' . $sent_to->email, $secret );
+			$_token = $this->encrypt->encode( $email_type->slug . '|' . $email_ref . '|' . $sent_to->email, $secret );
 			$_counter++;
 		}
 		while( $_counter <= $_attemps && strpos( $_token, '+') !== FALSE );

@@ -9,23 +9,24 @@
 
 class Emailer
 {
-	public $from;
+	//	Class traits
+	use NAILS_COMMON_TRAIT_ERROR_HANDLING;
+
+	//	Other vars
+	public  $from;
 	private $ci;
 	private $db;
-	private $email_type;
-	private $track_link_cache;
-	private $_errors;
+	private $_email_type;
+	private $_track_link_cache;
 
 
 	// --------------------------------------------------------------------------
 
 
 	/**
-	 * Constructor
-	 *
-	 * @access	public
-	 * @return	void
-	 **/
+	 * Construct the library
+	 * @param array $config An optional config array
+	 */
 	public function __construct( $config = array() )
 	{
 		$this->ci	=& get_instance();
@@ -76,9 +77,110 @@ class Emailer
 		// --------------------------------------------------------------------------
 
 		//	Set defaults
-		$this->email_type		= array();
-		$this->track_link_cache	= array();
-		$this->_errors			= array();
+		$this->_email_type			= array();
+		$this->_track_link_cache	= array();
+
+		// --------------------------------------------------------------------------
+
+		//	Look for email types defined by enabled modules
+		$_modules = _NAILS_GET_AVAILABLE_MODULES();
+
+		foreach( $_modules AS $module ) :
+
+			$_module	= explode( '-', $module );
+			$_path		= FCPATH . 'vendor/' . $module . '/' . $_module[1] . '/config/email_types.php';
+
+			if ( file_exists( $_path ) ) :
+
+				include $_path;
+
+				if ( ! empty( $config['email_types'] ) ) :
+
+					foreach( $config['email_types'] AS $type ) :
+
+						$this->add_type( $type );
+
+					endforeach;
+
+				endif;
+
+			endif;
+
+		endforeach;
+
+		//	Finally, look for app email types
+		$_path = FCPATH . APPPATH . 'config/email_types.php';
+
+		if ( file_exists( $_path ) ) :
+
+			include $_path;
+
+			if ( ! empty( $config['email_types'] ) ) :
+
+				foreach( $config['email_types'] AS $type ) :
+
+					$this->add_type( $type );
+
+				endforeach;
+
+			endif;
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Adds a new email type to the stack
+	 * @param mixed $slug             The email's slug; calling code refers to emails by this value. Alternatively pass a stdClass to set all values.
+	 * @param string $name            The human friendly name to give the email
+	 * @param string $description     The human friendly description of the email's purpose
+	 * @param string $template_body   The view to use for the email's body
+	 * @param string $template_header The view to use for the email's header
+	 * @param string $template_footer The view to use for the email's footer
+	 * @param string $default_subject The default subject to give the email
+	 */
+	public function add_type( $slug, $name = '', $description = '', $template_body = '', $template_header = '', $template_footer = '', $default_subject = '' )
+	{
+		if ( is_string( $slug ) ) :
+
+			if ( empty( $slug ) || empty( $template_body ) ) :
+
+				return FALSE;
+
+			endif;
+
+			$this->_email_type[$slug]					= new stdClass();
+			$this->_email_type[$slug]->slug				= $slug;
+			$this->_email_type[$slug]->name				= $name;
+			$this->_email_type[$slug]->description		= $description;
+			$this->_email_type[$slug]->template_header	= empty( $template_header ) ? 'email/structure/header' : $slug->template_header;
+			$this->_email_type[$slug]->template_body		= $template_body;
+			$this->_email_type[$slug]->template_footer	= empty( $template_footer ) ? 'email/structure/footer' : $slug->template_footer;
+			$this->_email_type[$slug]->default_subject	= $default_subject;
+
+		else :
+
+			if ( empty( $slug->slug ) || empty( $slug->template_body ) ) :
+
+				return FALSE;
+
+			endif;
+
+			$this->_email_type[$slug->slug]					= new stdClass();
+			$this->_email_type[$slug->slug]->slug			= $slug->slug;
+			$this->_email_type[$slug->slug]->name			= $slug->name;
+			$this->_email_type[$slug->slug]->description		= $slug->description;
+			$this->_email_type[$slug->slug]->template_header	= empty( $slug->template_header ) ? 'email/structure/header' : $slug->template_header;
+			$this->_email_type[$slug->slug]->template_body	= $slug->template_body;
+			$this->_email_type[$slug->slug]->template_footer	= empty( $slug->template_footer ) ? 'email/structure/footer' : $slug->template_footer;
+			$this->_email_type[$slug->slug]->default_subject	= $slug->default_subject;
+
+		endif;
+
+		return TRUE;
 	}
 
 
@@ -87,12 +189,10 @@ class Emailer
 
 	/**
 	 * Send an email
-	 *
-	 * @access	public
-	 * @param	object	$input		The input object
-	 * @param	bool	$graceful	Whether to gracefully fail or not
-	 * @return	void
-	 **/
+	 * @param  object  $input    The email object
+	 * @param  boolean $graceful Whether to gracefully fail or not
+	 * @return void
+	 */
 	public function send( $input, $graceful = FALSE )
 	{
 		//	We got something to work with?
@@ -160,28 +260,20 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Lookup the email type (caching it as we go)
-		if ( empty( $this->email_type[ $input->type ] ) ) :
+		//	Lookup the email type
+		if ( empty( $this->_email_type[ $input->type ] ) ) :
 
-			$this->db->where( 'et.slug', $input->type );
+			if ( ! $graceful ) :
 
-			$this->email_type[ $input->type ] = $this->db->get( NAILS_DB_PREFIX . 'email_type et' )->row();
+				show_error( 'EMAILER: Invalid Email Type "' . $input->type . '"' );
 
-			if ( ! $this->email_type[ $input->type ] ) :
+			else :
 
-				if ( ! $graceful ) :
-
-					show_error( 'EMAILER: Invalid Email Type "' . $input->type . '"' );
-
-				else :
-
-					$this->_set_error( 'EMAILER: Invalid Email Type "' . $input->type . '"' );
-
-				endif;
-
-				return FALSE;
+				$this->_set_error( 'EMAILER: Invalid Email Type "' . $input->type . '"' );
 
 			endif;
+
+			return FALSE;
 
 		endif;
 
@@ -194,7 +286,7 @@ class Emailer
 
 			if ( $_user ) :
 
-				$input->to_id		= $_user->id;
+				$input->to_id = $_user->id;
 
 			endif;
 
@@ -216,7 +308,7 @@ class Emailer
 		//	Check to see if the user has opted out of receiving these emails
 		if ( $input->to_id ) :
 
-			if ( $this->user_has_unsubscribed( $input->to_id, $this->email_type[ $input->type ]->id ) ) :
+			if ( $this->user_has_unsubscribed( $input->to_id, $input->type ) ) :
 
 				//	User doesn't want to receive these notifications; abort.
 				return TRUE;
@@ -227,15 +319,19 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Generate a unique reference - ref is sent in each email and can allow the
-		//	system to generate 'view online' links
+		/**
+		 * Generate a unique reference - ref is sent in each email and can allow the
+		 * system to generate 'view online' links
+		 */
 
 		$input->ref = $this->_generate_reference();
 
 		// --------------------------------------------------------------------------
 
-		//	Double check we have an email address (a user may exist but not have an
-		//	email address set)
+		/**
+		 * Double check we have an email address (a user may exist but not have an
+		 * email address set)
+		 */
 
 		if ( empty( $input->to_email ) ) :
 
@@ -259,7 +355,7 @@ class Emailer
 		$this->db->set( 'ref',			$input->ref );
 		$this->db->set( 'user_id',		$input->to_id );
 		$this->db->set( 'user_email',	$input->to_email );
-		$this->db->set( 'type_id',		$this->email_type[ $input->type ]->id );
+		$this->db->set( 'type',			$input->type );
 		$this->db->set( 'email_vars',	serialize( $input->data ) );
 		$this->db->set( 'internal_ref',	$input->internal_ref );
 
@@ -299,10 +395,16 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	public function user_has_unsubscribed( $user_id, $type_id )
+	/**
+	 * Determines whether the user has unsubscribed from this email type
+	 * @param  int    $user_id The user ID to check for
+	 * @param  string $type    The type of email to check against
+	 * @return boolean
+	 */
+	public function user_has_unsubscribed( $user_id, $type )
 	{
 		$this->db->where( 'user_id', $user_id );
-		$this->db->where( 'type_id', $type_id );
+		$this->db->where( 'type', $type );
 
 		return (bool) $this->db->count_all_results( NAILS_DB_PREFIX . 'user_email_blocker' );
 	}
@@ -311,9 +413,15 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	public function unsubscribe_user( $user_id, $type_id )
+	/**
+	 * Unsubscribes a user from a particular email type
+	 * @param  int    $user_id The user ID to unsubscribe
+	 * @param  string $type    The type of email to unsubscribe from
+	 * @return boolean
+	 */
+	public function unsubscribe_user( $user_id, $type )
 	{
-		if ( $this->user_has_unsubscribed( $user_id, $type_id ) ) :
+		if ( $this->user_has_unsubscribed( $user_id, $type ) ) :
 
 			return TRUE;
 
@@ -322,7 +430,7 @@ class Emailer
 		// --------------------------------------------------------------------------
 
 		$this->db->set( 'user_id', $user_id );
-		$this->db->set( 'type_id', $type_id );
+		$this->db->set( 'type', $type );
 		$this->db->set( 'created', 'NOW()', FALSE );
 		$this->db->insert( NAILS_DB_PREFIX . 'user_email_blocker' );
 
@@ -333,9 +441,15 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	public function subscribe_user( $user_id, $type_id )
+	/**
+	 * Subscribe a user to a aprticular email type
+	 * @param  int    $user_id The user ID to subscribe
+	 * @param  string $type    The type of email to subscribe to
+	 * @return boolean
+	 */
+	public function subscribe_user( $user_id, $type )
 	{
-		if ( ! $this->user_has_unsubscribed( $user_id, $type_id ) ) :
+		if ( ! $this->user_has_unsubscribed( $user_id, $type ) ) :
 
 			return TRUE;
 
@@ -344,7 +458,7 @@ class Emailer
 		// --------------------------------------------------------------------------
 
 		$this->db->where( 'user_id', $user_id );
-		$this->db->where( 'type_id', $type_id );
+		$this->db->where( 'type', $type );
 		$this->db->delete( NAILS_DB_PREFIX . 'user_email_blocker' );
 
 		return (bool) $this->db->affected_rows();
@@ -355,13 +469,11 @@ class Emailer
 
 
 	/**
-	 * Send a templated email immediately
-	 *
-	 * @access	private
-	 * @param	object	$input			The input object
-	 * @param	boolean	$graceful		Whether to fail gracefully or not
-	 * @return	boolean
-	 **/
+	 * Sends a templated email immediately
+	 * @param  int     $email_id The ID of the email to send, or the email object itself
+	 * @param  boolean $graceful Whether or not to faiul gracefully
+	 * @return boolean
+	 */
 	private function _send( $email_id = FALSE, $graceful = FALSE )
 	{
 		//	Get the email if $email_id is not an object
@@ -397,10 +509,14 @@ class Emailer
 		$_send->to->username			= $_email->user->username;
 		$_send->to->group_id			= $_email->user->group_id;
 		$_send->to->login_url			= $_email->user->id ? site_url( 'auth/login/with_hashes/' . md5( $_email->user->id ) . '/' . md5( $_email->user->password ) ) : NULL;
-		$_send->email_type_id			= $_email->type_id;
+		$_send->email_type				= $_email->type;
 		$_send->subject					= $_email->subject;
-		$_send->template				= $_email->template_file;
-		$_send->template_pt				= $_email->template_file . '_plaintext';
+		$_send->template_header			= $_email->type->template_header;
+		$_send->template_header_pt		= $_email->type->template_header . '_plaintext';
+		$_send->template_body			= $_email->type->template_body;
+		$_send->template_body_pt		= $_email->type->template_body . '_plaintext';
+		$_send->template_footer			= $_email->type->template_footer;
+		$_send->template_footer_pt		= $_email->type->template_footer . '_plaintext';
 		$_send->data					= $_email->email_vars;
 		$_send->data['ci']				=& get_instance();
 
@@ -444,7 +560,7 @@ class Emailer
 		// --------------------------------------------------------------------------
 
 		//	Add some extra, common variables for the template
-		$_send->data['email_type_id']	= $_email->type_id;
+		$_send->data['email_type']		= $_email->type;
 		$_send->data['email_ref']		= $_email->ref;
 		$_send->data['sent_from']		= $_send->from;
 		$_send->data['sent_to']			= $_send->to;
@@ -492,12 +608,14 @@ class Emailer
 		$_error->clear_errors();
 
 		//	Load the template
-		$body  = $this->ci->load->view( 'email/structure/header',	$_send->data, TRUE );
-		$body .= $this->ci->load->view( $_send->template,			$_send->data, TRUE );
-		$body .= $this->ci->load->view( 'email/structure/footer',	$_send->data, TRUE );
+		$body  = $this->ci->load->view( $_send->template_header,	$_send->data, TRUE );
+		$body .= $this->ci->load->view( $_send->template_body,		$_send->data, TRUE );
+		$body .= $this->ci->load->view( $_send->template_footer,	$_send->data, TRUE );
 
-		//	If any errors occurred while attempting to generate the body of this email
-		//	then abort the sending and log it
+		/**
+		 * If any errors occurred while attempting to generate the body of this email
+		 * then abort the sending and log it
+		 */
 
 		if ( EMAIL_DEBUG && APP_DEVELOPER_EMAIL && $_error->error_has_occurred() ) :
 
@@ -547,10 +665,12 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Parse the body for <a> links and replace with a tracking URL
-		//	First clear out any previous link caches (production only)
+		/**
+		 * Parse the body for <a> links and replace with a tracking URL
+		 * First clear out any previous link caches (production only)
+		 */
 
-		$this->track_link_cache = array();
+		$this->_track_link_cache = array();
 
 		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
 
@@ -579,9 +699,9 @@ class Emailer
 		// --------------------------------------------------------------------------
 
 		//	Set the plain text version
-		$plaintext  = $this->ci->load->view( 'email/structure/header_plaintext',	$_send->data, TRUE );
-		$plaintext .= $this->ci->load->view( $_send->template_pt,					$_send->data, TRUE );
-		$plaintext .= $this->ci->load->view( 'email/structure/footer_plaintext',	$_send->data, TRUE );
+		$plaintext  = $this->ci->load->view( $_send->template_header_pt,	$_send->data, TRUE );
+		$plaintext .= $this->ci->load->view( $_send->template_body_pt,		$_send->data, TRUE );
+		$plaintext .= $this->ci->load->view( $_send->template_footer_pt,	$_send->data, TRUE );
 
 		// --------------------------------------------------------------------------
 
@@ -603,9 +723,11 @@ class Emailer
 
 			foreach ( $_send->data['attachments'] AS $file ) :
 
-				//	TODO: Support for when custom names can be set.
-				//	IT's in the CI 3.0 dev branch, wonder if it'll ever be
-				//	released.
+				/**
+				 * TODO: Support for when custom names can be set.
+				 * It's in the CI 3.0 dev branch, wonder if it'll ever be
+				 * released.
+				 */
 
 				if ( is_array( $file ) ) :
 
@@ -705,8 +827,10 @@ class Emailer
 
 			else :
 
-				//	On non-production environments halt execution, this is an error with the configs
-				//	and should probably be addressed
+				/**
+				 * On non-production environments halt execution, this is an error with the configs
+				 * and should probably be addressed
+				 */
 
 				if ( ! $graceful ) :
 
@@ -731,18 +855,14 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	/* !GETTING */
-
-
-	// --------------------------------------------------------------------------
-
-
 	/**
-	 * Gets email from the archive
-	 *
-	 * @access	public
-	 * @return	array
-	 **/
+	 * Gets an email from the archive
+	 * @param  string $order    The column to order on
+	 * @param  string $sort     The direction in which to order
+	 * @param  int    $offset   The offset
+	 * @param  int    $per_page The number of records to show per page
+	 * @return array
+	 */
 	public function get_all( $order = NULL, $sort = NULL, $offset = NULL, $per_page = NULL )
 	{
 		//	Set defaults
@@ -753,12 +873,10 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		$this->db->select( 'ea.id, ea.ref, ea.type_id, ea.email_vars, ea.user_email sent_to, ue.is_verified email_verified, ue.code email_verified_code, ea.time_sent, ea.read_count, ea.link_click_count' );
+		$this->db->select( 'ea.id, ea.ref, ea.type, ea.email_vars, ea.user_email sent_to, ue.is_verified email_verified, ue.code email_verified_code, ea.time_sent, ea.read_count, ea.link_click_count' );
 		$this->db->select( 'u.first_name, u.last_name, u.id user_id, u.password user_password, u.group_id user_group, u.profile_img, u.gender, u.username' );
-		$this->db->select( 'et.name, et.template_file, et.default_subject' );
 
 		$this->db->join( NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id OR u.id = ea.user_email', 'LEFT' );
-		$this->db->join( NAILS_DB_PREFIX . 'email_type et', 'et.id = ea.type_id' );
 		$this->db->join( NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT' );
 
 		$this->db->order_by( $order, $sort );
@@ -785,11 +903,9 @@ class Emailer
 
 
 	/**
-	 * Returns the number of items in the arcive
-	 *
-	 * @access	public
-	 * @return	int
-	 **/
+	 * Count the number of records in the archive
+	 * @return int
+	 */
 	public function count_all()
 	{
 		return $this->db->count_all_results( NAILS_DB_PREFIX . 'email_archive' );
@@ -800,24 +916,25 @@ class Emailer
 
 
 	/**
-	 * Gets email from the archive by it's ID
-	 *
-	 * @access	public
-	 * @return	object
-	 **/
+	 * Get en email from the archive by its ID
+	 * @param  int $id The email's ID
+	 * @return mixed   stdClass on success, FALSE on failure
+	 */
 	public function get_by_id( $id )
 	{
 		$this->db->where( 'ea.id', $id );
 		$_item = $this->get_all();
 
-		if ( ! $_item )
+		if ( ! $_item ) :
+
 			return FALSE;
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
 		return $_item[0];
 	}
-
 
 
 	// --------------------------------------------------------------------------
@@ -830,6 +947,14 @@ class Emailer
 	 * @param	string	$ref	The reference of the item to get
 	 * @return	array
 	 **/
+
+	/**
+	 * Get an email from the archive by its reference
+	 * @param  string  $ref  The email's reference
+	 * @param  string  $guid The email's GUID
+	 * @param  string  $hash The email's hash
+	 * @return mixed         stdClass on success, FALSE on failure
+	 */
 	public function get_by_ref( $ref, $guid = FALSE, $hash = FALSE )
 	{
 		//	If guid and hash === FALSE then by-pass the check
@@ -838,8 +963,11 @@ class Emailer
 			//	Check hash
 			$_check = md5( $guid . APP_PRIVATE_KEY . $ref );
 
-			if ( $_check !== $hash )
+			if ( $_check !== $hash ) :
+
 				return 'BAD_HASH';
+
+			endif;
 
 		endif;
 		// --------------------------------------------------------------------------
@@ -847,8 +975,11 @@ class Emailer
 		$this->db->where( 'ea.ref', $ref );
 		$_item = $this->get_all();
 
-		if ( ! $_item )
+		if ( ! $_item ) :
+
 			return FALSE;
+
+		endif;
 
 		return $_item[0];
 	}
@@ -857,19 +988,11 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	/* !HELPERS */
-
-
-	// --------------------------------------------------------------------------
-
-
 	/**
-	 * Add an attachment to the email
-	 *
-	 * @access	private
-	 * @param	string	file to add
-	 * @return	boolean
-	 **/
+	 * Adds an attachment to an email
+	 * @param string $file     The file's path
+	 * @param string $filename The filename ot give the attachment
+	 */
 	private function _add_attachment( $file, $filename = NULL )
 	{
 		if ( ! file_exists( $file ) ) :
@@ -895,11 +1018,9 @@ class Emailer
 
 	/**
 	 * Generates a unique reference for an email, optionally exclude strings
-	 *
-	 * @access	public
-	 * @param	array $exclude An array of strings to exclude
-	 * @return	array
-	 **/
+	 * @param  array  $exclude Strings to exclude from the reference
+	 * @return string
+	 */
 	private function _generate_reference( $exclude = array() )
 	{
 		do
@@ -932,12 +1053,12 @@ class Emailer
 
 	/**
 	 * Renders the debugger
-	 *
-	 * @access	private
-	 * @param	string
-	 * @param	string
-	 * @return	void
-	 **/
+	 * @param  string $input         The email input object
+	 * @param  string $body          The email's body
+	 * @param  string $plaintext     The email's plaintext body
+	 * @param  array  $recent_errors An array of any recent errors
+	 * @return void
+	 */
 	private function _debugger( $input, $body, $plaintext, $recent_errors )
 	{
 		//	Debug mode, output data and don't actually send
@@ -1035,21 +1156,13 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	/* !TRACKING */
-
-
-	// --------------------------------------------------------------------------
-
-
 	/**
 	 * Increments an email's open count and adds a tracking note
-	 *
-	 * @access	public
-	 * @param	string $ref The email's reference
-	 * @param	string $guid the unique counter used to generate the hash
-	 * @param	string $hash The secutiry hash to check (i.e verify the ref and guid).
-	 * @return	bool
-	 **/
+	 * @param  string $ref  The email's reference
+	 * @param  string $guid The email's GUID
+	 * @param  string $hash The email's hash
+	 * @return boolean
+	 */
 	public function track_open( $ref, $guid, $hash )
 	{
 		$_email = $this->get_by_ref( $ref, $guid, $hash );
@@ -1085,15 +1198,12 @@ class Emailer
 
 	/**
 	 * Increments a link's open count and adds a tracking note
-	 *
-	 * @access	public
-	 * @param	string $ref The email's reference
-	 * @param	string $guid the unique counter used to generate the hash
-	 * @param	string $hash The secutiry hash to check (i.e verify the ref and guid).
-	 * @param	string $url
-	 * @param	string $type
-	 * @return	bool
-	 **/
+	 * @param  string $ref     The email's reference
+	 * @param  string $guid    The email's GUID
+	 * @param  string $hash    The email's hash
+	 * @param  string $link_id The link's ID
+	 * @return string
+	 */
 	public function track_link( $ref, $guid, $hash, $link_id )
 	{
 		$_email = $this->get_by_ref( $ref, $guid, $hash );
@@ -1146,13 +1256,13 @@ class Emailer
 
 	/**
 	 * Parses a string for <a> links and replaces them with a trackable URL
-	 *
-	 * @access	public
-	 * @param	string $body The string to parse
-	 * @param	int $email_id The ID of the email being processed
-	 * @param	bool $is_html Whether body is HTML (i.e look for <a> tags) or plaintext (i.e look for plain URL)
-	 * @return	string
-	 **/
+	 * @param  string  $body           The string to parse
+	 * @param  int     $email_id       The email's ID
+	 * @param  string  $email_ref      The email's reference
+	 * @param  boolean $is_html        Whether or not this is the HTML version of the email
+	 * @param  boolean $needs_verified Whether or not this user needs verified (i.e route tracking links through the verifier)
+	 * @return string
+	 */
 	private function _parse_links( $body, $email_id, $email_ref, $is_html = TRUE, $needs_verified = FALSE )
 	{
 		//	Set the class variables for the ID and ref (need those in the callbacks)
@@ -1188,6 +1298,11 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Processes a link found by _parse_links()
+	 * @param  array $link The link elements
+	 * @return string
+	 */
 	private function __process_link_html( $link )
 	{
 		$_html	= ! empty( $link[0] ) ? $link[0] : '';
@@ -1197,8 +1312,10 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Only process if there's at least the HTML tag and a detected URL
-		//	otherwise it's not worth it/possible to accurately replace the tag
+		/**
+		 * Only process if there's at least the HTML tag and a detected URL
+		 * otherwise it's not worth it/possible to accurately replace the tag
+		 */
 
 		if ( $_html && $_url ) :
 
@@ -1213,6 +1330,11 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Process the URL of a link found by __process_link_html()
+	 * @param  array $url The URL elements
+	 * @return string
+	 */
 	private function __process_link_url( $url )
 	{
 		$_html	= ! empty( $url[0] ) ? $url[0] : '';
@@ -1235,28 +1357,40 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Generate a tracking URL
+	 * @param  string  $html    The Link HTML
+	 * @param  string  $url     The Link's URL
+	 * @param  string  $title   The Link's Title
+	 * @param  boolean $is_html Whether this is HTML or not
+	 * @return string
+	 */
 	private function __process_link_generate( $html, $url, $title, $is_html )
 	{
-		//	Generate a tracking URL for this link
-		//	Firstly, check this URL hasn't been processed already (for this email)
+		/**
+		 * Generate a tracking URL for this link
+		 * Firstly, check this URL hasn't been processed already (for this email)
+		 */
 
-		if ( isset( $this->track_link_cache[md5( $url )] ) ) :
+		if ( isset( $this->_track_link_cache[md5( $url )] ) ) :
 
-			$_tracking_url = $this->track_link_cache[md5( $url )];
+			$_tracking_url = $this->_track_link_cache[md5( $url )];
 
 			//	Replace the URL	and return the new tag
 			$html = str_replace( $url, $_tracking_url, $html );
 
 		else :
 
-			//	New URL, needs processed. We take the URL and the Title, store it in the
-			//	database and generate the new tracking link (inc. hashes etc). We'll cache
-			//	this link so we don't have to process it again.
-
-			//	If the email we're sending to hasn't been verified yet we should set the
-			//	actual URL as the return_to value of the email verifier, that means that
-			//	every link in this email behaves as a verifying email. Obviously we shouldn't
-			//	do this for the actual email verifier...
+			/**
+			 * New URL, needs processed. We take the URL and the Title, store it in the
+			 * database and generate the new tracking link (inc. hashes etc). We'll cache
+			 * this link so we don't have to process it again.
+			 *
+			 * If the email we're sending to hasn't been verified yet we should set the
+			 * actual URL as the return_to value of the email verifier, that means that
+			 * every link in this email behaves as a verifying email. Obviously we shouldn't
+			 * do this for the actual email verifier...
+			 */
 
 			if ( $this->_generate_tracking_needs_verified ) :
 
@@ -1295,7 +1429,7 @@ class Emailer
 				$_time			= time();
 				$_tracking_url	= site_url( 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/' . md5( $_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref ). '/' . $_id );
 
-				$this->track_link_cache[md5( $url )] = $_tracking_url;
+				$this->_track_link_cache[md5( $url )] = $_tracking_url;
 
 				// --------------------------------------------------------------------------
 
@@ -1313,53 +1447,34 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	/* !ERRORS */
-
-
-	// --------------------------------------------------------------------------
-
-
-	public function get_errors()
-	{
-		return $this->_errors;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	public function last_error()
-	{
-		return end( $this->_errors );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	private function _set_error( $message )
-	{
-		$this->_errors[] = $message;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
+	/**
+	 * Format an email object
+	 * @param  object $email The raw email object
+	 * @return void
+	 */
 	protected function _format_email( &$email )
 	{
-		$email->email_vars = unserialize( $email->email_vars );
+		$email->email_vars	= unserialize( $email->email_vars );
+		$email->type		= ! empty( $this->_email_type[$email->type] ) ? $this->_email_type[$email->type] : NULL;
+
+		if ( empty( $email->type ) ) :
+
+			show_fatal_error( 'Invalid Email Type', 'Email with ID #' . $email->id . ' has an invalid email type.' );
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
-		//	If a subject is defined in the variables use that, if not check to see if one was
-		//	defined in the template; if not, fall back to a default subject
+		/**
+		 * If a subject is defined in the variables use that, if not check to see if one was
+		 * defined in the template; if not, fall back to a default subject
+		 */
 
-		if ( isset( $email->email_vars['email_subject'] ) ) :
+		if ( ! empty( $email->email_vars['email_subject'] ) ) :
 
 			$email->subject = $email->email_vars['email_subject'];
 
-		elseif ( $email->default_subject ) :
+		elseif ( ! empty( $email->default_subject ) ) :
 
 			$email->subject = $email->default_subject;
 
@@ -1371,14 +1486,22 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Same deal with the template
-		if ( isset( $email->email_vars['email_template'] ) ) :
+		//	Template overrides
+		if ( ! empty( $email->email_vars['template_header'] ) ) :
 
-			$email->template_file = $email->email_vars['email_template'];
+			$email->type->template_body = $email->email_vars['template_header'];
 
-		else :
+		endif;
 
-			$email->template_file = 'email/' . $email->template_file;
+		if ( ! empty( $email->email_vars['template_body'] ) ) :
+
+			$email->type->template_body = $email->email_vars['template_body'];
+
+		endif;
+
+		if ( ! empty( $email->email_vars['template_footer'] ) ) :
+
+			$email->type->template_body = $email->email_vars['template_footer'];
 
 		endif;
 
@@ -1406,10 +1529,8 @@ class Emailer
 		unset( $email->gender );
 		unset( $email->user_group );
 		unset( $email->user_password );
-
 	}
-
 }
 
-/* End of file emailer.php */
-/* Location: ./application/libraries/emailer.php */
+/* End of file Emailer.php */
+/* Location: ./module-email/email/libraries/Emailer.php */

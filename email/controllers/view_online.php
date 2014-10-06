@@ -69,7 +69,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
 		$_data['email_subject']	= $_email->subject;
 		$_data['site_url']		= site_url();
 		$_data['secret']		= APP_PRIVATE_KEY;
-		$_data['email_type_id']	= $_email->type_id;
+		$_data['email_type']	= $_email->type;
 
 		$_data['sent_to']				= new stdClass();
 		$_data['sent_to']->email		= $_email->user->email;
@@ -95,9 +95,9 @@ class NAILS_View_Online extends NAILS_Email_Controller
 		if ( $this->input->get( 'pt' ) ) :
 
 			$_out  = '<html><head><title>' . $_email->subject . '</title></head><body><pre>';
-			$_out .= $this->load->view( 'email/structure/header_plaintext',		$_data, TRUE );
-			$_out .= $this->load->view( $_email->template_file . '_plaintext',	$_data, TRUE );
-			$_out .= $this->load->view( 'email/structure/footer_plaintext',		$_data, TRUE );
+			$_out .= $this->load->view( $_email->type->template_header . '_plaintext',	$_data, TRUE );
+			$_out .= $this->load->view( $_email->type->template_body . '_plaintext',	$_data, TRUE );
+			$_out .= $this->load->view( $_email->type->template_footer . '_plaintext',	$_data, TRUE );
 			$_out .= '</pre></body></html>';
 
 			//	Sanitise a little
@@ -106,9 +106,9 @@ class NAILS_View_Online extends NAILS_Email_Controller
 		else :
 
 			$_out  = '';
-			$_out .= $this->load->view( 'email/structure/header',	$_data, TRUE );
-			$_out .= $this->load->view(  $_email->template_file,	$_data, TRUE );
-			$_out .= $this->load->view( 'email/structure/footer',	$_data, TRUE );
+			$_out .= $this->load->view( $_email->type->template_header,	$_data, TRUE );
+			$_out .= $this->load->view( $_email->type->template_body,	$_data, TRUE );
+			$_out .= $this->load->view( $_email->type->template_footer,	$_data, TRUE );
 
 			if ( $this->user_model->is_superuser() && $this->input->get( 'show_vars' ) ) :
 
