@@ -157,7 +157,7 @@ class Emailer
 			$this->_email_type[$slug]->name				= $name;
 			$this->_email_type[$slug]->description		= $description;
 			$this->_email_type[$slug]->template_header	= empty( $template_header ) ? 'email/structure/header' : $slug->template_header;
-			$this->_email_type[$slug]->template_body		= $template_body;
+			$this->_email_type[$slug]->template_body	= $template_body;
 			$this->_email_type[$slug]->template_footer	= empty( $template_footer ) ? 'email/structure/footer' : $slug->template_footer;
 			$this->_email_type[$slug]->default_subject	= $default_subject;
 
@@ -169,12 +169,12 @@ class Emailer
 
 			endif;
 
-			$this->_email_type[$slug->slug]					= new stdClass();
-			$this->_email_type[$slug->slug]->slug			= $slug->slug;
-			$this->_email_type[$slug->slug]->name			= $slug->name;
+			$this->_email_type[$slug->slug]						= new stdClass();
+			$this->_email_type[$slug->slug]->slug				= $slug->slug;
+			$this->_email_type[$slug->slug]->name				= $slug->name;
 			$this->_email_type[$slug->slug]->description		= $slug->description;
 			$this->_email_type[$slug->slug]->template_header	= empty( $slug->template_header ) ? 'email/structure/header' : $slug->template_header;
-			$this->_email_type[$slug->slug]->template_body	= $slug->template_body;
+			$this->_email_type[$slug->slug]->template_body		= $slug->template_body;
 			$this->_email_type[$slug->slug]->template_footer	= empty( $slug->template_footer ) ? 'email/structure/footer' : $slug->template_footer;
 			$this->_email_type[$slug->slug]->default_subject	= $slug->default_subject;
 
@@ -1474,9 +1474,9 @@ class Emailer
 
 			$email->subject = $email->email_vars['email_subject'];
 
-		elseif ( ! empty( $email->default_subject ) ) :
+		elseif ( ! empty( $email->type->default_subject ) ) :
 
-			$email->subject = $email->default_subject;
+			$email->subject = $email->type->default_subject;
 
 		else :
 
