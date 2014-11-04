@@ -670,26 +670,25 @@ class Emailer
 		 * First clear out any previous link caches (production only)
 		 */
 
-		$this->_track_link_cache = array();
+        $this->_track_link_cache = array();
 
-		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
+        if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
 
-			if ( $_send->to->id && ! $_send->to->email_verified ) :
+            if ($_send->to->id && ! $_send->to->email_verified) :
 
-				$_needs_verified = array(
-					'id' => $_send->to->id,
-					'code' => $_send->to->email_verified_code
-				);
+                $_needs_verified = array(
+                    'id'    => $_send->to->id,
+                    'code'  => $_send->to->email_verified_code
+                );
 
-			else :
+            else :
 
-				$_needs_verified = FALSE;
+                $_needs_verified = false;
 
-			endif;
+            endif;
 
-			$body = $this->_parse_links( $body, $_email->id, $_email->ref, TRUE, $_needs_verified );
-
-		endif;
+            $body = $this->_parse_links($body, $_email->id, $_email->ref, true, $_needs_verified);
+        }
 
 		// --------------------------------------------------------------------------
 
@@ -1254,45 +1253,47 @@ class Emailer
 	// --------------------------------------------------------------------------
 
 
-	/**
-	 * Parses a string for <a> links and replaces them with a trackable URL
-	 * @param  string  $body           The string to parse
-	 * @param  int     $email_id       The email's ID
-	 * @param  string  $email_ref      The email's reference
-	 * @param  boolean $is_html        Whether or not this is the HTML version of the email
-	 * @param  boolean $needs_verified Whether or not this user needs verified (i.e route tracking links through the verifier)
-	 * @return string
-	 */
-	private function _parse_links( $body, $email_id, $email_ref, $is_html = TRUE, $needs_verified = FALSE )
-	{
-		//	Set the class variables for the ID and ref (need those in the callbacks)
-		$this->_generate_tracking_email_id			= $email_id;
-		$this->_generate_tracking_email_ref			= $email_ref;
-		$this->_generate_tracking_needs_verified	= $needs_verified;
+    /**
+     * Parses a string for <a> links and replaces them with a trackable URL
+     * @param  string  $body           The string to parse
+     * @param  int     $emailId       The email's ID
+     * @param  string  $emailRef      The email's reference
+     * @param  boolean $isHtml        Whether or not this is the HTML version of the email
+     * @param  boolean $needsVerified Whether or not this user needs verified (i.e route tracking links through the verifier)
+     * @return string
+     */
+    private function _parse_links($body, $emailId, $emailRef, $isHtml = true, $needsVerified = false)
+    {
+        //    Set the class variables for the ID and ref (need those in the callbacks)
+        $this->_generate_tracking_email_id          = $emailId;
+        $this->_generate_tracking_email_ref         = $emailRef;
+        $this->_generate_tracking_needs_verified    = $needsVerified;
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		if ( $is_html ) :
+        if ($isHtml) {
 
-			$body = preg_replace_callback( '/<a .*?(href="(.*?)").*?>(.*?)<\/a>/', array( $this, '__process_link_html' ), $body );
+            $pattern    = '/<a .*?(href="(https?.*?)").*?>(.*?)<\/a>/';
+            $body       = preg_replace_callback($pattern, array($this, '__process_link_html'), $body);
 
-		else :
+        } else {
 
-			$body = preg_replace_callback( '/(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/  ', array( $this, '__process_link_url' ), $body );
+            $pattern    = '/(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/';
+            $body       = preg_replace_callback($pattern, array($this, '__process_link_url'), $body);
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	And null these again, so nothing gets confused
-		$this->_generate_tracking_email_id			= NULL;
-		$this->_generate_tracking_email_ref			= NULL;
-		$this->_generate_tracking_needs_verified	= NULL;
+        //    And null these again, so nothing gets confused
+        $this->_generate_tracking_email_id          = null;
+        $this->_generate_tracking_email_ref         = null;
+        $this->_generate_tracking_needs_verified    = null;
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return $body;
-	}
+        return $body;
+    }
 
 
 	// --------------------------------------------------------------------------
