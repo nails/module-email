@@ -54,18 +54,8 @@ class Emailer
 
 		// --------------------------------------------------------------------------
 
-		//	Check configurations
-		$_email_config = array();
-		$_email_config['smtp_host']		= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_host', 'email' );
-		$_email_config['smtp_username']	= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_username', 'email' );
-		$_email_config['smtp_password']	= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_password', 'email' );
-		$_email_config['smtp_port']		= app_setting( strtoupper( ENVIRONMENT ) . '_smtp_port', 'email' );
-
-		// --------------------------------------------------------------------------
-
-		//	Load and configure the Email library
+		//	Load Email library
 		$this->ci->load->library( 'email' );
-		$this->ci->email->initialize( $_email_config );
 
 		// --------------------------------------------------------------------------
 
