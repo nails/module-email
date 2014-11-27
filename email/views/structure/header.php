@@ -28,9 +28,6 @@
 				line-height:1.5em;
 				font-style:italic;
 				font-weight:bold;
-				margin-bottom:1em;
-				padding-bottom:1em;
-				border-bottom:1px solid #ECECEC;
 			}
 
 			h2
@@ -105,6 +102,13 @@
 				border-top:1px dotted #CCCCCC;
 				margin: 30px 0;
 			}
+
+	        hr
+            {
+                border:0;
+                margin:20px 0;
+                border-bottom:1px solid #F1F1F1
+            }
 
 			.footer
 			{
@@ -219,10 +223,16 @@
 				font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			}
 
+			a.button.large
+			{
+				font-size:1em;
+				padding: 10px 15px;
+			}
+
 			a.button.small
 			{
 				font-size:0.8em;
-				padding: 0 5px;
+				padding: 2px 7px;
 			}
 
 			a.button:hover
@@ -283,7 +293,10 @@
 	<div class="padder">
 	<?php
 
-		echo '<h1>' . $email_subject . '</h1>';
+		echo '<h1>';
+			echo $email_subject;
+			echo '<hr />';
+		echo '</h1>';
 
 		if ( isset( $sent_to->first ) && $sent_to->first ) :
 
