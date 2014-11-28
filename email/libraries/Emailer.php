@@ -1272,7 +1272,7 @@ class Emailer
             $body       = preg_replace_callback($pattern, array($this, '__process_link_url'), $body);
 
         }
-
+die($body);
         // --------------------------------------------------------------------------
 
         //    And null these again, so nothing gets confused
@@ -1418,19 +1418,24 @@ class Emailer
 			if ( $_id ) :
 
 				$_time			= time();
-				$_tracking_url	= site_url( 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/' . md5( $_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref ). '/' . $_id );
+				$_tracking_url	= 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
+				$_tracking_url .= md5( $_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref ). '/' . $_id;
 
 				$this->_track_link_cache[md5( $url )] = $_tracking_url;
 
 				// --------------------------------------------------------------------------
 
-				//	Replace the URL	and return the new tag
-				$html = str_replace( $url, $_tracking_url, $html );
+				/**
+				 * Replace the URL and return the new tag. $url in quotes so we only replace
+				 * hyperlinks and not something else, such as an image's URL
+				 */
+
+				$html = str_replace( '"' . $url . '"', $_tracking_url, $html );
 
 			endif;
 
 		endif;
-
+		die($html);
 		return $html;
 	}
 
