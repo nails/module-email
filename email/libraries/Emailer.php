@@ -1272,7 +1272,7 @@ class Emailer
             $body       = preg_replace_callback($pattern, array($this, '__process_link_url'), $body);
 
         }
-die($body);
+
         // --------------------------------------------------------------------------
 
         //    And null these again, so nothing gets confused
@@ -1417,11 +1417,12 @@ die($body);
 
 			if ( $_id ) :
 
-				$_time			= time();
-				$_tracking_url	= 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
-				$_tracking_url .= md5( $_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref ). '/' . $_id;
+				$_time        = time();
+				$trackingUrl  = 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
+				$trackingUrl .= md5($_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref). '/' . $_id;
+				$trackingUrl  = site_url($_tracking_url);
 
-				$this->_track_link_cache[md5( $url )] = $_tracking_url;
+				$this->_track_link_cache[md5($url)] = $trackingUrl;
 
 				// --------------------------------------------------------------------------
 
@@ -1430,12 +1431,12 @@ die($body);
 				 * hyperlinks and not something else, such as an image's URL
 				 */
 
-				$html = str_replace( '"' . $url . '"', $_tracking_url, $html );
+				$html = str_replace('"' . $url . '"', $trackingUrl, $html);
 
 			endif;
 
 		endif;
-		die($html);
+
 		return $html;
 	}
 
