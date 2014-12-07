@@ -370,15 +370,55 @@ class Emailer
 
 		endif;
 
-		if ( $this->_send( $input->id, $graceful ) ) :
+		if ($this->_send($input->id, $graceful)) {
+
+            //  Mail sent, mark the time
+            $this->db->set('sent', 'NOW()', false);
+            $this->db->where('id', $input->id);
+            $this->db->update(NAILS_DB_PREFIX . 'email_archive');
 
 			return $input->ref;
 
-		else :
+		} else {
 
-			return FALSE;
 
-		endif;
+            //  Mail failed, update the status
+            $this->db->set('status', 'FAILED');
+            $this->db->where('id', $input->id);
+            $this->db->update(NAILS_DB_PREFIX . 'email_archive');
+
+			return false;
+		}
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function resend($emailIdRef)
+	{
+		if (is_numeric($emailIdRef)) {
+
+			$email = $this->get_by_id($emailIdRef);
+
+		} else {
+
+			$email = $this->get_by_ref($emailIdRef);
+		}
+
+		if (!$email) {
+
+			$this->_set_error('"' . $emailIdRef . '" is not a valid Email ID or reference.');
+			return false;
+		}
+
+		$send           = new stdClass();
+		$send->to_id    = $email->user->id;
+		$send->to_email = $email->user->email;
+		$send->type     = $email->type->slug;
+		$send->data		= $email->email_vars;
+
+		return $this->send($send);
 	}
 
 
@@ -460,31 +500,32 @@ class Emailer
 
 	/**
 	 * Sends a templated email immediately
-	 * @param  int     $email_id The ID of the email to send, or the email object itself
+	 * @param  int     $emailId The ID of the email to send, or the email object itself
 	 * @param  boolean $graceful Whether or not to faiul gracefully
 	 * @return boolean
 	 */
-	private function _send( $email_id = FALSE, $graceful = FALSE )
+	private function _send($emailId = false, $graceful = false)
 	{
-		//	Get the email if $email_id is not an object
-		if ( ! is_object( $email_id ) ) :
+		//	Get the email if $emailId is not an object
+		if (is_numeric($emailId)) {
 
-			$_email = $this->get_by_id( $email_id );
+			$_email = $this->get_by_id($emailId);
 
-		else :
+			if (!$_email) {
 
-			$_email = $email_id;
+				$this->_set_error('EMAILER: Invalid email ID');
+				return false;
+			}
 
-		endif;
+		} elseif (is_object($emailId)) {
 
-		// --------------------------------------------------------------------------
+			$_email = $emailId;
 
-		if ( ! $_email ) :
+		} else {
 
-			$this->_set_error( 'EMAILER: Unable to fetch email object' );
-			return FALSE;
-
-		endif;
+			$this->_set_error('EMAILER: Invalid email ID');
+			return false;
+		}
 
 		// --------------------------------------------------------------------------
 
@@ -771,12 +812,10 @@ class Emailer
 			//	Put error reporting back as it was
 			error_reporting( $_previous_error_reporting );
 
-			// --------------------------------------------------------------------------
-
-			//	Mail sent, mark the time
-			$this->db->set( 'time_sent', 'NOW()', FALSE );
-			$this->db->where( 'id', $_email->id );
-			$this->db->update( NAILS_DB_PREFIX . 'email_archive' );
+			//	Update the counter on the email address
+			$this->db->set('countSends', 'countSends+1', false);
+			$this->db->where('email', $_send->to->email);
+			$this->db->update(NAILS_DB_PREFIX . 'user_email');
 
 			return TRUE;
 
@@ -849,42 +888,44 @@ class Emailer
 	 * @param  string $order    The column to order on
 	 * @param  string $sort     The direction in which to order
 	 * @param  int    $offset   The offset
-	 * @param  int    $per_page The number of records to show per page
+	 * @param  int    $perPage  The number of records to show per page
 	 * @return array
 	 */
-	public function get_all( $order = NULL, $sort = NULL, $offset = NULL, $per_page = NULL )
+	public function get_all($order = null, $sort = null, $offset = null, $perPage = null)
 	{
 		//	Set defaults
-		$order		= $order	? $order	: 'ea.time_sent';
+		$order		= $order	? $order	: 'ea.sent';
 		$sort		= $sort		? $sort		: 'ASC';
 		$offset		= $offset	? $offset	: 0;
-		$per_page	= $per_page	? $per_page	: 25;
+		$perPage	= $perPage	? $perPage	: 25;
 
 		// --------------------------------------------------------------------------
 
-		$this->db->select( 'ea.id, ea.ref, ea.type, ea.email_vars, ea.user_email sent_to, ue.is_verified email_verified, ue.code email_verified_code, ea.time_sent, ea.read_count, ea.link_click_count' );
-		$this->db->select( 'u.first_name, u.last_name, u.id user_id, u.password user_password, u.group_id user_group, u.profile_img, u.gender, u.username' );
+		$this->db->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
+		$this->db->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
+		$this->db->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
+		$this->db->select('u.profile_img,u.gender,u.username');
 
-		$this->db->join( NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id OR u.id = ea.user_email', 'LEFT' );
-		$this->db->join( NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT' );
+		$this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id', 'LEFT');
+		$this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT');
 
-		$this->db->order_by( $order, $sort );
-		$this->db->limit( $per_page, $offset );
+		$this->db->order_by($order, $sort);
+		$this->db->order_by('ea.id', $sort);
+		$this->db->limit($perPage, $offset);
 
-		$_emails = $this->db->get( NAILS_DB_PREFIX . 'email_archive ea' )->result();
+		$emails = $this->db->get(NAILS_DB_PREFIX . 'email_archive ea')->result();
 
 		// --------------------------------------------------------------------------
 
 		//	Format emails
-		foreach ( $_emails AS $email ) :
+		foreach ($emails as $email) {
 
-			$this->_format_email( $email );
-
-		endforeach;
+			$this->_format_email($email);
+		}
 
 		// --------------------------------------------------------------------------
 
-		return $_emails;
+		return $emails;
 	}
 
 
@@ -1050,9 +1091,11 @@ class Emailer
 	 */
 	private function _debugger( $input, $body, $plaintext, $recent_errors )
 	{
-		//	Debug mode, output data and don't actually send
+		/**
+		 * Debug mode, output data and don't actually send
+		 * Remove the reference to CI; takes up a ton'na space
+		 */
 
-		//	Remove the reference to CI; takes up a ton'na space
 		if ( isset( $input->data['ci'] ) ) :
 
 			$input->data['ci'] = '**REFERENCE TO CODEIGNITER INSTANCE**';
@@ -1085,8 +1128,10 @@ class Emailer
 		//	Template
 		echo "\n\n" . '<strong>Email body:</strong>' . "\n";
 		echo '-----------------------------------------------------------------' . "\n";
-		echo 'Subject:	' . $input->subject . "\n";
-		echo 'template:	' . $input->template . "\n";
+		echo 'Subject:         ' . $input->subject . "\n";
+		echo 'Template Header: ' . $input->template_header . "\n";
+		echo 'Template Body:   ' . $input->template_body . "\n";
+		echo 'Template Footer: ' . $input->template_footer . "\n";
 
 		if ( $recent_errors ) :
 
@@ -1122,23 +1167,29 @@ class Emailer
 
 		endforeach;
 
-		$_rendered_body = implode( $_new_lines );
+		$renderedBody  = implode($_new_lines);
+		$entitiyBody   = htmlentities($body);
+		$plaintextBody = nl2br($plaintext);
 
-		echo '<iframe width="100%" height="900" src="" id="renderframe"></iframe>' ."\n";
-		echo '<script type="text/javascript">' . "\n";
-		echo 'var _body = "' . $_rendered_body. '";' . "\n";
-		echo 'document.getElementById(\'renderframe\').src = "data:text/html;charset=utf-8," + escape(_body);' . "\n";
-		echo '</script>' . "\n";
+		$html = <<<EOT
 
-		echo "\n\n" . '<strong>HTML:</strong>' . "\n";
-		echo '-----------------------------------------------------------------' . "\n";
-		echo htmlentities( $body ) ."\n";
+		<iframe width="100%" height="900" src="" id="renderframe"></iframe>
+		<script type="text/javascript">
+			var emailBody = "{$renderedBody}";
+			document.getElementById('renderframe').src = "data:text/html;charset=utf-8," + escape(emailBody);
+		</script>
 
-		echo "\n\n" . '<strong>Plain Text:</strong>' . "\n";
-		echo '-----------------------------------------------------------------' . "\n";
-		echo '</pre>' . nl2br( $plaintext ) . "\n";
+		<strong>HTML:</strong>
+		-----------------------------------------------------------------
+		{$entitiyBody}
 
-		exit( 0 );
+		<strong>Plain Text:</strong>
+		-----------------------------------------------------------------
+		</pre>{$plaintextBody}
+
+EOT;
+		echo $html;
+
 	}
 
 
