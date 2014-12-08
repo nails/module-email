@@ -1365,10 +1365,10 @@ class Emailer
 
 		if ( isset( $this->_track_link_cache[md5( $url )] ) ) :
 
-			$_tracking_url = $this->_track_link_cache[md5( $url )];
+			$trackingUrl = $this->_track_link_cache[md5( $url )];
 
 			//	Replace the URL	and return the new tag
-			$html = str_replace( $url, $_tracking_url, $html );
+			$html = str_replace( $url, $trackingUrl, $html );
 
 		else :
 
@@ -1420,7 +1420,7 @@ class Emailer
 				$_time        = time();
 				$trackingUrl  = 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
 				$trackingUrl .= md5($_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref). '/' . $_id;
-				$trackingUrl  = site_url($_tracking_url);
+				$trackingUrl  = site_url($trackingUrl);
 
 				$this->_track_link_cache[md5($url)] = $trackingUrl;
 
