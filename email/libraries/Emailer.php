@@ -682,7 +682,7 @@ class Emailer
 			$_message	.= '' . "\n";
 			$_message	.= print_r( $_send, TRUE ) . "\n";
 
-			send_developer_mail( $_subject, $_message );
+			sendDeveloperMail($_subject, $_message);
 
 			// --------------------------------------------------------------------------
 
@@ -850,8 +850,8 @@ class Emailer
 
 			if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
 
-				$this->_set_error( 'Email failed to send at SMTP time, developers informed' );
-				send_developer_mail( $_subject, $_message );
+				$this->_set_error('Email failed to send at SMTP time, developers informed');
+				sendDeveloperMail($_subject, $_message);
 
 			else :
 
@@ -1507,7 +1507,7 @@ EOT;
 
 		if ( empty( $email->type ) ) :
 
-			show_fatal_error( 'Invalid Email Type', 'Email with ID #' . $email->id . ' has an invalid email type.' );
+			showFatalError('Invalid Email Type', 'Email with ID #' . $email->id . ' has an invalid email type.');
 
 		endif;
 
