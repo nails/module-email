@@ -1,4 +1,4 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
  * Name:		Email [verify]
@@ -29,84 +29,68 @@ class NAILS_Verify extends NAILS_Email_Controller
 	public function index()
 	{
 		//	Define the key variables
-		$_id	= $this->uri->segment( 3, NULL );
-		$_code	= $this->uri->segment( 4, NULL );
+		$id   = $this->uri->segment(3, null);
+		$code = $this->uri->segment(4, null);
 
 		// --------------------------------------------------------------------------
 
 		//	Fetch the user
-		$_u = $this->user_model->get_by_id( $_id );
+		$u = $this->user_model->get_by_id($id);
 
-		if ( $_u && $_code ) :
+		if ($u && $code) {
 
 			//	User found, attempt to verify
-			if ( $this->user_model->email_verify( $_u->id, $_code ) ) :
+			if ($this->user_model->email_verify($u->id, $code)) {
 
 				//	Reward referrer (if any
-				if ( ! empty( $_u->referred_by ) ) :
+				if (!empty($u->referred_by)) {
 
-					$this->user_model->reward_referral( $_u->id, $_u->referred_by );
-
-				endif;
+					$this->user_model->reward_referral($u->id, $u->referred_by);
+				}
 
 				// --------------------------------------------------------------------------
 
 				//	Send user on their way
-				if ( $this->input->get( 'return_to' ) ) :
+				if ($this->input->get('return_to')) {
 
-					//	Let the next page handle wetehr the user is logged in or not etc.
-					//	Ahh, go on set a wee notice that the user's email has been verified
+					/**
+					 * Let the next page handle whether the user is logged in or not etc.
+					 * Ahh, go on set a wee notice that the user's email has been verified
+					 */
 
-					$this->session->set_flashdata( 'message', lang( 'email_verify_ok_subtle' ) );
+					$this->session->set_flashdata('message', lang('email_verify_ok_subtle'));
+					redirect($this->input->get('return_to'));
 
-					redirect( $this->input->get( 'return_to' ) );
-
-				elseif ( ! $this->user_model->is_logged_in() ) :
+				} elseif (!$this->user_model->is_logged_in()) {
 
 					//	Set success message
-					$this->session->set_flashdata( 'success', lang( 'email_verify_ok' ) );
-
-					// --------------------------------------------------------------------------
+					$this->session->set_flashdata('success', lang('email_verify_ok'));
 
 					//	If a password change is requested, then redirect here
-					if ( $_u->temp_pw ) :
+					if ($u->temp_pw) {
 
 						//	Send user on their merry way
-						redirect( 'auth/reset_password/' . $_u->id . '/' . md5( $_u->salt ) );
+						redirect('auth/reset_password/' . $u->id . '/' . md5($u->salt));
 
-					else :
+					} else {
 
 						//	Nope, log in as normal
-						$this->user_model->set_login_data( $_u->id );
+						$this->user_model->set_login_data($u->id);
+						redirect($u->group_homepage);
+					}
 
-						// --------------------------------------------------------------------------
+				} else {
 
-						//	Where are we redirecting too?
-						redirect( $_u->group_homepage );
-
-					endif;
-
-				else :
-
-
-					//	Set success message
-					$this->session->set_flashdata( 'success', lang( 'email_verify_ok' ) );
-
-					// --------------------------------------------------------------------------
-
-					//	And bounce, bounce, c'mon, bounce.
-					redirect( $_u->group_homepage );
-
-				endif;
-
-			endif;
-
-		endif;
+					$this->session->set_flashdata('success', lang('email_verify_ok'));
+					redirect($u->group_homepage);
+				}
+			}
+		}
 
 		// --------------------------------------------------------------------------
 
-		$this->session->set_flashdata( 'error', lang( 'email_verify_fail_error' ) . ' ' . $this->user_model->last_error() );
-		redirect( '/' );
+		$this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $this->user_model->last_error());
+		redirect('/');
 	}
 
 
@@ -154,13 +138,9 @@ class NAILS_Verify extends NAILS_Email_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION')) {
 
 	class Verify extends NAILS_Verify
 	{
 	}
-
-endif;
-
-/* End of file verify.php */
-/* Location: ./application/modules/email/controllers/verify.php */
+}
