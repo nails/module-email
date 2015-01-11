@@ -1,11 +1,14 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:		Email Controller
+ * This class provides some common email controller functionality
  *
- * Description:	Executes common email functionality
- *
- **/
+ * @package     Nails
+ * @subpackage  module-email
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Email_Controller extends NAILS_Controller
 {
@@ -26,7 +29,3 @@ class NAILS_Email_Controller extends NAILS_Controller
 		$this->lang->load( 'email' );
 	}
 }
-
-
-/* End of file _email.php */
-/* Location: ./application/modules/email/controllers/_email.php */
