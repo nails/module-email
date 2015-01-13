@@ -75,7 +75,7 @@ class Emailer
 		//	Look for email types defined by enabled modules
 		$_modules = _NAILS_GET_AVAILABLE_MODULES();
 
-		foreach( $_modules AS $module ) :
+		foreach ( $_modules AS $module ) :
 
 			$_module	= explode( '-', $module );
 			$_path		= FCPATH . 'vendor/' . $module . '/' . $_module[1] . '/config/email_types.php';
@@ -86,7 +86,7 @@ class Emailer
 
 				if ( ! empty( $config['email_types'] ) ) :
 
-					foreach( $config['email_types'] AS $type ) :
+					foreach ( $config['email_types'] AS $type ) :
 
 						$this->add_type( $type );
 
@@ -107,7 +107,7 @@ class Emailer
 
 			if ( ! empty( $config['email_types'] ) ) :
 
-				foreach( $config['email_types'] AS $type ) :
+				foreach ( $config['email_types'] AS $type ) :
 
 					$this->add_type( $type );
 
