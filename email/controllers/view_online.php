@@ -1,155 +1,150 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
-* Name:			View Online
-*
-* Description:	Allows users to view an email sent to them in their browser
-*
-*/
-
-//	Include _email.php; executes common functionality
+//  Include _email.php; executes common functionality
 require_once '_email.php';
 
 /**
- * OVERLOADING NAILS' EMAIL MODULES
+ * This class allows users to view an email in the browser
  *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-email
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_View_Online extends NAILS_Email_Controller
 {
 
-	/**
-	 * Constructor
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function index()
-	{
-		//	Fetch data; return a string if not set so as not to accidentally skip the
-		//	hash check in get_by_ref();
+    /**
+     * Constructor
+     *
+     * @access  public
+     * @param   none
+     * @return  void
+     **/
+    public function index()
+    {
+        /**
+         * Fetch data; return a string if not set so as not to accidentally skip the
+         * hash check in get_by_ref();
+         */
 
-		$_ref = $this->uri->segment( 3, 'NULL' );
+        $ref = $this->uri->segment(3, 'null');
 
-		if ( $this->user_model->is_admin() ) :
+        if ($this->user_model->is_admin()) {
 
-			$_guid	= FALSE;
-			$_hash	= FALSE;
+            $guid = false;
+            $hash = false;
 
-		else:
+        } else {
 
-			$_guid	= $this->uri->segment( 4, 'NULL' );
-			$_hash	= $this->uri->segment( 5, 'NULL' );
+            $guid = $this->uri->segment(4, 'null');
+            $hash = $this->uri->segment(5, 'null');
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Fetch the email
+        $email = $this->emailer->get_by_ref($ref, $guid, $hash);
 
-		//	Fetch the email
-		$_email = $this->emailer->get_by_ref( $_ref, $_guid, $_hash );
+        if (!$email || $email == 'BAD_HASH') {
 
-		if ( ! $_email || $_email == 'BAD_HASH' ) :
+            show_error(lang('invalid_email'));
+        }
 
-			show_error( lang( 'invalid_email' ) );
+        // --------------------------------------------------------------------------
 
-		endif;
+        //  Prep data
+        $data                       = $email->email_vars;
+        $data['ci']                 =& get_instance();
+        $data['email_ref']          = $email->ref;
+        $data['sent_from']          = $this->emailer->from;
+        $data['email_subject']      = $email->subject;
+        $data['site_url']           = site_url();
+        $data['secret']             = APP_PRIVATE_KEY;
+        $data['email_type']         = $email->type;
+        $data['sent_to']            = new stdClass();
+        $data['sent_to']->email     = $email->user->email;
+        $data['sent_to']->first     = $email->user->first_name;
+        $data['sent_to']->last      = $email->user->last_name;
+        $data['sent_to']->id        = (int) $email->user->id;
+        $data['sent_to']->username  = $email->user->username;
+        $data['sent_to']->group_id  = $email->user->group_id;
 
-		// --------------------------------------------------------------------------
+        if ($email->user->id) {
 
-		//	Prep data
-		$_data					= $_email->email_vars;
+            $md5Id = md5($email->user->id);
+            $md5Pw = md5($email->user->password);
+            $data['sent_to']->login_url = site_url('auth/login/with_hashes/' . $md5Id . '/' . $md5Pw);
 
-		$_data['ci']			=& get_instance();
-		$_data['email_ref']		= $_email->ref;
-		$_data['sent_from']		= $this->emailer->from;
-		$_data['email_subject']	= $_email->subject;
-		$_data['site_url']		= site_url();
-		$_data['secret']		= APP_PRIVATE_KEY;
-		$_data['email_type']	= $_email->type;
+        } else {
 
-		$_data['sent_to']				= new stdClass();
-		$_data['sent_to']->email		= $_email->user->email;
-		$_data['sent_to']->first		= $_email->user->first_name;
-		$_data['sent_to']->last			= $_email->user->last_name;
-		$_data['sent_to']->id			= (int) $_email->user->id;
-		$_data['sent_to']->username		= $_email->user->username;
-		$_data['sent_to']->group_id		= $_email->user->group_id;
-		$_data['sent_to']->login_url	= $_email->user->id ? site_url( 'auth/login/with_hashes/' . md5( $_email->user->id ) . '/' . md5( $_email->user->password ) ) : NULL;
+            $data['sent_to']->login_url = null;
+        }
 
-		//	Check login URLs are allowed
-		$this->config->load( 'auth/auth' );
+        //  Check login URLs are allowed
+        $this->config->load('auth/auth');
 
-		if ( ! $this->config->item( 'auth_enable_hashed_login' ) ) :
+        if (!$this->config->item('auth_enable_hashed_login')) {
 
-			$_data['sent_to']->login_url = '';
+            $data['sent_to']->login_url = '';
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Load template
+        if ($this->input->get('pt')) {
 
-		//	Load template
-		if ( $this->input->get( 'pt' ) ) :
+            $out  = '<html><head><title>' . $email->subject . '</title></head><body><pre>';
+            $out .= $this->load->view($email->type->template_header . '_plaintext', $data, true);
+            $out .= $this->load->view($email->type->template_body . '_plaintext', $data, true);
+            $out .= $this->load->view($email->type->template_footer . '_plaintext', $data, true);
+            $out .= '</pre></body></html>';
 
-			$_out  = '<html><head><title>' . $_email->subject . '</title></head><body><pre>';
-			$_out .= $this->load->view( $_email->type->template_header . '_plaintext',	$_data, TRUE );
-			$_out .= $this->load->view( $_email->type->template_body . '_plaintext',	$_data, TRUE );
-			$_out .= $this->load->view( $_email->type->template_footer . '_plaintext',	$_data, TRUE );
-			$_out .= '</pre></body></html>';
+            //  Sanitise a little
+            $out = preg_replace('/{unwrap}(.*?){\/unwrap}/', '$1', $out);
 
-			//	Sanitise a little
-			$_out = preg_replace( '/{unwrap}(.*?){\/unwrap}/', '$1', $_out );
+        } else {
 
-		else :
+            $out  = '';
+            $out .= $this->load->view($email->type->template_header, $data, true);
+            $out .= $this->load->view($email->type->template_body, $data, true);
+            $out .= $this->load->view($email->type->template_footer, $data, true);
 
-			$_out  = '';
-			$_out .= $this->load->view( $_email->type->template_header,	$_data, TRUE );
-			$_out .= $this->load->view( $_email->type->template_body,	$_data, TRUE );
-			$_out .= $this->load->view( $_email->type->template_footer,	$_data, TRUE );
+            if ($this->user_model->is_superuser() && $this->input->get('show_vars')) {
 
-			if ( $this->user_model->is_superuser() && $this->input->get( 'show_vars' ) ) :
+                $vars  = '<div style="max-width:600px;border:1px solid #CCC;margin:10px;padding:10px;background:#EFEFEF;white-space:pre;">';
+                $vars .= '<p style="margin-top:0;border-bottom:1px solid #CCC;padding-bottom:10px;"><strong>Superusers only: Email Variables</strong></p>';
+                $vars .= print_r($email->email_vars, true);
+                $vars .= '</div>';
 
-				$_vars  = '<div style="max-width:600px;border:1px solid #CCC;margin:10px;padding:10px;background:#EFEFEF;white-space:pre;">';
-				$_vars .= '<p style="margin-top:0;border-bottom:1px solid #CCC;padding-bottom:10px;"><strong>Superusers only: Email Variables</strong></p>';
-				$_vars .= print_r( $_email->email_vars, TRUE );
-				$_vars .= '</div>';
+                $out = preg_replace('/<body.*?>/', '$0' . $vars, $out);
+            }
+        }
 
-				$_out = preg_replace( '/<body.*?>/', '$0' . $_vars, $_out );
+        // --------------------------------------------------------------------------
 
-			endif;
+        //  Output
+        $this->output->set_output($out);
+    }
 
-		endif;
+    // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
-
-		//	Output
-		$this->output->set_output( $_out );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Map all requests to index
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function _remap()
-	{
-		$this->index();
-	}
-
+    /**
+     * Map all requests to index
+     *
+     * @access  public
+     * @param   none
+     * @return  void
+     **/
+    public function _remap()
+    {
+        $this->index();
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' EMAIL MODULES
@@ -175,14 +170,9 @@ class NAILS_View_Online extends NAILS_Email_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_VIEW_ONLINE' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_VIEW_ONLINE')) {
 
-	class View_online extends NAILS_View_online
-	{
-	}
-
-endif;
-
-
-/* End of file view_online.php */
-/* Location: ./application/modules/email/controllers/view_online.php */
+    class View_online extends NAILS_View_online
+    {
+    }
+}

@@ -1,118 +1,112 @@
 <?php
 
-/**
- * Name:		Email [verify]
- *
- * Description:	This controller handles verifying email addresses
- *
- **/
-
-/**
- * OVERLOADING NAILS' AUTH MODULE
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
-
+//  Include _email.php; executes common functionality
 require_once '_email.php';
+
+/**
+ * This class allows users to verify their email address
+ *
+ * @package     Nails
+ * @subpackage  module-email
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Verify extends NAILS_Email_Controller
 {
-	/**
-	 * Attempt to validate the user's activation code
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function index()
-	{
-		//	Define the key variables
-		$id   = $this->uri->segment(3, null);
-		$code = $this->uri->segment(4, null);
+    /**
+     * Attempt to validate the user's activation code
+     *
+     * @access  public
+     * @param   none
+     * @return  void
+     **/
+    public function index()
+    {
+        //  Define the key variables
+        $id   = $this->uri->segment(3, null);
+        $code = $this->uri->segment(4, null);
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Fetch the user
-		$u = $this->user_model->get_by_id($id);
+        //  Fetch the user
+        $u = $this->user_model->get_by_id($id);
 
-		if ($u && $code) {
+        if ($u && $code) {
 
-			//	User found, attempt to verify
-			if ($this->user_model->email_verify($u->id, $code)) {
+            //  User found, attempt to verify
+            if ($this->user_model->email_verify($u->id, $code)) {
 
-				//	Reward referrer (if any
-				if (!empty($u->referred_by)) {
+                //  Reward referrer (if any
+                if (!empty($u->referred_by)) {
 
-					$this->user_model->reward_referral($u->id, $u->referred_by);
-				}
+                    $this->user_model->reward_referral($u->id, $u->referred_by);
+                }
 
-				// --------------------------------------------------------------------------
+                // --------------------------------------------------------------------------
 
-				//	Send user on their way
-				if ($this->input->get('return_to')) {
+                //  Send user on their way
+                if ($this->input->get('return_to')) {
 
-					/**
-					 * Let the next page handle whether the user is logged in or not etc.
-					 * Ahh, go on set a wee notice that the user's email has been verified
-					 */
+                    /**
+                     * Let the next page handle whether the user is logged in or not etc.
+                     * Ahh, go on set a wee notice that the user's email has been verified
+                     */
 
-					$this->session->set_flashdata('message', lang('email_verify_ok_subtle'));
-					redirect($this->input->get('return_to'));
+                    $this->session->set_flashdata('message', lang('email_verify_ok_subtle'));
+                    redirect($this->input->get('return_to'));
 
-				} elseif (!$this->user_model->is_logged_in()) {
+                } elseif (!$this->user_model->is_logged_in()) {
 
-					//	Set success message
-					$this->session->set_flashdata('success', lang('email_verify_ok'));
+                    //  Set success message
+                    $this->session->set_flashdata('success', lang('email_verify_ok'));
 
-					//	If a password change is requested, then redirect here
-					if ($u->temp_pw) {
+                    //  If a password change is requested, then redirect here
+                    if ($u->temp_pw) {
 
-						//	Send user on their merry way
-						redirect('auth/reset_password/' . $u->id . '/' . md5($u->salt));
+                        //  Send user on their merry way
+                        redirect('auth/reset_password/' . $u->id . '/' . md5($u->salt));
 
-					} else {
+                    } else {
 
-						//	Nope, log in as normal
-						$this->user_model->set_login_data($u->id);
-						redirect($u->group_homepage);
-					}
+                        //  Nope, log in as normal
+                        $this->user_model->set_login_data($u->id);
+                        redirect($u->group_homepage);
+                    }
 
-				} else {
+                } else {
 
-					$this->session->set_flashdata('success', lang('email_verify_ok'));
-					redirect($u->group_homepage);
-				}
-			}
-		}
+                    $this->session->set_flashdata('success', lang('email_verify_ok'));
+                    redirect($u->group_homepage);
+                }
+            }
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		$this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $this->user_model->last_error());
-		redirect('/');
-	}
-
-
-	// --------------------------------------------------------------------------
+        $this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $this->user_model->last_error());
+        redirect('/');
+    }
 
 
-	/**
-	 *  Map the class so that index() does all the work
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function _remap()
-	{
-		$this->index();
-	}
+    // --------------------------------------------------------------------------
+
+
+    /**
+     *  Map the class so that index() does all the work
+     *
+     * @access  public
+     * @param   none
+     * @return  void
+     **/
+    public function _remap()
+    {
+        $this->index();
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' EMAIL MODULE
@@ -140,7 +134,7 @@ class NAILS_Verify extends NAILS_Email_Controller
 
 if (!defined('NAILS_ALLOW_EXTENSION')) {
 
-	class Verify extends NAILS_Verify
-	{
-	}
+    class Verify extends NAILS_Verify
+    {
+    }
 }

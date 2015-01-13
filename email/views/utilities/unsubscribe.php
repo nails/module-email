@@ -1,65 +1,222 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<title>Manage your email subscriptions</title>
-		<style type="text/css">
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+    <title>Manage what email you receive - <?=APP_NAME?></title>
+    <style type="text/css">
 
-			body
-			{
-				background:#EFEFEF;
-				font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-				font-weight: 300;
-				line-height:2em;
-				text-align:center;
-			}
-			#container
-			{
-				border:1px solid #CCC;
-				display:inline-block;
-				background:#FFF;
-				min-width:450px;
-				max-width:550px;
-				padding:0px;
-				margin:50px auto 25px auto;
-				border-radius:5px;
-				box-shadow:0px 2px 5px #CCC;
-				overflow:none;
-			}
+        html,
+        body
+        {
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            color: #333;
+            overflow: hidden;
+            font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif;
+            font-size: 16px;
+            line-height: 1.6em;
+        }
 
-			h1
-			{
-				margin:0;
-				padding:15px;
-				border-bottom:1px dashed #EEE;
-			}
+        #container {
+            word-wrap: break-word;
+            max-width: 600px;
+            min-width: 200px;
+            margin: 0 auto;
+            padding: 30px;
+            text-align: center;
+        }
 
-			small
-			{
-				font-size:0.8em;
-			}
+        h1
+        {
+            position: relative;
+            margin: 0.67em 0;
+            margin-top: 1em;
+            margin-bottom: 16px;
+            padding-bottom: 0.3em;
+            font-size: 2.25em;
+            font-weight: bold;
+            line-height: 1.2;
+        }
 
-		</style>
-	</head>
-	<body>
-		<div id="container">
-			<?php if ( $this->input->get( 'undo' ) ) : ?>
+        h2
+        {
+            font-size: 1.1em;
+        }
 
-				<h1>That's OK, we all make mistakes</h1>
-				<p>
-					We'll continue to send you these types of email. <?=anchor( 'email/unsubscribe?token=' . $this->input->get( 'token' ), 'Unsubscribe?' ) ?>
-				</p>
+        h1,
+        hr
+        {
+            border: 0;
+            border-bottom: 1px solid #eee;
+        }
 
-			<?php else : ?>
+        img
+        {
+            border: 0;
+            max-width: 100%;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
 
-				<h1>Successfully Unsubscribed</h1>
-				<p>
-					OK! We won't send you this type of email again. <?=anchor( 'email/unsubscribe?token=' . $this->input->get( 'token' ) . '&undo=1', 'Undo?' ) ?>
-				</p>
+        p
+        {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
 
-			<?php endif; ?>
-		</div>
-		<p>
-			<small><?=anchor( '', 'Back to ' . APP_NAME )?></small>
-		</p>
-	</body>
-</html>
+        a
+        {
+            background: transparent;
+            color: #4183C4;
+            text-decoration: none;
+        }
+
+        a:active,
+        a:hover
+        {
+            outline: 0;
+        }
+
+        a:hover,
+        a:focus,
+        a:active
+        {
+            text-decoration: underline;
+        }
+
+        a.btn
+        {
+            border: 1px solid #396C9E;
+            background: #4183C4;
+            padding: 0.4em 0.8em;
+            color: #FFFFFF;
+            border-radius: 3px;
+            box-shadow: 0px 0px 1px rgba(0,0,0,0.5)
+        }
+
+        a.btn:hover,
+        a.btn:focus,
+        a.btn:active
+        {
+            text-decoration: none;
+            background: #396C9E;
+        }
+
+        a.btn:active
+        {
+            position: relative;
+            top: 1px;
+            box-shadow: none;
+        }
+
+        small
+        {
+            font-size:0.65em;
+        }
+
+        #logoContainer
+        {
+            width: 125px;
+            margin: auto;
+        }
+
+        #logo
+        {
+            max-width: 100%;
+            height: auto;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>
+        <?php
+
+            $paths   = array();
+
+            $paths[] = array(
+                FCPATH . 'assets/img/error_404.png',
+                BASE_URL . 'assets/img/error_404.png'
+            );
+
+            $paths[] = array(
+                FCPATH . 'assets/img/logo.png',
+                BASE_URL . 'assets/img/logo.png'
+            );
+
+            $paths[] = array(
+                FCPATH . 'assets/img/logo.jpg',
+                BASE_URL . 'assets/img/logo.jpg'
+            );
+
+            $paths[] = array(
+                FCPATH . 'assets/img/logo.gif',
+                BASE_URL . 'assets/img/logo.gif'
+            );
+
+            $paths[] = array(
+                FCPATH . 'assets/img/logo/logo.png',
+                BASE_URL . 'assets/img/logo/logo.png'
+            );
+
+            $paths[] = array(
+                FCPATH . 'assets/img/logo/logo.jpg',
+                BASE_URL . 'assets/img/logo/logo.jpg'
+            );
+
+            $paths[] = array(
+                FCPATH . 'assets/img/logo/logo.gif',
+                BASE_URL . 'assets/img/logo/logo.gif'
+            );
+
+            $paths[] = array(
+                NAILS_ASSETS_PATH . 'img/nails/icon/icon@2x.png',
+                NAILS_ASSETS_URL . 'img/nails/icon/icon@2x.png'
+            );
+
+
+            foreach ($paths AS $path) {
+
+                if (is_file($path[0])) {
+
+                    echo '<div id="logoContainer">';
+                        echo '<img src="' . $path[1] . '" id="logo" />';
+                    echo '</div>';
+                    break;
+                }
+            }
+
+        ?>
+        </h1>
+        <?php if ($this->input->get('undo')) { ?>
+
+            <h2>That's OK, we all make mistakes</h2>
+            <p>
+                We'll continue to send you this type of email.
+            </p>
+            <p>
+                <?=anchor('email/unsubscribe?token=' . $this->input->get('token'), 'Unsubscribe?', 'class="btn"') ?>
+            </p>
+
+        <?php } else { ?>
+
+            <h2>Successfully Unsubscribed</h2>
+            <p>
+                OK! We won't send you this type of email again.
+            </p>
+            <p>
+                <?=anchor('email/unsubscribe?token=' . $this->input->get('token') . '&undo=1', 'Undo?', 'class="btn"') ?>
+            </p>
+
+        <?php }; ?>
+        <hr />
+        <p>
+            <small>
+                Powered by <a href="http://nailsapp.co.uk">Nails</a>
+            </small>
+        </p>
+    </div>
+</body>

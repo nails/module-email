@@ -1,123 +1,97 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
-* Name:			Unsubscribe
-*
-* Description:	Allows users to unsubscribe from a particular email type
-*
-*/
-
-//	Include _email.php; executes common functionality
+//  Include _email.php; executes common functionality
 require_once '_email.php';
 
 /**
- * OVERLOADING NAILS' EMAIL MODULES
+ * This class allows users to subscribe and unsubscribe from individual email types
  *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-email
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Unsubscribe extends NAILS_Email_Controller
 {
+    /**
+     * Renders the subscribe/unsubscribe page
+     * @return void
+     */
+    public function index()
+    {
+        if (! $this->user_model->is_logged_in()) {
 
-	/**
-	 * Constructor
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function index()
-	{
-		if ( ! $this->user_model->is_logged_in() ) :
+            unauthorised();
+        }
 
-			unauthorised();
+        $_token = $this->input->get('token');
+        $_token = $this->encrypt->decode($_token, APP_PRIVATE_KEY);
 
-		endif;
+        if (! $_token) {
 
-		$_token = $this->input->get( 'token' );
-		$_token = $this->encrypt->decode( $_token, APP_PRIVATE_KEY );
+            show_404();
+        }
 
-		if ( ! $_token ) :
+        $_token = explode('|', $_token);
 
-			show_404();
+        if (count($_token) != 3) {
 
-		endif;
+            show_404();
+        }
 
-		$_token = explode( '|', $_token );
+        $_user = $this->user_model->get_by_email($_token[2]);
 
-		if ( count( $_token ) != 3 ) :
+        if (! $_user || $_user->id != active_user('id ')) {
 
-			show_404();
+            show_404();
+        }
 
-		endif;
+        $_email = $this->emailer->get_by_ref($_token[1]);
 
-		$_user = $this->user_model->get_by_email( $_token[2] );
+        if (! $_email) {
 
-		if ( ! $_user || $_user->id != active_user( 'id ' ) ) :
+            show_404();
+        }
 
-			show_404();
+        // --------------------------------------------------------------------------
 
-		endif;
+        //  All seems above board, action the request
+        if ($this->input->get('undo')) {
 
-		$_email = $this->emailer->get_by_ref( $_token[1] );
+            if ($this->emailer->userHasUnsubscribed(active_user('id'), $_token[0])) {
 
-		if ( ! $_email ) :
+                $this->emailer->subscribeUser(active_user('id'), $_token[0]);
+            }
 
-			show_404();
+        } else {
 
-		endif;
+            if (!$this->emailer->userHasUnsubscribed(active_user('id'), $_token[0])) {
 
-		// --------------------------------------------------------------------------
+                $this->emailer->unsubscribeUser(active_user('id'), $_token[0]);
+            }
+        }
 
-		//	All seems above board, action the request
-		if ( $this->input->get( 'undo' ) ) :
+        // --------------------------------------------------------------------------
 
-			if ( $this->emailer->user_has_unsubscribed( active_user( 'id' ), $_token[0] ) ) :
+        //  Load views
+        $this->load->view('email/utilities/unsubscribe', $this->data);
+    }
 
-				$this->emailer->subscribe_user( active_user( 'id' ), $_token[0] );
+    // --------------------------------------------------------------------------
 
-			endif;
-
-		else :
-
-			if ( ! $this->emailer->user_has_unsubscribed( active_user( 'id' ), $_token[0] ) ) :
-
-				$this->emailer->unsubscribe_user( active_user( 'id' ), $_token[0] );
-
-			endif;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Load views
-		$this->load->view( 'email/utilities/unsubscribe', $this->data );
-
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Map all requests to index
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function _remap()
-	{
-		$this->index();
-	}
-
+    /**
+     * Map all requests to index
+     * @return  void
+     **/
+    public function _remap()
+    {
+        $this->index();
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' EMAIL MODULES
@@ -143,14 +117,9 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_UNSUBSCRIBE' ) ) :
+if (! defined('NAILS_ALLOW_EXTENSION_UNSUBSCRIBE')) {
 
-	class Unsubscribe extends NAILS_Unsubscribe
-	{
-	}
-
-endif;
-
-
-/* End of file unsubscribe.php */
-/* Location: ./application/modules/email/controllers/view_online.php */
+    class Unsubscribe extends NAILS_Unsubscribe
+    {
+    }
+}

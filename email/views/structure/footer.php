@@ -1,76 +1,75 @@
-	<div class="footer">
-	<?php
+    <div class="footer">
+    <?php
 
-		$_links = array();
+        $links = array();
 
-		//	View Online link & Unsubscribe
-		if ( ! empty( $email_ref ) ) :
+        //  View Online link & Unsubscribe
+        if (!empty($email_ref)) {
 
-			//	Generate the hash
-			$_time = time();
-			$_hash = $email_ref . '/' . $_time . '/' . md5( $_time . $secret . $email_ref );
+            //  Generate the hash
+            $time = time();
+            $hash = $email_ref . '/' . $time . '/' . md5($time . $secret . $email_ref);
 
-			//	Link
-			$_links[] = anchor( 'email/view_online/' . $_hash, 'View this E-mail Online' );
+            //  Link
+            $links[] = anchor('email/view_online/' . $hash, 'View this E-mail Online');
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  1-Click unsubscribe
+        $loginUrl = $sent_to->login_url . '?return_to=';
+        $return    = '/email/unsubscribe?token=';
 
-		//	1-Click unsubscribe
-		$_login_url	= $sent_to->login_url . '?return_to=';
-		$_return	= '/email/unsubscribe?token=';
+        /**
+         * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
+         * 20 times before giving up @TODO: make this less hacky
+         */
 
-		//	Bit of a hack; keep trying until there's no + symbol in the hash, try up to 20 times before giving up
-		//	TODO: make this less hacky
+        $counter = 0;
+        $attemps = 20;
 
-		$_counter	= 0;
-		$_attemps	= 20;
+        do {
 
-		do
-		{
-			$_token = $this->encrypt->encode( $email_type->slug . '|' . $email_ref . '|' . $sent_to->email, $secret );
-			$_counter++;
-		}
-		while( $_counter <= $_attemps && strpos( $_token, '+') !== FALSE );
+            $token = $this->encrypt->encode($email_type->slug . '|' . $email_ref . '|' . $sent_to->email, $secret);
+            $counter++;
 
-		//	Link, autologin if possible
-		if ( ! empty( $sent_to->login_url ) ) :
+        } while($counter <= $attemps && strpos($token, '+') !== false);
 
-			$_url = $_login_url . urlencode( $_return . $_token );
+        //  Link, autologin if possible
+        if (!empty($sent_to->login_url)) {
 
-		else :
+            $url = $loginUrl . urlencode($return . $token);
 
-			$_url = $_return . $_token;
+        } else {
 
-		endif;
+            $url = $return . $token;
+        }
 
-		$_links[] = anchor( $_url, 'Unsubscribe' );
+        $links[] = anchor($url, 'Unsubscribe');
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Render
-		if ( $_links ) :
+        //  Render
+        if ($links) {
 
-			echo '<p><small>';
-			echo implode( ' | ', $_links );
-			echo '</small></p>';
+            echo '<p><small>';
+            echo implode(' | ', $links);
+            echo '</small></p>';
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Tracker, production only
+        if (strtoupper(ENVIRONMENT) == 'PRODUCTION' && !$ci->user_model->is_admin() && !$ci->user_model->was_admin()) {
 
-		//	Tracker, production only
-		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' && ! $ci->user_model->is_admin() && ! $ci->user_model->was_admin() ) :
+            $time   = time();
+            $imgSrc = site_url('email/tracker/' . $email_ref . '/' . $time . '/' . md5($time . $secret . $email_ref));
+            echo '<img src="' . $imgSrc . '/tracker.gif" width="0" height="0" style="width:0px;height:0px;"">';
+        }
 
-			$_time = time();
-			echo '<img src="' . site_url( 'email/tracker/' . $email_ref . '/' . $_time . '/' . md5( $_time . $secret . $email_ref ) ) . '/tracker.gif" width="0" height="0" style="width:0px;height:0px;"">';
-
-		endif;
-
-	?>
-	</div>
-	</div>
-	</div>
-	</body>
+    ?>
+    </div>
+    </div>
+    </div>
+    </body>
 </html>

@@ -298,10 +298,7 @@
 			echo '<hr />';
 		echo '</h1>';
 
-		if ( isset( $sent_to->first ) && $sent_to->first ) :
+		if (isset($sent_to->first) && $sent_to->first) {
 
 			echo '<p>Hi ' . $sent_to->first . ',</p>';
-
-		endif;
-
-	?>
+		}

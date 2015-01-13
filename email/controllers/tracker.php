@@ -1,168 +1,148 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
- * Name:		Track email opens
- *
- * Description:	Allows users to view an email sent to them in their browser
- *
- **/
-
-//	Include _email.php; executes common functionality
+//  Include _email.php; executes common functionality
 require_once '_email.php';
 
 /**
- * OVERLOADING NAILS' EMAIL MODULES
+ * This class allows NAils to track email opens and link clicks
  *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-email
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Tracker extends NAILS_Email_Controller
 {
+    /**
+     * Track an email open.
+     * @return  void
+     **/
+    public function track_open()
+    {
+        /**
+         * Fetch data; return a string if not set so as not to accidentally skip the
+         * hash check in get_by_ref();
+         */
 
-	/**
-	 * Track an email open.
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function track_open()
-	{
-		//	Fetch data; return a string if not set so as not to accidentally skip the
-		//	hash check in get_by_ref();
+        $ref  = $this->uri->segment(3, 'null');
+        $guid = $this->uri->segment(4, 'null');
+        $hash = $this->uri->segment(5, 'null');
 
-		$_ref	= $this->uri->segment( 3, 'NULL' );
-		$_guid	= $this->uri->segment( 4, 'NULL' );
-		$_hash	= $this->uri->segment( 5, 'NULL' );
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Fetch the email
+        $this->emailer->trackOpen($ref, $guid, $hash);
 
-		//	Fetch the email
-		$this->emailer->track_open( $_ref, $_guid, $_hash );
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        /**
+         * Render out a tiny, tiny image
+         * Thanks http://probablyprogramming.com/2009/03/15/the-tiniest-gif-ever
+         */
 
-		//	Render out a tiny, tiny image
-		//	Thanks http://probablyprogramming.com/2009/03/15/the-tiniest-gif-ever
+        header('Content-Type: image/gif');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Cache-Control: post-check=0, pre-check=0', false);
+        header('Pragma: no-cache');
 
-		header( 'Content-Type: image/gif' );
-		header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
-		header( 'Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT' );
-		header( 'Cache-Control: no-store, no-cache, must-revalidate' );
-		header( 'Cache-Control: post-check=0, pre-check=0', FALSE );
-		header( 'Pragma: no-cache' );
+        echo base64_decode('R0lGODlhAQABAIABAP///wAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==');
 
-		echo base64_decode('R0lGODlhAQABAIABAP///wAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==');
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        /**
+         * Kill script, th, th, that's all folks. Stop the output class from hijacking
+         * our headers and setting an incorrect Content-Type
+         */
 
-		//	Kill script, th, th, that's all folks.
-		//	Stop the output class from hijacking our headers and
-		//	setting an incorrect Content-Type
+        exit(0);
+    }
 
-		exit(0);
-	}
+    // --------------------------------------------------------------------------
 
+    /**
+     * Track a link click and forward through
+     * @return  void
+     **/
+    public function track_link()
+    {
+        /**
+         * Fetch data; return a string if not set so as not to accidentally skip the
+         * hash check in get_by_ref();
+         */
 
-	// --------------------------------------------------------------------------
+        $ref     = $this->uri->segment(4);
+        $guid    = $this->uri->segment(5, 'null');
+        $hash    = $this->uri->segment(6, 'null');
+        $link_id = $this->uri->segment(7, 'null');
 
+        // --------------------------------------------------------------------------
 
-	/**
-	 * Track a link click and forward through
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function track_link()
-	{
-		//	Fetch data; return a string if not set so as not to accidentally skip the
-		//	hash check in get_by_ref();
+        //  Check the reference is present
+        if (!$ref) {
 
-		$_ref		= $this->uri->segment( 4 );
-		$_guid		= $this->uri->segment( 5, 'NULL' );
-		$_hash		= $this->uri->segment( 6, 'NULL' );
-		$_link_id	= $this->uri->segment( 7, 'NULL' );
+            show_error(lang('argument_missing', 'EMAIL_REF'));
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Check the reference is present
-		if ( ! $_ref ) :
+        //  Fetch the email
+        $url = $this->emailer->trackLink($ref, $guid, $hash, $link_id);
 
-			show_error( lang( 'argument_missing', 'EMAIL_REF' ) );
+        switch ($url) {
 
-		endif;
+            case 'BAD_HASH':
 
-		// --------------------------------------------------------------------------
+                $this->output->set_content_type('application/json');
+                $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
+                $this->output->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+                $this->output->set_header('Pragma: no-cache');
+                $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 400 Bad Request');
+                $this->output->set_output(json_encode(array('status' => 400, 'error' => lang('invalid_email'))));
+                log_message('error', 'Emailer link failed with reason BAD_HASH');
+                break;
 
-		//	Fetch the email
-		$_url = $this->emailer->track_link( $_ref, $_guid, $_hash, $_link_id );
+            case 'BAD_LINK':
 
-		switch ( $_url ) :
+                $this->output->set_content_type('application/json');
+                $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
+                $this->output->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+                $this->output->set_header('Pragma: no-cache');
+                $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 400 Bad Request');
+                $this->output->set_output(json_encode(array('status' => 400, 'error' => lang('invalid_link'))));
+                log_message('error', 'Emailer link failed with reason BAD_LINK');
+                break;
 
-			case 'BAD_HASH' :
+            default:
 
-				$this->output->set_content_type( 'application/json' );
-				$this->output->set_header( 'Cache-Control: no-store, no-cache, must-revalidate' );
-				$this->output->set_header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
-				$this->output->set_header( 'Pragma: no-cache' );
-				$this->output->set_header( $this->input->server( 'SERVER_PROTOCOL' ) . ' 400 Bad Request' );
-				$this->output->set_output( json_encode( array( 'status' => 400, 'error' => lang( 'invalid_email' ) ) ) );
-				log_message( 'error', 'Emailer link failed with reason BAD_HASH' );
+                redirect($url);
+                break;
+        }
+    }
 
-			break;
+    // --------------------------------------------------------------------------
 
-			case 'BAD_LINK' :
+    /**
+     * Maps requests to the correct method
+     * @return  void
+     **/
+    public function _remap($method)
+    {
+        if ($method == 'link') {
 
-				$this->output->set_content_type( 'application/json' );
-				$this->output->set_header( 'Cache-Control: no-store, no-cache, must-revalidate' );
-				$this->output->set_header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
-				$this->output->set_header( 'Pragma: no-cache' );
-				$this->output->set_header( $this->input->server( 'SERVER_PROTOCOL' ) . ' 400 Bad Request' );
-				$this->output->set_output( json_encode( array( 'status' => 400, 'error' => lang( 'invalid_link' ) ) ) );
-				log_message( 'error', 'Emailer link failed with reason BAD_LINK' );
+            $this->track_link();
 
-			break;
+        } else {
 
-			default :
-
-				redirect( $_url );
-
-			break;
-
-		endswitch;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Map all requests to index
-	 *
-	 * @access	public
-	 * @param	none
-	 * @return	void
-	 **/
-	public function _remap( $method )
-	{
-		if ( $method == 'link' ) :
-
-			$this->track_link();
-
-		else :
-
-			$this->track_open();
-
-		endif;
-	}
+            $this->track_open();
+        }
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' EMAIL MODULES
@@ -188,14 +168,9 @@ class NAILS_Tracker extends NAILS_Email_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_TRACKER' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_TRACKER')) {
 
-	class Tracker extends NAILS_Tracker
-	{
-	}
-
-endif;
-
-
-/* End of file view_online.php */
-/* Location: ./application/modules/email/controllers/view_online.php */
+    class Tracker extends NAILS_Tracker
+    {
+    }
+}
