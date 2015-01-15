@@ -178,7 +178,7 @@
             );
 
 
-            foreach ($paths AS $path) {
+            foreach ($paths as $path) {
 
                 if (is_file($path[0])) {
 
