@@ -1360,7 +1360,7 @@ class Emailer
      */
     protected function _format_email(&$email)
     {
-        $email->email_vars = unserialize($email->email_vars);
+        $email->email_vars = @unserialize($email->email_vars);
         $email->type       = !empty($this->_email_type[$email->type]) ? $this->_email_type[$email->type] : null;
 
         if (empty($email->type)) {
