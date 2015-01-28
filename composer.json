@@ -37,6 +37,7 @@
     {
         "nails" :
         {
+            "moduleName": "email",
             "type": "module"
         }
     }
