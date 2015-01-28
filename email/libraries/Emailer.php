@@ -75,11 +75,11 @@ class Emailer
         $emailTypeLocations   = array();
         $emailTypeLocations[] = NAILS_COMMON_PATH . 'config/email_types.php';
 
-        $modules = _NAILS_GET_AVAILABLE_MODULES();
+        $modules = _NAILS_GET_MODULES();
+
         foreach ($modules as $module) {
 
-            $moduleBits           = explode('-', $module);
-            $emailTypeLocations[] = FCPATH . 'vendor/' . $module . '/' . $moduleBits[1] . '/config/email_types.php';
+            $emailTypeLocations[] = $module->path . $module->moduleName . '/config/email_types.php';
         }
 
         $emailTypeLocations[] = FCPATH . APPPATH . 'config/email_types.php';
