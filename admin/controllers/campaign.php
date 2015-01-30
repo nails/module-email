@@ -27,6 +27,14 @@ class Campaign extends \AdminController
 
     // --------------------------------------------------------------------------
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->lang->load('admin_email_campaign');
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Manage email campaigns
      * @return void
@@ -46,8 +54,6 @@ class Campaign extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/email/campaign/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('index');
     }
 }

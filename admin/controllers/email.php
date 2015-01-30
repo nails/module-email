@@ -27,6 +27,14 @@ class Email extends \AdminController
 
     // --------------------------------------------------------------------------
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->lang->load('admin_email');
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Browse the email archive
      * @return void
@@ -59,9 +67,7 @@ class Email extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/email/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
