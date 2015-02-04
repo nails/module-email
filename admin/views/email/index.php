@@ -6,7 +6,7 @@
     <?php
 
         // @todo: Add search facilities
-        echo \Nails\Admin\Helper::loadPagination($emails->pagination->total_results, 2)
+        echo \Nails\Admin\Helper::loadPagination($emails->pagination->total_results);
 
     ?>
     <table>
@@ -133,7 +133,7 @@
 
                             echo anchor(site_url('email/view_online/' . $email->ref, isPageSecure()), lang('action_preview'), 'class="awesome small fancybox fancybox.iframe" target="_blank"');
 
-                            if (!user_has_permission('admin.email:0.can_resend')) {
+                            if (!userHasPermission('admin.email:0.can_resend')) {
 
                                 $return = uri_string();
                                 if ($this->input->server('QUERY_STRING')) {

@@ -41,7 +41,7 @@ class Campaign extends \AdminController
      */
     public function index()
     {
-        if (!user_has_permission('admin.email:0.can_manage_campaigns')) {
+        if (!userHasPermission('admin.email:0.can_manage_campaigns')) {
 
             unauthorised();
         }

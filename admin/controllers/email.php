@@ -41,7 +41,7 @@ class Email extends \AdminController
      */
     public function index()
     {
-        if (!user_has_permission('admin.email:0.can_browse_archive')) {
+        if (!userHasPermission('admin.email:0.can_browse_archive')) {
 
             unauthorised();
         }
@@ -78,7 +78,7 @@ class Email extends \AdminController
      */
     public function resend()
     {
-        if (!user_has_permission('admin.email:0.can_resend')) {
+        if (!userHasPermission('admin.email:0.can_resend')) {
 
             unauthorised();
         }
