@@ -20,9 +20,9 @@ class Email extends \AdminController
      */
     public static function announce()
     {
-        $d     = parent::announce();
-        $d[''] = array('Email', 'Message Archive');
-        return $d;
+        $navGroup = new \Nails\Admin\Nav('Email');
+        $navGroup->addMethod('Message Archive');
+        return $navGroup;
     }
 
     // --------------------------------------------------------------------------

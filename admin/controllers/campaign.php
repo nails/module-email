@@ -20,9 +20,9 @@ class Campaign extends \AdminController
      */
     public static function announce()
     {
-        $d     = parent::announce();
-        $d[''] = array('Email', 'Manage Campaigns');
-        return $d;
+        $navGroup = new \Nails\Admin\Nav('Email');
+        $navGroup->addMethod('Manage Campaigns');
+        return $navGroup;
     }
 
     // --------------------------------------------------------------------------
