@@ -5,8 +5,8 @@
     <hr />
     <?php
 
-        // @todo: Add search facilities
-        echo \Nails\Admin\Helper::loadPagination($emails->pagination->total_results);
+        echo \Nails\Admin\Helper::loadSearch($search);
+        echo \Nails\Admin\Helper::loadPagination($pagination);
 
     ?>
     <table>
@@ -26,9 +26,9 @@
         <tbody>
             <?php
 
-            if ($emails->data) {
+            if ($emails) {
 
-                foreach ($emails->data as $email) {
+                foreach ($emails as $email) {
 
                     ?>
                     <tr>
@@ -166,7 +166,7 @@
     </table>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($emails->pagination->total_results)
+        echo \Nails\Admin\Helper::loadPagination($pagination);
 
     ?>
 </div>

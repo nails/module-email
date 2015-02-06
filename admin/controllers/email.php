@@ -39,6 +39,10 @@ class Email extends \AdminController
      * Browse the email archive
      * @return void
      */
+    /**
+     * Browse posts
+     * @return void
+     */
     public function index()
     {
         if (!userHasPermission('admin.email:0.can_browse_archive')) {
@@ -46,27 +50,47 @@ class Email extends \AdminController
             unauthorised();
         }
 
-        // --------------------------------------------------------------------------
-
-        //  Page Title
+        //  Set method info
         $this->data['page']->title = lang('email_index_title');
 
         // --------------------------------------------------------------------------
 
-        //  Fetch emails from the archive
-        $offset  = $this->input->get('offset');
-        $perPage = $this->input->get('per_page') ? $this->input->get('per_page') : 25;
-
-        $this->data['emails']       = new \stdClass();
-        $this->data['emails']->data = $this->emailer->get_all(null, 'DESC', $offset, $perPage);
-
-        //  Work out pagination
-        $this->data['emails']->pagination                = new \stdClass();
-        $this->data['emails']->pagination->total_results = $this->emailer->count_all();
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : 'ea.queued';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
 
-        //  Load views
+        //  Define the sortable columns
+        $sortColumns = array(
+            'ea.queued' => 'Queued Date',
+            'ea.sent'   => 'Sent Date'
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'sort'  => array(
+                'column' => $sortOn,
+                'order'  => $sortOrder
+            ),
+            'keywords' => $keywords
+        );
+
+        //  Get the items for the page
+        $totalRows            = $this->emailer->count_all($data);
+        $this->data['emails'] = $this->emailer->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject($sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
         \Nails\Admin\Helper::loadView('index');
     }
 

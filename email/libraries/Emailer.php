@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 /**
  * This class brings email functionality to Nails
@@ -14,6 +14,7 @@ class Emailer
 {
     //  Class traits
     use NAILS_COMMON_TRAIT_ERROR_HANDLING;
+    use NAILS_COMMON_TRAIT_GETCOUNT_COMMON;
 
     //  Other vars
     public $from;
@@ -785,7 +786,11 @@ class Emailer
 
                 if (!$graceful) {
 
-                    show_error('Email failed to send at SMTP time. Potential configuration error. Investigate, debugging data below: <div style="padding:20px;background:#EEE">' . $this->ci->email->print_debugger() . '</div>');
+                    $error  = 'Email failed to send at SMTP time. Potential configuration error. Investigate, ';
+                    $error .= 'debugging data below: <div style="padding:20px;background:#EEE">';
+                    $error .= $this->ci->email->print_debugger() . '</div>';
+
+                    show_error($error);
 
                 } else {
 
@@ -802,23 +807,15 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
-     * Gets an email from the archive
-     * @param  string $order    The column to order on
-     * @param  string $sort     The direction in which to order
-     * @param  int    $offset   The offset
-     * @param  int    $perPage  The number of records to show per page
+     * Returns emails from the archive
+     * @param  integer $page    The page of results to retrieve
+     * @param  integer $perPage The number of results per page
+     * @param  array   $data    Data to pass to _getcount_common_email()
+     * @param  string  $_caller An internal flag highlighting the parent method
      * @return array
      */
-    public function get_all($order = null, $sort = null, $offset = null, $perPage = null)
+    public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
     {
-        //  Set defaults
-        $order   = $order   ? $order   : 'ea.sent';
-        $sort    = $sort    ? $sort    : 'ASC';
-        $offset  = $offset  ? $offset  : 0;
-        $perPage = $perPage ? $perPage : 25;
-
-        // --------------------------------------------------------------------------
-
         $this->db->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
         $this->db->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
         $this->db->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
@@ -827,23 +824,74 @@ class Emailer
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id', 'LEFT');
         $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT');
 
-        $this->db->order_by($order, $sort);
-        $this->db->order_by('ea.id', $sort);
-        $this->db->limit($perPage, $offset);
-
-        $emails = $this->db->get(NAILS_DB_PREFIX . 'email_archive ea')->result();
+        //  Apply common items; pass $data
+        $this->_getcount_common_email($data, $_caller);
 
         // --------------------------------------------------------------------------
 
-        //  Format emails
-        foreach ($emails as $email) {
+        //  Facilitate pagination
+        if (!is_null($page)) {
 
-            $this->_format_email($email);
+            /**
+             * Adjust the page variable, reduce by one so that the offset is calculated
+             * correctly. Make sure we don't go into negative numbers
+             */
+
+            $page--;
+            $page = $page < 0 ? 0 : $page;
+
+            //  Work out what the offset should be
+            $perPage = is_null($perPage) ? 50 : (int) $perPage;
+            $offset  = $page * $perPage;
+
+            $this->db->limit($perPage, $offset);
         }
 
         // --------------------------------------------------------------------------
 
+        $emails = $this->db->get(NAILS_DB_PREFIX . 'email_archive ea')->result();
+
+        for ($i = 0; $i < count($emails); $i++) {
+
+            //  Format the object, make it pretty
+            $this->_format_object($emails[$i]);
+        }
+
         return $emails;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * This method applies the conditionals which are common across the get_*()
+     * methods and the count() method.
+     * @param array  $data    Data passed from the calling method
+     * @param string $_caller The name of the calling method
+     * @return void
+     **/
+    protected function _getcount_common_email($data = array(), $_caller = null)
+    {
+        if (!empty($data['keywords'])) {
+
+            if (!isset($data['or_like'])) {
+
+                $data['or_like'] = array();
+            }
+
+            $data['or_like'][] = array('ea.ref', $data['keywords']);
+            $data['or_like'][] = array('ea.user_id', $data['keywords']);
+            $data['or_like'][] = array('ea.user_email', $data['keywords']);
+            $data['or_like'][] = array('ue.email', $data['keywords']);
+
+            $keywordAsId = (int) preg_replace('/[^0-9]/', '', $data['keywords']);
+
+            if ($keywordAsId) {
+
+                $data['or_like'][] = array('u.id', $keywordAsId);
+            }
+        }
+
+        $this->_getcount_common($data, $_caller);
     }
 
     // --------------------------------------------------------------------------
@@ -866,17 +914,17 @@ class Emailer
      */
     public function get_by_id($id)
     {
-        $this->db->where('ea.id', $id);
-        $_item = $this->get_all();
+        $data = array('where' => array('ea.id', $id));
+        $emails = $this->get_all(null, null, $data);
 
-        if (!$_item) {
+        if (!$emails) {
 
             return false;
         }
 
         // --------------------------------------------------------------------------
 
-        return $_item[0];
+        return $emails[0];
     }
 
     // --------------------------------------------------------------------------
@@ -904,15 +952,15 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->db->where('ea.ref', $ref);
-        $_item = $this->get_all();
+        $data = array('where' => array('ea.ref', $ref));
+        $emails = $this->get_all();
 
-        if (!$_item) {
+        if (!$emails) {
 
             return false;
         }
 
-        return $_item[0];
+        return $emails[0];
     }
 
     // --------------------------------------------------------------------------
@@ -950,22 +998,22 @@ class Emailer
     {
         do {
 
-            $_ref_ok = false;
+            $refOk = false;
 
             do {
 
-                $ref = random_string('alnum', 10);
+                $ref = strtoupper(random_string('alnum', 10));
                 if (array_search($ref, $exclude) === false) {
 
-                    $_ref_ok = true;
+                    $refOk = true;
                 }
 
-            } while (!$_ref_ok);
+            } while (!$refOk);
 
             $this->db->where('ref', $ref);
-            $_query = $this->db->get(NAILS_DB_PREFIX . 'email_archive');
+            $result = $this->db->get(NAILS_DB_PREFIX . 'email_archive');
 
-        } while ($_query->num_rows());
+        } while ($result->num_rows());
 
         // --------------------------------------------------------------------------
 
@@ -1358,7 +1406,7 @@ class Emailer
      * @param  object $email The raw email object
      * @return void
      */
-    protected function _format_email(&$email)
+    protected function _format_object(&$email)
     {
         $email->email_vars = @unserialize($email->email_vars);
         $email->type       = !empty($this->_email_type[$email->type]) ? $this->_email_type[$email->type] : null;
