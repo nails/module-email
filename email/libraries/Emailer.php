@@ -1,4 +1,4 @@
-    <?php
+<?php
 
 /**
  * This class brings email functionality to Nails
