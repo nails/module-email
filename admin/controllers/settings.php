@@ -49,7 +49,7 @@ class Settings extends \AdminController
 
             } else {
 
-                $this->data['error'] = '<strong>Sorry,</strong> I can\'t determine what type of update you are trying to perform.';
+                $this->data['error'] = 'I can\'t determine what type of update you are trying to perform.';
             }
         }
 
@@ -88,11 +88,11 @@ class Settings extends \AdminController
 
         if ($this->app_setting_model->set($settings, 'email')) {
 
-            $this->data['success'] = '<strong>Success!</strong> General email settings have been saved.';
+            $this->data['success'] = 'General email settings have been saved.';
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
         }
     }
 }
