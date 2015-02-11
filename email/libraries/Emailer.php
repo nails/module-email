@@ -821,9 +821,6 @@ class Emailer
         $this->db->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
         $this->db->select('u.profile_img,u.gender,u.username');
 
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT');
-
         //  Apply common items; pass $data
         $this->_getcount_common_email($data, $_caller);
 
@@ -891,6 +888,10 @@ class Emailer
             }
         }
 
+        //  Common joins
+        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT');
+
         $this->_getcount_common($data, $_caller);
     }
 
@@ -900,9 +901,10 @@ class Emailer
      * Count the number of records in the archive
      * @return int
      */
-    public function count_all()
+    public function count_all($data)
     {
-        return $this->db->count_all_results(NAILS_DB_PREFIX . 'email_archive');
+        $this->_getcount_common_email($data, 'COUNT_ALL');
+        return $this->db->count_all_results(NAILS_DB_PREFIX . 'email_archive ea');
     }
 
     // --------------------------------------------------------------------------
@@ -914,7 +916,7 @@ class Emailer
      */
     public function get_by_id($id)
     {
-        $data = array('where' => array('ea.id', $id));
+        $data = array('where' => array(array('ea.id', $id)));
         $emails = $this->get_all(null, null, $data);
 
         if (!$emails) {
