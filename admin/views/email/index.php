@@ -2,7 +2,6 @@
     <p>
         <?=lang('email_index_intro')?>
     </p>
-    <hr />
     <?php
 
         echo \Nails\Admin\Helper::loadSearch($search);
