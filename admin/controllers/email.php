@@ -27,6 +27,25 @@ class Email extends \AdminController
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Returns an array of permissions which can be configured for the user
+     * @return array
+     */
+    public static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['browse'] = 'Can browse email archive';
+        $permissions['resend'] = 'Can resend email';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Construct the controller
+     */
     public function __construct()
     {
         parent::__construct();

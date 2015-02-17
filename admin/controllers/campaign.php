@@ -27,6 +27,24 @@ class Campaign extends \AdminController
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Returns an array of permissions which can be configured for the user
+     * @return array
+     */
+    public static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['manage'] = 'Can manage campaigns';
+        $permissions['create']  = 'Can create draft campaigns';
+        $permissions['send']    = 'Can send campaigns';
+        $permissions['delete']  = 'Can delete campaigns';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
     public function __construct()
     {
         parent::__construct();
