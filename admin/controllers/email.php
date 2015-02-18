@@ -74,6 +74,8 @@ class Email extends \AdminController
             unauthorised();
         }
 
+        // --------------------------------------------------------------------------
+
         //  Set method info
         $this->data['page']->title = lang('email_index_title');
 

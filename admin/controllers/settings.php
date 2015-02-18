@@ -21,9 +21,28 @@ class Settings extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Settings');
-        $navGroup->addMethod('Email');
+
+        if (userHasPermission('admin:email:settings:update')) {
+
+            $navGroup->addMethod('Email');
+        }
 
         return $navGroup;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an array of permissions which can be configured for the user
+     * @return array
+     */
+    public static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['update'] = 'Can update settings';
+
+        return $permissions;
     }
 
     // --------------------------------------------------------------------------
@@ -32,10 +51,12 @@ class Settings extends \AdminController
      * Manage Email settings
      * @return void
      */
-    public function email()
+    public function index()
     {
-        //  Set method info
-        $this->data['page']->title = 'Email';
+        if (!userHasPermission('admin:email:settings:update')) {
+
+            unauthorised();
+        }
 
         // --------------------------------------------------------------------------
 
@@ -66,9 +87,13 @@ class Settings extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/settings/email', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        //  Set page title
+        $this->data['page']->title = 'Settings &rsaquo; Email';
+
+        // --------------------------------------------------------------------------
+
+        //  Load views
+        \Nails\Admin\Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------

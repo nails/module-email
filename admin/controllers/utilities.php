@@ -21,9 +21,28 @@ class Utilities extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Utilities');
-        $navGroup->addMethod('Send Test Email');
+
+        if (userHasPermission('admin:email:utilities:sendTest')) {
+
+            $navGroup->addMethod('Send Test Email');
+        }
 
         return $navGroup;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an array of permissions which can be configured for the user
+     * @return array
+     */
+    public static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['sendTest'] = 'Can send test email';
+
+        return $permissions;
     }
 
     // --------------------------------------------------------------------------
@@ -34,6 +53,13 @@ class Utilities extends \AdminController
      */
     public function index()
     {
+        if (!userHasPermission('admin:email:utilities:sendTest')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Page Title
         $this->data['page']->title = 'Send a Test Email';
 
