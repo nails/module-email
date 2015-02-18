@@ -21,7 +21,12 @@ class Campaign extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Email');
-        $navGroup->addMethod('Manage Campaigns');
+
+        if (userHasPermission('admin:email:campaign:manage')) {
+
+            $navGroup->addMethod('Manage Campaigns');
+        }
+
         return $navGroup;
     }
 

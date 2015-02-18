@@ -21,7 +21,7 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
      */
     public function index()
     {
-        if (! $this->user_model->is_logged_in()) {
+        if (! $this->user_model->isLoggedIn()) {
 
             unauthorised();
         }
@@ -43,7 +43,7 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
 
         $_user = $this->user_model->get_by_email($_token[2]);
 
-        if (! $_user || $_user->id != active_user('id ')) {
+        if (! $_user || $_user->id != activeUser('id ')) {
 
             show_404();
         }
@@ -60,16 +60,16 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
         //  All seems above board, action the request
         if ($this->input->get('undo')) {
 
-            if ($this->emailer->userHasUnsubscribed(active_user('id'), $_token[0])) {
+            if ($this->emailer->userHasUnsubscribed(activeUser('id'), $_token[0])) {
 
-                $this->emailer->subscribeUser(active_user('id'), $_token[0]);
+                $this->emailer->subscribeUser(activeUser('id'), $_token[0]);
             }
 
         } else {
 
-            if (!$this->emailer->userHasUnsubscribed(active_user('id'), $_token[0])) {
+            if (!$this->emailer->userHasUnsubscribed(activeUser('id'), $_token[0])) {
 
-                $this->emailer->unsubscribeUser(active_user('id'), $_token[0]);
+                $this->emailer->unsubscribeUser(activeUser('id'), $_token[0]);
             }
         }
 

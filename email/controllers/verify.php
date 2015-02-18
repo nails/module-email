@@ -41,7 +41,7 @@ class NAILS_Verify extends NAILS_Email_Controller
                 //  Reward referrer (if any
                 if (!empty($u->referred_by)) {
 
-                    $this->user_model->reward_referral($u->id, $u->referred_by);
+                    $this->user_model->rewardReferral($u->id, $u->referred_by);
                 }
 
                 // --------------------------------------------------------------------------
@@ -57,7 +57,7 @@ class NAILS_Verify extends NAILS_Email_Controller
                     $this->session->set_flashdata('message', lang('email_verify_ok_subtle'));
                     redirect($this->input->get('return_to'));
 
-                } elseif (!$this->user_model->is_logged_in()) {
+                } elseif (!$this->user_model->isLoggedIn()) {
 
                     //  Set success message
                     $this->session->set_flashdata('success', lang('email_verify_ok'));
@@ -71,7 +71,7 @@ class NAILS_Verify extends NAILS_Email_Controller
                     } else {
 
                         //  Nope, log in as normal
-                        $this->user_model->set_login_data($u->id);
+                        $this->user_model->setLoginData($u->id);
                         redirect($u->group_homepage);
                     }
 

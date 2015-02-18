@@ -21,7 +21,12 @@ class Email extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Email');
-        $navGroup->addMethod('Message Archive');
+
+        if (userHasPermission('admin:email:email:browse')) {
+
+            $navGroup->addMethod('Message Archive');
+        }
+
         return $navGroup;
     }
 
@@ -64,7 +69,7 @@ class Email extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.email:0.can_browse_archive')) {
+        if (!userHasPermission('admin:email:email:browse')) {
 
             unauthorised();
         }
@@ -120,7 +125,7 @@ class Email extends \AdminController
      */
     public function resend()
     {
-        if (!userHasPermission('admin.email:0.can_resend')) {
+        if (!userHasPermission('admin:email:email:resend')) {
 
             unauthorised();
         }

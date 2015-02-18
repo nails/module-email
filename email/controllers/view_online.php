@@ -32,7 +32,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
 
         $ref = $this->uri->segment(3, 'null');
 
-        if ($this->user_model->is_admin()) {
+        if ($this->user_model->isAdmin()) {
 
             $guid = false;
             $hash = false;
@@ -112,7 +112,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
             $out .= $this->load->view($email->type->template_body, $data, true);
             $out .= $this->load->view($email->type->template_footer, $data, true);
 
-            if ($this->user_model->is_superuser() && $this->input->get('show_vars')) {
+            if ($this->user_model->isSuperuser() && $this->input->get('show_vars')) {
 
                 $vars  = '<div style="max-width:600px;border:1px solid #CCC;margin:10px;padding:10px;background:#EFEFEF;white-space:pre;">';
                 $vars .= '<p style="margin-top:0;border-bottom:1px solid #CCC;padding-bottom:10px;"><strong>Superusers only: Email Variables</strong></p>';

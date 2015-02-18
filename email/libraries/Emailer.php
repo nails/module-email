@@ -1178,9 +1178,9 @@ class Emailer
             $this->db->set('created', 'NOW()', false);
             $this->db->set('email_id', $_email->id);
 
-            if (active_user('id')) {
+            if (activeUser('id')) {
 
-                $this->db->set('user_id', active_user('id'));
+                $this->db->set('user_id', activeUser('id'));
             }
 
             $this->db->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
@@ -1225,9 +1225,9 @@ class Emailer
                 $this->db->set('email_id', $_email->id);
                 $this->db->set('link_id', $link_id);
 
-                if (active_user('id')) {
+                if (activeUser('id')) {
 
-                    $this->db->set('user_id', active_user('id'));
+                    $this->db->set('user_id', activeUser('id'));
                 }
 
                 $this->db->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
