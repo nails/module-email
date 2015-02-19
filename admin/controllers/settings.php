@@ -20,11 +20,11 @@ class Settings extends \AdminController
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Settings');
+        $navGroup = new \Nails\Admin\Nav('Settings', 'fa-wrench');
 
         if (userHasPermission('admin:email:settings:update')) {
 
-            $navGroup->addMethod('Email');
+            $navGroup->addAction('Email');
         }
 
         return $navGroup;
@@ -40,7 +40,7 @@ class Settings extends \AdminController
     {
         $permissions = parent::permissions();
 
-        $permissions['update'] = 'Can update settings';
+        $permissions['update:sender'] = 'Can update sender settings';
 
         return $permissions;
     }
@@ -53,24 +53,37 @@ class Settings extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin:email:settings:update')) {
+        if (!userHasPermission('admin:email:settings:update:.*')) {
 
             unauthorised();
         }
 
         // --------------------------------------------------------------------------
 
-        //  Process POST
         if ($this->input->post()) {
 
-            $method = $this->input->post('update');
-            if (method_exists($this, '_email_update_' . $method)) {
+            $settings = array();
 
-                $this->{'_email_update_' . $method}();
+            if (userHasPermission('admin:email:settings:update:sender')) {
+
+                $settings['from_name']  = $this->input->post('from_name');
+                $settings['from_email'] = $this->input->post('from_email');
+            }
+
+            if (!empty($settings)) {
+
+                if ($this->app_setting_model->set($settings, 'email')) {
+
+                    $this->data['success'] = 'Email settings have been saved.';
+
+                } else {
+
+                    $this->data['error'] = 'There was a problem saving email settings.';
+                }
 
             } else {
 
-                $this->data['error'] = 'I can\'t determine what type of update you are trying to perform.';
+                $this->data['message'] = 'No settings to save.';
             }
         }
 
@@ -82,8 +95,7 @@ class Settings extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Assets
-        $this->asset->load('nails.admin.email.settings.min.js', true);
-        $this->asset->inline('<script>_nails_settings = new NAILS_Admin_Email_Settings();</script>');
+        $this->asset->load('nails.admin.settings.min.js', 'NAILS');
 
         // --------------------------------------------------------------------------
 
@@ -94,30 +106,5 @@ class Settings extends \AdminController
 
         //  Load views
         \Nails\Admin\Helper::loadView('index');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Email settings
-     * @return void
-     */
-    protected function _email_update_general()
-    {
-        //  Prepare update
-        $settings               = array();
-        $settings['from_name']  = $this->input->post('from_name');
-        $settings['from_email'] = $this->input->post('from_email');
-
-        // --------------------------------------------------------------------------
-
-        if ($this->app_setting_model->set($settings, 'email')) {
-
-            $this->data['success'] = 'General email settings have been saved.';
-
-        } else {
-
-            $this->data['error'] = 'There was a problem saving settings.';
-        }
     }
 }

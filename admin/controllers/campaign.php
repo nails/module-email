@@ -15,16 +15,16 @@ namespace Nails\Admin\Email;
 class Campaign extends \AdminController
 {
     /**
-     * Announces this controllers methods
+     * Announces this controller's navGroups
      * @return stdClass
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Email');
+        $navGroup = new \Nails\Admin\Nav('Email', 'fa-paper-plane-o');
 
         if (userHasPermission('admin:email:campaign:manage')) {
 
-            $navGroup->addMethod('Manage Campaigns');
+            $navGroup->addAction('Manage Campaigns');
         }
 
         return $navGroup;
@@ -64,7 +64,7 @@ class Campaign extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.email:0.can_manage_campaigns')) {
+        if (!userHasPermission('admin:email:campaign:manage')) {
 
             unauthorised();
         }

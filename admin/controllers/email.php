@@ -15,16 +15,16 @@ namespace Nails\Admin\Email;
 class Email extends \AdminController
 {
     /**
-     * Announces this controllers methods
+     * Announces this controller's navGroups
      * @return stdClass
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Email');
+        $navGroup = new \Nails\Admin\Nav('Email', 'fa-paper-plane-o');
 
         if (userHasPermission('admin:email:email:browse')) {
 
-            $navGroup->addMethod('Message Archive');
+            $navGroup->addAction('Message Archive');
         }
 
         return $navGroup;

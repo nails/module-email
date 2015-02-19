@@ -133,7 +133,7 @@
 
                                 echo anchor(site_url('email/view_online/' . $email->ref, isPageSecure()), lang('action_preview'), 'class="awesome small fancybox fancybox.iframe" target="_blank"');
 
-                                if (!userHasPermission('admin.email:0.can_resend')) {
+                                if (!userHasPermission('admin:email:email:resend')) {
 
                                     $return = uri_string();
                                     if ($this->input->server('QUERY_STRING')) {

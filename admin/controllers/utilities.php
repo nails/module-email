@@ -20,11 +20,11 @@ class Utilities extends \AdminController
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Utilities');
+        $navGroup = new \Nails\Admin\Nav('Utilities', 'fa-sliders');
 
         if (userHasPermission('admin:email:utilities:sendTest')) {
 
-            $navGroup->addMethod('Send Test Email');
+            $navGroup->addAction('Send Test Email');
         }
 
         return $navGroup;
