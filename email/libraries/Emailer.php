@@ -238,7 +238,7 @@ class Emailer
         //  If we're sending to an email address, try and associate it to a registered user
         if ($input->to_email) {
 
-            $_user = get_userobject()->get_by_email($input->to_email);
+            $_user = getUserObject()->get_by_email($input->to_email);
 
             if ($_user) {
 
@@ -248,7 +248,7 @@ class Emailer
         } else {
 
             //  Sending to an ID, fetch the user's email
-            $_user = get_userobject()->get_by_id($input->to_id);
+            $_user = getUserObject()->get_by_id($input->to_id);
 
             if (!empty($_user->email)) {
 
