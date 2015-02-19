@@ -131,9 +131,13 @@
                             <td class="actions">
                             <?php
 
-                                echo anchor(site_url('email/view_online/' . $email->ref, isPageSecure()), lang('action_preview'), 'class="awesome small fancybox fancybox.iframe" target="_blank"');
+                                echo anchor(
+                                    site_url('email/view_online/' . $email->ref, isPageSecure()),
+                                    lang('action_preview'),
+                                    'class="awesome small fancybox" data-fancybox-type="iframe"'
+                                );
 
-                                if (!userHasPermission('admin:email:email:resend')) {
+                                if (userHasPermission('admin:email:email:resend')) {
 
                                     $return = uri_string();
                                     if ($this->input->server('QUERY_STRING')) {
@@ -141,7 +145,7 @@
                                         $return .= '?' . $this->input->server('QUERY_STRING');
                                     }
                                     $return = urlencode($return);
-                                    echo anchor('admin/email/resend/' . $email->id . '?return=' . $return, 'Resend', 'class="awesome small green"');
+                                    echo anchor('admin/email/email/resend/' . $email->id . '?return=' . $return, 'Resend', 'class="awesome small green"');
                                 }
 
                             ?>
