@@ -22,8 +22,8 @@ class Emailer
     private $db;
     private $_email_type;
     private $_track_link_cache;
-    private $_table;
-    private $_table_prefix;
+    private $table;
+    private $tablePrefix;
 
     // --------------------------------------------------------------------------
 
@@ -95,8 +95,8 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->_table        = NAILS_DB_PREFIX . 'email_archive';
-        $this->_table_prefix = 'ea';
+        $this->table        = NAILS_DB_PREFIX . 'email_archive';
+        $this->tablePrefix = 'ea';
     }
 
     // --------------------------------------------------------------------------
@@ -307,7 +307,7 @@ class Emailer
         $this->db->set('email_vars', serialize($input->data));
         $this->db->set('internal_ref', $input->internal_ref);
 
-        $this->db->insert($this->_table);
+        $this->db->insert($this->table);
 
         if ($this->db->affected_rows()) {
 
@@ -331,7 +331,7 @@ class Emailer
             //  Mail sent, mark the time
             $this->db->set('sent', 'NOW()', false);
             $this->db->where('id', $input->id);
-            $this->db->update($this->_table);
+            $this->db->update($this->table);
 
             return $input->ref;
 
@@ -341,7 +341,7 @@ class Emailer
             //  Mail failed, update the status
             $this->db->set('status', 'FAILED');
             $this->db->where('id', $input->id);
-            $this->db->update($this->_table);
+            $this->db->update($this->table);
 
             return false;
         }
@@ -855,7 +855,7 @@ class Emailer
 
         if (empty($data['RETURN_QUERY_OBJECT'])) {
 
-            $emails = $this->db->get($this->_table . ' ' . $this->_table_prefix)->result();
+            $emails = $this->db->get($this->table . ' ' . $this->tablePrefix)->result();
 
             for ($i = 0; $i < count($emails); $i++) {
 
@@ -867,7 +867,7 @@ class Emailer
 
         } else {
 
-            return $this->db->get($this->_table . ' ' . $this->_table_prefix);
+            return $this->db->get($this->table . ' ' . $this->tablePrefix);
         }
     }
 
@@ -933,7 +933,7 @@ class Emailer
     public function count_all($data)
     {
         $this->_getcount_common_email($data, 'COUNT_ALL');
-        return $this->db->count_all_results($this->_table . ' ' . $this->_table_prefix);
+        return $this->db->count_all_results($this->table . ' ' . $this->tablePrefix);
     }
 
     // --------------------------------------------------------------------------
@@ -1042,7 +1042,7 @@ class Emailer
             } while (!$refOk);
 
             $this->db->where('ref', $ref);
-            $result = $this->db->get($this->_table);
+            $result = $this->db->get($this->table);
 
         } while ($result->num_rows());
 
@@ -1173,7 +1173,7 @@ class Emailer
             //  Update the read count and a add a track data point
             $this->db->set('read_count', 'read_count+1', false);
             $this->db->where('id', $_email->id);
-            $this->db->update($this->_table);
+            $this->db->update($this->table);
 
             $this->db->set('created', 'NOW()', false);
             $this->db->set('email_id', $_email->id);
@@ -1218,7 +1218,7 @@ class Emailer
                 //  Update the read count and a add a track data point
                 $this->db->set('link_click_count', 'link_click_count+1', false);
                 $this->db->where('id', $_email->id);
-                $this->db->update($this->_table);
+                $this->db->update($this->table);
 
                 //  Add a link trackback
                 $this->db->set('created', 'NOW()', false);
@@ -1513,22 +1513,22 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
-     * Returns protected property $_table
+     * Returns protected property $table
      * @return string
      */
     public function getTableName()
     {
-        return $this->_table;
+        return $this->table;
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Returns protected property $_table_prefix
+     * Returns protected property $tablePrefix
      * @return string
      */
     public function getTablePrefix()
     {
-        return $this->_table_prefix;
+        return $this->tablePrefix;
     }
 }
