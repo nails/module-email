@@ -84,7 +84,7 @@ class Email extends \AdminController
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : 'ea.queued';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : 'ea.sent';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -92,7 +92,6 @@ class Email extends \AdminController
 
         //  Define the sortable columns
         $sortColumns = array(
-            'ea.queued' => 'Queued Date',
             'ea.sent'   => 'Sent Date'
         );
 
