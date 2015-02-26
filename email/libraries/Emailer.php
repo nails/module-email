@@ -890,15 +890,15 @@ class Emailer
             }
 
             $data['or_like'][] = array(
-                'column' => 'ea.ref',
+                'column' => $this->tablePrefix . '.ref',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => 'ea.user_id',
+                'column' => $this->tablePrefix . '.user_id',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => 'ea.user_email',
+                'column' => $this->tablePrefix . '.user_email',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
@@ -918,8 +918,8 @@ class Emailer
         }
 
         //  Common joins
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ea.user_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ea.user_email', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tablePrefix . '.user_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tablePrefix . '.user_email', 'LEFT');
 
         $this->_getcount_common($data, $_caller);
     }
@@ -945,7 +945,11 @@ class Emailer
      */
     public function get_by_id($id)
     {
-        $data = array('where' => array(array('ea.id', $id)));
+        $data = array(
+            'where' => array(
+                array($this->tablePrefix . '.id', $ref)
+            )
+        );
         $emails = $this->get_all(null, null, $data);
 
         if (!$emails) {
@@ -983,8 +987,12 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $data = array('where' => array('ea.ref', $ref));
-        $emails = $this->get_all();
+        $data = array(
+            'where' => array(
+                array($this->tablePrefix . '.ref', $ref)
+            )
+        );
+        $emails = $this->get_all(null, null, $data);
 
         if (!$emails) {
 

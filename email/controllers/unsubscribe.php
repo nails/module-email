@@ -21,36 +21,36 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
      */
     public function index()
     {
-        if (! $this->user_model->isLoggedIn()) {
+        if (!$this->user_model->isLoggedIn()) {
 
             unauthorised();
         }
 
-        $_token = $this->input->get('token');
-        $_token = $this->encrypt->decode($_token, APP_PRIVATE_KEY);
+        $token = $this->input->get('token');
+        $token = $this->encrypt->decode($token, APP_PRIVATE_KEY);
 
-        if (! $_token) {
-
-            show_404();
-        }
-
-        $_token = explode('|', $_token);
-
-        if (count($_token) != 3) {
+        if (!$token) {
 
             show_404();
         }
 
-        $_user = $this->user_model->get_by_email($_token[2]);
+        $token = explode('|', $token);
 
-        if (! $_user || $_user->id != activeUser('id ')) {
+        if (count($token) != 3) {
 
             show_404();
         }
 
-        $_email = $this->emailer->get_by_ref($_token[1]);
+        $user = $this->user_model->get_by_email($token[2]);
 
-        if (! $_email) {
+        if (!$user || $user->id != activeUser('id ')) {
+
+            show_404();
+        }
+
+        $email = $this->emailer->get_by_ref($token[1]);
+
+        if (!$email) {
 
             show_404();
         }
@@ -60,16 +60,16 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
         //  All seems above board, action the request
         if ($this->input->get('undo')) {
 
-            if ($this->emailer->userHasUnsubscribed(activeUser('id'), $_token[0])) {
+            if ($this->emailer->userHasUnsubscribed(activeUser('id'), $token[0])) {
 
-                $this->emailer->subscribeUser(activeUser('id'), $_token[0]);
+                $this->emailer->subscribeUser(activeUser('id'), $token[0]);
             }
 
         } else {
 
-            if (!$this->emailer->userHasUnsubscribed(activeUser('id'), $_token[0])) {
+            if (!$this->emailer->userHasUnsubscribed(activeUser('id'), $token[0])) {
 
-                $this->emailer->unsubscribeUser(activeUser('id'), $_token[0]);
+                $this->emailer->unsubscribeUser(activeUser('id'), $token[0]);
             }
         }
 
@@ -117,7 +117,7 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
  *
  **/
 
-if (! defined('NAILS_ALLOW_EXTENSION_UNSUBSCRIBE')) {
+if (!defined('NAILS_ALLOW_EXTENSION_UNSUBSCRIBE')) {
 
     class Unsubscribe extends NAILS_Unsubscribe
     {
