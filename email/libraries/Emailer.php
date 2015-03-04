@@ -947,7 +947,7 @@ class Emailer
     {
         $data = array(
             'where' => array(
-                array($this->tablePrefix . '.id', $ref)
+                array($this->tablePrefix . '.id', $id)
             )
         );
         $emails = $this->get_all(null, null, $data);
