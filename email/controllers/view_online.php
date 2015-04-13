@@ -86,7 +86,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
         //  Check login URLs are allowed
         $this->config->load('auth/auth');
 
-        if (!$this->config->item('auth_enable_hashed_login')) {
+        if (!$this->config->item('authEnableHashedLogin')) {
 
             $data['sent_to']->login_url = '';
         }

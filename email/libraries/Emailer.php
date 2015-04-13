@@ -498,7 +498,7 @@ class Emailer
         //  Check login URLs are allowed
         get_instance()->config->load('auth/auth');
 
-        if (!get_instance()->config->item('auth_enable_hashed_login')) {
+        if (!get_instance()->config->item('authEnableHashedLogin')) {
 
             $_send->to->login_url = '';
         }
