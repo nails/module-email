@@ -195,7 +195,17 @@
 				box-shadow: 0px 1px 1px #CCCCCC;
 			}
 
-			a.button
+			.heads-up.warning,
+			.heads-up.warning hr
+			{
+				background-color: #fcf8e3;
+				border-color: #faebcc;
+				color: #8a6d3b;
+				margin: 1em 0;
+			}
+
+			a.button,
+			a.btn
 			{
 				background: #eee; /* Old browsers */
 				background: #eee -moz-linear-gradient(top, rgba(255,255,255,.2) 0%, rgba(0,0,0,.2) 100%); /* FF3.6+ */
@@ -212,30 +222,30 @@
 				border-radius: 3px;
 				color: #444444;
 				display: inline-block;
-				/*font-size: 11px;*/
 				font-weight: bold;
 				text-decoration: none;
 				text-shadow: 0 1px rgba(255, 255, 255, .75);
 				cursor: pointer;
-				margin-bottom: 20px;
-				/*line-height: normal;*/
 				padding: 8px 10px;
 				font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 			}
 
-			a.button.large
+			a.button.large,
+			a.btn.large
 			{
 				font-size:1em;
 				padding: 10px 15px;
 			}
 
-			a.button.small
+			a.button.small,
+			a.btn.small
 			{
 				font-size:0.8em;
 				padding: 2px 7px;
 			}
 
-			a.button:hover
+			a.button:hover,
+			a.btn:hover
 			{
 				color: #222222;
 				background: #DDDDDD; /* Old browsers */
@@ -264,7 +274,8 @@
 				background: #CCCCCC linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* W3C */
 			}
 
-			a.button:active
+			a.button:active,
+			a.btn:active
 			{
 				border: 1px solid #666666;
 				background: #CCCCCC; /* Old browsers */
