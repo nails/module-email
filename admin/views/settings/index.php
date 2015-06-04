@@ -24,7 +24,7 @@
         }
         ?>
     </ul>
-    <section class="tabs pages">
+    <section class="tabs">
         <?php
 
         if (userHasPermission('admin:email:settings:update:sender')) {
@@ -32,7 +32,7 @@
             $display = $this->input->post('activeTab') == 'tab-sender' || !$this->input->post('activeTab') ? 'active' : '';
 
             ?>
-            <div id="tab-sender" class="tab page <?=$display?>">
+            <div class="tab-page tab-sender <?=$display?>">
                 <div class="fieldset">
                     <?php
 
