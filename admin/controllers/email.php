@@ -133,7 +133,7 @@ class Email extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $emailId = $this->uri->segment(4);
+        $emailId = $this->uri->segment(5);
         $return  = $this->input->get('return') ? $this->input->get('return') : 'admin/email/index';
 
         if ($this->emailer->resend($emailId)) {
@@ -144,7 +144,7 @@ class Email extends \AdminController
         } else {
 
             $status  = 'error';
-            $message = 'Message failed to resend.';
+            $message = 'Message failed to resend. ' . $this->emailer->last_error();
         }
 
         $this->session->Set_flashdata($status, $message);
