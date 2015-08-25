@@ -1,12 +1,6 @@
 {
     "name": "nailsapp/module-email",
-    "keywords":
-    [
-        "Nails",
-        "Shed Collective",
-        "CodeIgniter",
-        "Email Module"
-    ],
+    "keywords": ["Nails", "Shed Collective", "CodeIgniter", "Email Module"],
     "homepage": "http://nailsapp.co.uk/modules/email",
     "description": "This is the \"Email\" module for Nails.",
     "license": "MIT",
