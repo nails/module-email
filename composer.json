@@ -31,7 +31,6 @@
     },
     "require":
     {
-        "nailsapp/common" : "dev-develop"
     },
     "extra":
     {
