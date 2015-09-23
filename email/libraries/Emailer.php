@@ -24,6 +24,8 @@ class Emailer
     private $_track_link_cache;
     private $table;
     private $tablePrefix;
+    private $isDebugging;
+    private $hasDeveloperMail;
 
     // --------------------------------------------------------------------------
 
@@ -97,6 +99,11 @@ class Emailer
 
         $this->table        = NAILS_DB_PREFIX . 'email_archive';
         $this->tablePrefix = 'ea';
+
+        // --------------------------------------------------------------------------
+
+        $this->isDebugging = defined('EMAIL_DEBUG') && !empty(EMAIL_DEBUG);
+        $this->hasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
     }
 
     // --------------------------------------------------------------------------
@@ -587,7 +594,7 @@ class Emailer
          * then abort the sending and log it
          */
 
-        if (EMAIL_DEBUG && APP_DEVELOPER_EMAIL && $_error->error_has_occurred()) {
+        if ($this->isDebugging && $this->hasDeveloperMail && $_error->error_has_occurred()) {
 
             //  The templates error'd, abort the send and let dev know
             $_subject  = 'Email #' . $_email->id . ' failed to send due to errors occurring in the templates';
@@ -726,7 +733,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Debugging?
-        if (EMAIL_DEBUG) {
+        if ($this->isDebugging) {
 
             $this->printDebugger($_send, $body, $plaintext, $_error->recent_errors());
             return false;
