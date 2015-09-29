@@ -751,7 +751,7 @@ class Emailer
             error_reporting($_previous_error_reporting);
 
             //  Update the counter on the email address
-            $this->db->set('countSends', 'countSends+1', false);
+            $this->db->set('count_sends', 'count_sends+1', false);
             $this->db->where('email', $_send->to->email);
             $this->db->update(NAILS_DB_PREFIX . 'user_email');
 
