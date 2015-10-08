@@ -12,20 +12,20 @@
 
 class Emailer
 {
-    //  Class traits
-    use NAILS_COMMON_TRAIT_ERROR_HANDLING;
-    use NAILS_COMMON_TRAIT_GETCOUNT_COMMON;
+    use \Nails\Common\Traits\ErrorHandling;
+    use \Nails\Common\Traits\GetCountCommon;
 
-    //  Other vars
+    // --------------------------------------------------------------------------
+
     public $from;
-    private $ci;
-    private $db;
-    private $_email_type;
-    private $_track_link_cache;
-    private $table;
-    private $tablePrefix;
-    private $isDebugging;
-    private $hasDeveloperMail;
+    private $oCi;
+    private $oDb;
+    private $aEmailType;
+    private $aTrackLinkCache;
+    private $sTable;
+    private $sTablePrefix;
+    private $bIsDebugging;
+    private $bHasDeveloperMail;
 
     // --------------------------------------------------------------------------
 
@@ -35,15 +35,15 @@ class Emailer
      */
     public function __construct($config = array())
     {
-        $this->ci   =& get_instance();
-        $this->db   =& $this->ci->db;
+        $this->oCi =& get_instance();
+        $this->oDb =& \Nails\Factory::service('Database');
 
         // --------------------------------------------------------------------------
 
         //  Set email related settings
-        $this->from         = new stdClass();
-        $this->from->name   = app_setting('from_name', 'email');
-        $this->from->email  = app_setting('from_email', 'email');
+        $this->from        = new stdClass();
+        $this->from->name  = app_setting('from_name', 'email');
+        $this->from->email = app_setting('from_email', 'email');
 
         if (empty($this->from->name)) {
 
@@ -59,20 +59,19 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Load Email library
-        $this->ci->load->library('email');
+        $this->oCi->load->library('email');
 
         // --------------------------------------------------------------------------
 
         //  Load helpers
-        $this->ci->load->helper('email');
-        $this->ci->load->helper('typography');
-        $this->ci->load->helper('string');
+        \Nails\Factory::helper('email');
+        \Nails\Factory::helper('string');
 
         // --------------------------------------------------------------------------
 
         //  Set defaults
-        $this->_email_type       = array();
-        $this->_track_link_cache = array();
+        $this->aEmailType      = array();
+        $this->aTrackLinkCache = array();
 
         // --------------------------------------------------------------------------
 
@@ -97,13 +96,13 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->table        = NAILS_DB_PREFIX . 'email_archive';
-        $this->tablePrefix = 'ea';
+        $this->sTable       = NAILS_DB_PREFIX . 'email_archive';
+        $this->sTablePrefix = 'ea';
 
         // --------------------------------------------------------------------------
 
-        $this->isDebugging = defined('EMAIL_DEBUG') && !empty(EMAIL_DEBUG);
-        $this->hasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
+        $this->bIsDebugging = defined('EMAIL_DEBUG') && !empty(EMAIL_DEBUG);
+        $this->bHasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
     }
 
     // --------------------------------------------------------------------------
@@ -152,7 +151,7 @@ class Emailer
         $temp->template_footer  = empty($data->template_footer) ? 'email/structure/footer' : $data->template_footer;
         $temp->default_subject  = $data->default_subject;
 
-        $this->_email_type[$data->slug] = $temp;
+        $this->aEmailType[$data->slug] = $temp;
 
         return true;
     }
@@ -226,7 +225,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Lookup the email type
-        if (empty($this->_email_type[ $input->type ])) {
+        if (empty($this->aEmailType[$input->type])) {
 
             if (!$graceful) {
 
@@ -307,18 +306,18 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Add to the archive table
-        $this->db->set('ref', $input->ref);
-        $this->db->set('user_id', $input->to_id);
-        $this->db->set('user_email', $input->to_email);
-        $this->db->set('type', $input->type);
-        $this->db->set('email_vars', serialize($input->data));
-        $this->db->set('internal_ref', $input->internal_ref);
+        $this->oDb->set('ref', $input->ref);
+        $this->oDb->set('user_id', $input->to_id);
+        $this->oDb->set('user_email', $input->to_email);
+        $this->oDb->set('type', $input->type);
+        $this->oDb->set('email_vars', serialize($input->data));
+        $this->oDb->set('internal_ref', $input->internal_ref);
 
-        $this->db->insert($this->table);
+        $this->oDb->insert($this->sTable);
 
-        if ($this->db->affected_rows()) {
+        if ($this->oDb->affected_rows()) {
 
-            $input->id = $this->db->insert_id();
+            $input->id = $this->oDb->insert_id();
 
         } else {
 
@@ -336,9 +335,9 @@ class Emailer
         if ($this->doSend($input->id, $graceful)) {
 
             //  Mail sent, mark the time
-            $this->db->set('sent', 'NOW()', false);
-            $this->db->where('id', $input->id);
-            $this->db->update($this->table);
+            $this->oDb->set('sent', 'NOW()', false);
+            $this->oDb->where('id', $input->id);
+            $this->oDb->update($this->sTable);
 
             return $input->ref;
 
@@ -346,9 +345,9 @@ class Emailer
 
 
             //  Mail failed, update the status
-            $this->db->set('status', 'FAILED');
-            $this->db->where('id', $input->id);
-            $this->db->update($this->table);
+            $this->oDb->set('status', 'FAILED');
+            $this->oDb->where('id', $input->id);
+            $this->oDb->update($this->sTable);
 
             return false;
         }
@@ -392,10 +391,10 @@ class Emailer
      */
     public function userHasUnsubscribed($user_id, $type)
     {
-        $this->db->where('user_id', $user_id);
-        $this->db->where('type', $type);
+        $this->oDb->where('user_id', $user_id);
+        $this->oDb->where('type', $type);
 
-        return (bool) $this->db->count_all_results(NAILS_DB_PREFIX . 'user_email_blocker');
+        return (bool) $this->oDb->count_all_results(NAILS_DB_PREFIX . 'user_email_blocker');
     }
 
     // --------------------------------------------------------------------------
@@ -415,12 +414,12 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->db->set('user_id', $user_id);
-        $this->db->set('type', $type);
-        $this->db->set('created', 'NOW()', false);
-        $this->db->insert(NAILS_DB_PREFIX . 'user_email_blocker');
+        $this->oDb->set('user_id', $user_id);
+        $this->oDb->set('type', $type);
+        $this->oDb->set('created', 'NOW()', false);
+        $this->oDb->insert(NAILS_DB_PREFIX . 'user_email_blocker');
 
-        return (bool) $this->db->affected_rows();
+        return (bool) $this->oDb->affected_rows();
     }
 
     // --------------------------------------------------------------------------
@@ -440,11 +439,11 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->db->where('user_id', $user_id);
-        $this->db->where('type', $type);
-        $this->db->delete(NAILS_DB_PREFIX . 'user_email_blocker');
+        $this->oDb->where('user_id', $user_id);
+        $this->oDb->where('type', $type);
+        $this->oDb->delete(NAILS_DB_PREFIX . 'user_email_blocker');
 
-        return (bool) $this->db->affected_rows();
+        return (bool) $this->oDb->affected_rows();
     }
 
     // --------------------------------------------------------------------------
@@ -534,7 +533,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Fresh start please
-        $this->ci->email->clear(true);
+        $this->oCi->email->clear(true);
 
         // --------------------------------------------------------------------------
 
@@ -573,10 +572,10 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Start prepping the email
-        $this->ci->email->from($this->from->email, $_send->from->name);
-        $this->ci->email->reply_to($_send->from->email, $_send->from->name);
-        $this->ci->email->to($_send_to);
-        $this->ci->email->subject($_send->subject);
+        $this->oCi->email->from($this->from->email, $_send->from->name);
+        $this->oCi->email->reply_to($_send->from->email, $_send->from->name);
+        $this->oCi->email->to($_send_to);
+        $this->oCi->email->subject($_send->subject);
 
         // --------------------------------------------------------------------------
 
@@ -585,16 +584,16 @@ class Emailer
         $_error->clear_errors();
 
         //  Load the template
-        $body  = $this->ci->load->view($_send->template_header, $_send->data, true);
-        $body .= $this->ci->load->view($_send->template_body, $_send->data, true);
-        $body .= $this->ci->load->view($_send->template_footer, $_send->data, true);
+        $body  = $this->oCi->load->view($_send->template_header, $_send->data, true);
+        $body .= $this->oCi->load->view($_send->template_body, $_send->data, true);
+        $body .= $this->oCi->load->view($_send->template_footer, $_send->data, true);
 
         /**
          * If any errors occurred while attempting to generate the body of this email
          * then abort the sending and log it
          */
 
-        if ($this->isDebugging && $this->hasDeveloperMail && $_error->error_has_occurred()) {
+        if ($this->bIsDebugging && $this->bHasDeveloperMail && $_error->error_has_occurred()) {
 
             //  The templates error'd, abort the send and let dev know
             $_subject  = 'Email #' . $_email->id . ' failed to send due to errors occurring in the templates';
@@ -645,7 +644,7 @@ class Emailer
          * First clear out any previous link caches (production only)
          */
 
-        $this->_track_link_cache = array();
+        $this->aTrackLinkCache = array();
 
         if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
 
@@ -667,14 +666,14 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Set the email body
-        $this->ci->email->message($body);
+        $this->oCi->email->message($body);
 
         // --------------------------------------------------------------------------
 
         //  Set the plain text version
-        $plaintext  = $this->ci->load->view($_send->template_header_pt, $_send->data, true);
-        $plaintext .= $this->ci->load->view($_send->template_body_pt, $_send->data, true);
-        $plaintext .= $this->ci->load->view($_send->template_footer_pt, $_send->data, true);
+        $plaintext  = $this->oCi->load->view($_send->template_header_pt, $_send->data, true);
+        $plaintext .= $this->oCi->load->view($_send->template_body_pt, $_send->data, true);
+        $plaintext .= $this->oCi->load->view($_send->template_footer_pt, $_send->data, true);
 
         // --------------------------------------------------------------------------
 
@@ -686,7 +685,7 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->ci->email->set_alt_message($plaintext);
+        $this->oCi->email->set_alt_message($plaintext);
 
         // --------------------------------------------------------------------------
 
@@ -733,7 +732,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Debugging?
-        if ($this->isDebugging) {
+        if ($this->bIsDebugging) {
 
             $this->printDebugger($_send, $body, $plaintext, $_error->recent_errors());
             return false;
@@ -745,15 +744,15 @@ class Emailer
         $_previous_error_reporting = error_reporting();
         error_reporting(0);
 
-        if ($this->ci->email->send()) {
+        if ($this->oCi->email->send()) {
 
             //  Put error reporting back as it was
             error_reporting($_previous_error_reporting);
 
             //  Update the counter on the email address
-            $this->db->set('count_sends', 'count_sends+1', false);
-            $this->db->where('email', $_send->to->email);
-            $this->db->update(NAILS_DB_PREFIX . 'user_email');
+            $this->oDb->set('count_sends', 'count_sends+1', false);
+            $this->oDb->where('email', $_send->to->email);
+            $this->oDb->update(NAILS_DB_PREFIX . 'user_email');
 
             return true;
 
@@ -775,7 +774,7 @@ class Emailer
             $_message   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
             $_message   .= '' . "\n";
 
-            $_message   .= $this->ci->email->print_debugger();
+            $_message   .= $this->oCi->email->print_debugger();
 
             $_message   .= '' . "\n";
             $_message   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
@@ -802,7 +801,7 @@ class Emailer
 
                     $error  = 'Email failed to send at SMTP time. Potential configuration error. Investigate, ';
                     $error .= 'debugging data below: <div style="padding:20px;background:#EEE">';
-                    $error .= $this->ci->email->print_debugger() . '</div>';
+                    $error .= $this->oCi->email->print_debugger() . '</div>';
 
                     show_error($error);
 
@@ -830,10 +829,10 @@ class Emailer
      */
     public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
     {
-        $this->db->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
-        $this->db->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
-        $this->db->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
-        $this->db->select('u.profile_img,u.gender,u.username');
+        $this->oDb->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
+        $this->oDb->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
+        $this->oDb->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
+        $this->oDb->select('u.profile_img,u.gender,u.username');
 
         //  Apply common items; pass $data
         $this->_getcount_common_email($data, $_caller);
@@ -855,14 +854,14 @@ class Emailer
             $perPage = is_null($perPage) ? 50 : (int) $perPage;
             $offset  = $page * $perPage;
 
-            $this->db->limit($perPage, $offset);
+            $this->oDb->limit($perPage, $offset);
         }
 
         // --------------------------------------------------------------------------
 
         if (empty($data['RETURN_QUERY_OBJECT'])) {
 
-            $emails = $this->db->get($this->table . ' ' . $this->tablePrefix)->result();
+            $emails = $this->oDb->get($this->sTable . ' ' . $this->sTablePrefix)->result();
 
             for ($i = 0; $i < count($emails); $i++) {
 
@@ -874,7 +873,7 @@ class Emailer
 
         } else {
 
-            return $this->db->get($this->table . ' ' . $this->tablePrefix);
+            return $this->oDb->get($this->sTable . ' ' . $this->sTablePrefix);
         }
     }
 
@@ -897,15 +896,15 @@ class Emailer
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.ref',
+                'column' => $this->sTablePrefix . '.ref',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.user_id',
+                'column' => $this->sTablePrefix . '.user_id',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.user_email',
+                'column' => $this->sTablePrefix . '.user_email',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
@@ -925,8 +924,8 @@ class Emailer
         }
 
         //  Common joins
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tablePrefix . '.user_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tablePrefix . '.user_email', 'LEFT');
+        $this->oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTablePrefix . '.user_id', 'LEFT');
+        $this->oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTablePrefix . '.user_email', 'LEFT');
 
         $this->_getcount_common($data, $_caller);
     }
@@ -940,7 +939,7 @@ class Emailer
     public function count_all($data)
     {
         $this->_getcount_common_email($data, 'COUNT_ALL');
-        return $this->db->count_all_results($this->table . ' ' . $this->tablePrefix);
+        return $this->oDb->count_all_results($this->sTable . ' ' . $this->sTablePrefix);
     }
 
     // --------------------------------------------------------------------------
@@ -954,7 +953,7 @@ class Emailer
     {
         $data = array(
             'where' => array(
-                array($this->tablePrefix . '.id', $id)
+                array($this->sTablePrefix . '.id', $id)
             )
         );
         $emails = $this->get_all(null, null, $data);
@@ -996,7 +995,7 @@ class Emailer
 
         $data = array(
             'where' => array(
-                array($this->tablePrefix . '.ref', $ref)
+                array($this->sTablePrefix . '.ref', $ref)
             )
         );
         $emails = $this->get_all(null, null, $data);
@@ -1023,7 +1022,7 @@ class Emailer
             return false;
         }
 
-        if (!$this->ci->email->attach($file, 'attachment', $filename)) {
+        if (!$this->oCi->email->attach($file, 'attachment', $filename)) {
 
             return false;
 
@@ -1056,8 +1055,8 @@ class Emailer
 
             } while (!$refOk);
 
-            $this->db->where('ref', $ref);
-            $result = $this->db->get($this->table);
+            $this->oDb->where('ref', $ref);
+            $result = $this->oDb->get($this->sTable);
 
         } while ($result->num_rows());
 
@@ -1186,19 +1185,19 @@ class Emailer
         if ($_email && $_email != 'BAD_HASH') {
 
             //  Update the read count and a add a track data point
-            $this->db->set('read_count', 'read_count+1', false);
-            $this->db->where('id', $_email->id);
-            $this->db->update($this->table);
+            $this->oDb->set('read_count', 'read_count+1', false);
+            $this->oDb->where('id', $_email->id);
+            $this->oDb->update($this->sTable);
 
-            $this->db->set('created', 'NOW()', false);
-            $this->db->set('email_id', $_email->id);
+            $this->oDb->set('created', 'NOW()', false);
+            $this->oDb->set('email_id', $_email->id);
 
             if (activeUser('id')) {
 
-                $this->db->set('user_id', activeUser('id'));
+                $this->oDb->set('user_id', activeUser('id'));
             }
 
-            $this->db->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
+            $this->oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
 
             return true;
         }
@@ -1223,29 +1222,29 @@ class Emailer
         if ($_email && $_email != 'BAD_HASH') {
 
             //  Get the link which was clicked
-            $this->db->select('url');
-            $this->db->where('email_id', $_email->id);
-            $this->db->where('id', $link_id);
-            $_link = $this->db->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
+            $this->oDb->select('url');
+            $this->oDb->where('email_id', $_email->id);
+            $this->oDb->where('id', $link_id);
+            $_link = $this->oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
 
             if ($_link) {
 
                 //  Update the read count and a add a track data point
-                $this->db->set('link_click_count', 'link_click_count+1', false);
-                $this->db->where('id', $_email->id);
-                $this->db->update($this->table);
+                $this->oDb->set('link_click_count', 'link_click_count+1', false);
+                $this->oDb->where('id', $_email->id);
+                $this->oDb->update($this->sTable);
 
                 //  Add a link trackback
-                $this->db->set('created', 'NOW()', false);
-                $this->db->set('email_id', $_email->id);
-                $this->db->set('link_id', $link_id);
+                $this->oDb->set('created', 'NOW()', false);
+                $this->oDb->set('email_id', $_email->id);
+                $this->oDb->set('link_id', $link_id);
 
                 if (activeUser('id')) {
 
-                    $this->db->set('user_id', activeUser('id'));
+                    $this->oDb->set('user_id', activeUser('id'));
                 }
 
-                $this->db->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
+                $this->oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
 
                 //  Return the URL to go to
                 return $_link->url;
@@ -1372,9 +1371,9 @@ class Emailer
          * Firstly, check this URL hasn't been processed already (for this email)
          */
 
-        if (isset($this->_track_link_cache[md5($url)])) {
+        if (isset($this->aTrackLinkCache[md5($url)])) {
 
-            $trackingUrl = $this->_track_link_cache[md5($url)];
+            $trackingUrl = $this->aTrackLinkCache[md5($url)];
 
             //  Replace the URL and return the new tag
             $html = str_replace($url, $trackingUrl, $html);
@@ -1413,14 +1412,14 @@ class Emailer
                 $_url = $url;
             }
 
-            $this->db->set('email_id', $this->_generate_tracking_email_id);
-            $this->db->set('url', $_url);
-            $this->db->set('title', $title);
-            $this->db->set('created', 'NOW()', false);
-            $this->db->set('is_html', $is_html);
-            $this->db->insert(NAILS_DB_PREFIX . 'email_archive_link');
+            $this->oDb->set('email_id', $this->_generate_tracking_email_id);
+            $this->oDb->set('url', $_url);
+            $this->oDb->set('title', $title);
+            $this->oDb->set('created', 'NOW()', false);
+            $this->oDb->set('is_html', $is_html);
+            $this->oDb->insert(NAILS_DB_PREFIX . 'email_archive_link');
 
-            $_id = $this->db->insert_id();
+            $_id = $this->oDb->insert_id();
 
             if ($_id) {
 
@@ -1429,7 +1428,7 @@ class Emailer
                 $trackingUrl .= md5($_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref). '/' . $_id;
                 $trackingUrl  = site_url($trackingUrl);
 
-                $this->_track_link_cache[md5($url)] = $trackingUrl;
+                $this->aTrackLinkCache[md5($url)] = $trackingUrl;
 
                 // --------------------------------------------------------------------------
 
@@ -1455,7 +1454,7 @@ class Emailer
     protected function _format_object(&$email)
     {
         $email->email_vars = @unserialize($email->email_vars);
-        $email->type       = !empty($this->_email_type[$email->type]) ? $this->_email_type[$email->type] : null;
+        $email->type       = !empty($this->aEmailType[$email->type]) ? $this->aEmailType[$email->type] : null;
 
         if (empty($email->type)) {
 
@@ -1533,7 +1532,7 @@ class Emailer
      */
     public function getTableName()
     {
-        return $this->table;
+        return $this->sTable;
     }
 
     // --------------------------------------------------------------------------
@@ -1544,6 +1543,6 @@ class Emailer
      */
     public function getTablePrefix()
     {
-        return $this->tablePrefix;
+        return $this->sTablePrefix;
     }
 }
