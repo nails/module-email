@@ -132,7 +132,6 @@
 </head>
 <body>
     <div id="container">
-        <h1>
         <?php
 
             $paths   = array();
@@ -185,15 +184,18 @@
 
                 if (is_file($path[0])) {
 
-                    echo '<div id="logoContainer">';
-                        echo '<img src="' . $path[1] . '" id="logo" />';
-                    echo '</div>';
+                    ?>
+                    <h1>
+                        <div id="logoContainer">
+                            <img src="<?=$path[1]?>" id="logo" />
+                        </div>
+                    </h1>
+                    <?php
                     break;
                 }
             }
 
         ?>
-        </h1>
         <?php
 
         if ($this->input->get('undo')) {
