@@ -172,10 +172,13 @@
                 BASE_URL . 'assets/img/logo/logo.gif'
             );
 
-            $paths[] = array(
-                NAILS_ASSETS_PATH . 'img/nails/icon/icon@2x.png',
-                NAILS_ASSETS_URL . 'img/nails/icon/icon@2x.png'
-            );
+            if (NAILS_BRANDING) {
+
+                $paths[] = array(
+                    NAILS_ASSETS_PATH . 'img/nails/icon/icon@2x.png',
+                    NAILS_ASSETS_URL . 'img/nails/icon/icon@2x.png'
+                );
+            }
 
 
             foreach ($paths as $path) {
@@ -191,8 +194,11 @@
 
         ?>
         </h1>
-        <?php if ($this->input->get('undo')) { ?>
+        <?php
 
+        if ($this->input->get('undo')) {
+
+            ?>
             <h2>That's OK, we all make mistakes</h2>
             <p>
                 We'll continue to send you this type of email.
@@ -200,9 +206,11 @@
             <p>
                 <?=anchor('email/unsubscribe?token=' . $this->input->get('token'), 'Unsubscribe?', 'class="btn"') ?>
             </p>
+            <?php
 
-        <?php } else { ?>
+        } else {
 
+            ?>
             <h2>Successfully Unsubscribed</h2>
             <p>
                 OK! We won't send you this type of email again.
@@ -210,13 +218,23 @@
             <p>
                 <?=anchor('email/unsubscribe?token=' . $this->input->get('token') . '&undo=1', 'Undo?', 'class="btn"') ?>
             </p>
+            <?php
 
-        <?php }; ?>
-        <hr />
-        <p>
-            <small>
-                Powered by <a href="http://nailsapp.co.uk">Nails</a>
-            </small>
-        </p>
+        }
+
+        if (NAILS_BRANDING) {
+
+            ?>
+            <hr />
+            <p>
+                <small>
+                    Powered by <a href="http://nailsapp.co.uk">Nails</a>
+                </small>
+            </p>
+            <?php
+
+        }
+
+        ?>
     </div>
 </body>
