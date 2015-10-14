@@ -10,10 +10,12 @@
  * @link
  */
 
+use Nails\Factory;
+
 class Emailer
 {
-    use \Nails\Common\Traits\ErrorHandling;
-    use \Nails\Common\Traits\GetCountCommon;
+    use Nails\Common\Traits\ErrorHandling;
+    use Nails\Common\Traits\GetCountCommon;
 
     // --------------------------------------------------------------------------
 
@@ -36,7 +38,7 @@ class Emailer
     public function __construct($config = array())
     {
         $this->oCi =& get_instance();
-        $this->oDb =& \Nails\Factory::service('Database');
+        $this->oDb =& Factory::service('Database');
 
         // --------------------------------------------------------------------------
 
@@ -64,8 +66,8 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Load helpers
-        \Nails\Factory::helper('email');
-        \Nails\Factory::helper('string');
+        Factory::helper('email');
+        Factory::helper('string');
 
         // --------------------------------------------------------------------------
 
