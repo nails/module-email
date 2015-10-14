@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Email;
 
-class Utilities extends \AdminController
+use Nails\Email\Controller\BaseAdmin;
+
+class Utilities extends BaseAdmin
 {
      /**
      * Announces this controller's navGroups

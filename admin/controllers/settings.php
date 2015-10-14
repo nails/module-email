@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Email;
 
-class Settings extends \AdminController
+use Nails\Email\Controller\BaseAdmin;
+
+class Settings extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups

@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Email;
 
-class Campaign extends \AdminController
+use Nails\Email\Controller\BaseAdmin;
+
+class Campaign extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups
