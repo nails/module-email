@@ -27,7 +27,7 @@
     "prefer-stable": true,
     "require":
     {
-        "module-common": "dev-develop"
+        "nailsapp/common": "dev-develop"
     },
     "require-dev":
     {
