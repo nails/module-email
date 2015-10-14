@@ -14,8 +14,8 @@ use Nails\Factory;
 
 class Emailer
 {
-    use Nails\Common\Traits\ErrorHandling;
-    use Nails\Common\Traits\GetCountCommon;
+    use \Nails\Common\Traits\ErrorHandling;
+    use \Nails\Common\Traits\GetCountCommon;
 
     // --------------------------------------------------------------------------
 
