@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Email;
 
+use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
 
 class Campaign extends BaseAdmin
@@ -79,6 +80,6 @@ class Campaign extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 }

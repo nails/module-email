@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Email;
 
+use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
 
 class Utilities extends BaseAdmin
@@ -106,6 +107,6 @@ class Utilities extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 }

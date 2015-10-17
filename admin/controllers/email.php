@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Email;
 
+use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
 
 class Email extends BaseAdmin
@@ -112,12 +113,12 @@ class Email extends BaseAdmin
         $this->data['emails'] = $this->emailer->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
