@@ -42,7 +42,14 @@
         "nails" :
         {
             "moduleName": "email",
-            "type": "module"
+            "type": "module",
+            "autoload": {
+                "services": [
+                    {
+                        "emailer": "Emailer"
+                    }
+                ]
+            }
         }
     }
 }

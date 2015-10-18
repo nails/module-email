@@ -3,11 +3,11 @@
 return array(
     'services' => array(
         'Emailer' => function() {
-
-            $oCi = get_instance();
-            $oCi->load->library('email/emailer');
-
-            return $oCi->emailer;
+            if (class_exists('\App\Email\Library\Emailer')) {
+                return new \App\Email\Library\Emailer();
+            } else {
+                return new \Nails\Email\Library\Emailer();
+            }
         }
     )
 );

@@ -10,6 +10,8 @@
  * @link
  */
 
+namespace Nails\Email\Library;
+
 use Nails\Factory;
 
 class Emailer
@@ -43,7 +45,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Set email related settings
-        $this->from        = new stdClass();
+        $this->from        = new \stdClass();
         $this->from->name  = app_setting('from_name', 'email');
         $this->from->email = app_setting('from_email', 'email');
 
@@ -144,7 +146,7 @@ class Emailer
             return false;
         }
 
-        $temp                   = new stdClass();
+        $temp                   = new \stdClass();
         $temp->slug             = $data->slug;
         $temp->name             = $data->name;
         $temp->description      = $data->description;
@@ -374,7 +376,7 @@ class Emailer
             return false;
         }
 
-        $send           = new stdClass();
+        $send           = new \stdClass();
         $send->to_id    = $email->user->id;
         $send->to_email = $email->user->email;
         $send->type     = $email->type->slug;
@@ -481,8 +483,8 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $_send                          = new stdClass();
-        $_send->to                      = new stdClass();
+        $_send                          = new \stdClass();
+        $_send->to                      = new \stdClass();
         $_send->to->email               = $_email->user->email;
         $_send->to->email_verified      = (bool) $_email->email_verified;
         $_send->to->email_verified_code = $_email->email_verified_code;
@@ -519,7 +521,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  From user
-        $_send->from = new stdClass();
+        $_send->from = new \stdClass();
 
         if (!empty($_send->data['email_from_email'])) {
 
@@ -1504,7 +1506,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Sent to
-        $email->user              = new stdClass();
+        $email->user              = new \stdClass();
         $email->user->id          = $email->user_id;
         $email->user->group_id    = $email->user_group;
         $email->user->email       = $email->sent_to;
