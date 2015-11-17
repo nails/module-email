@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Email;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
 
@@ -71,17 +72,17 @@ class Utilities extends BaseAdmin
         if ($this->input->post()) {
 
             //  Form validation and update
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
 
             //  Define rules
-            $this->form_validation->set_rules('recipient', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('recipient', '', 'xss_clean|required|valid_email');
 
             //  Set Messages
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('valid_email', lang('fv_valid_email'));
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
 
             //  Execute
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 //  Prepare date
                 $email           = new \stdClass();
