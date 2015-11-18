@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Email;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
 
@@ -23,7 +24,9 @@ class Settings extends BaseAdmin
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Settings', 'fa-wrench');
+        $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $navGroup->setLabel('Settings');
+        $navGroup->setIcon('fa-wrench');
 
         if (userHasPermission('admin:email:settings:update')) {
 

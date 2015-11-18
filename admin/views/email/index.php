@@ -4,8 +4,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -36,8 +36,8 @@
                             <td class="ref"><?=$email->ref?></td>
                             <?php
 
-                                echo \Nails\Admin\Helper::loadUserCell($email->user);
-                                echo \Nails\Admin\Helper::loadDatetimeCell($email->sent);
+                                echo adminHelper('loadUserCell', $email->user);
+                                echo adminHelper('loadDatetimeCell', $email->sent);
 
                             ?>
                             <td class="type">
@@ -171,7 +171,7 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>

@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Email;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
 
@@ -23,7 +24,9 @@ class Email extends BaseAdmin
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Email', 'fa-paper-plane-o');
+        $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $navGroup->setLabel('Email');
+        $navGroup->setIcon('fa-paper-plane-o');
 
         if (userHasPermission('admin:email:email:browse')) {
 
