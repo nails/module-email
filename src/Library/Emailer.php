@@ -828,10 +828,9 @@ class Emailer
      * @param  integer $page    The page of results to retrieve
      * @param  integer $perPage The number of results per page
      * @param  array   $data    Data to pass to _getcount_common_email()
-     * @param  string  $_caller An internal flag highlighting the parent method
      * @return array
      */
-    public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
+    public function get_all($page = null, $perPage = null, $data = array())
     {
         $this->oDb->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
         $this->oDb->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
@@ -839,7 +838,7 @@ class Emailer
         $this->oDb->select('u.profile_img,u.gender,u.username');
 
         //  Apply common items; pass $data
-        $this->_getcount_common_email($data, $_caller);
+        $this->_getcount_common_email($data);
 
         // --------------------------------------------------------------------------
 
@@ -886,11 +885,10 @@ class Emailer
     /**
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
-     * @param array  $data    Data passed from the calling method
-     * @param string $_caller The name of the calling method
+     * @param array  $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common_email($data = array(), $_caller = null)
+    protected function _getcount_common_email($data = array())
     {
         if (!empty($data['keywords'])) {
 
@@ -931,7 +929,7 @@ class Emailer
         $this->oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTablePrefix . '.user_id', 'LEFT');
         $this->oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTablePrefix . '.user_email', 'LEFT');
 
-        $this->_getcount_common($data, $_caller);
+        $this->_getcount_common($data);
     }
 
     // --------------------------------------------------------------------------
