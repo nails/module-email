@@ -46,8 +46,8 @@ class Emailer
 
         //  Set email related settings
         $this->from        = new \stdClass();
-        $this->from->name  = app_setting('from_name', 'email');
-        $this->from->email = app_setting('from_email', 'email');
+        $this->from->name  = appSetting('from_name', 'email');
+        $this->from->email = appSetting('from_email', 'email');
 
         if (empty($this->from->name)) {
 

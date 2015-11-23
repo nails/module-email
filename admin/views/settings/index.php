@@ -39,7 +39,7 @@
                         $field                = array();
                         $field['key']         = 'from_name';
                         $field['label']       = 'From Name';
-                        $field['default']     = app_setting($field['key'], 'email') ? app_setting($field['key'], 'email') : APP_NAME;
+                        $field['default']     = appSetting($field['key'], 'email') ? appSetting($field['key'], 'email') : APP_NAME;
                         $field['placeholder'] = 'The name of the sender which recipients should see.';
 
                         echo form_field($field);
@@ -52,7 +52,7 @@
                         $field                = array();
                         $field['key']         = 'from_email';
                         $field['label']       = 'From Email';
-                        $field['default']     = app_setting($field['key'], 'email') ? app_setting($field['key'], 'email') : $default;
+                        $field['default']     = appSetting($field['key'], 'email') ? appSetting($field['key'], 'email') : $default;
                         $field['placeholder'] = 'The email address of the sender which recipients should see.';
                         $field['info']        = '<strong>Note:</strong> If sending using SMTP to send email ensure this email is a valid account on the mail server. If it\'s not valid, some services will junk the email.';
 
