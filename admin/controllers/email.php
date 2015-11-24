@@ -112,8 +112,8 @@ class Email extends BaseAdmin
         );
 
         //  Get the items for the page
-        $totalRows            = $this->emailer->count_all($data);
-        $this->data['emails'] = $this->emailer->get_all($page, $perPage, $data);
+        $totalRows            = $this->emailer->countAll($data);
+        $this->data['emails'] = $this->emailer->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);

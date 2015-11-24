@@ -23,7 +23,7 @@ class NAILS_Tracker extends NAILS_Email_Controller
     {
         /**
          * Fetch data; return a string if not set so as not to accidentally skip the
-         * hash check in get_by_ref();
+         * hash check in getByRef();
          */
 
         $ref  = $this->uri->segment(3, 'null');
@@ -71,7 +71,7 @@ class NAILS_Tracker extends NAILS_Email_Controller
     {
         /**
          * Fetch data; return a string if not set so as not to accidentally skip the
-         * hash check in get_by_ref();
+         * hash check in getByRef();
          */
 
         $ref     = $this->uri->segment(4);

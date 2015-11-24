@@ -41,14 +41,14 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
             show_404();
         }
 
-        $user = $this->user_model->get_by_email($token[2]);
+        $user = $this->user_model->getByEmail($token[2]);
 
         if (!$user || $user->id != activeUser('id ')) {
 
             show_404();
         }
 
-        $email = $this->emailer->get_by_ref($token[1]);
+        $email = $this->emailer->getByRef($token[1]);
 
         if (!$email) {
 

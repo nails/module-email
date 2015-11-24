@@ -248,7 +248,7 @@ class Emailer
         //  If we're sending to an email address, try and associate it to a registered user
         if ($input->to_email) {
 
-            $_user = getUserObject()->get_by_email($input->to_email);
+            $_user = getUserObject()->getByEmail($input->to_email);
 
             if ($_user) {
 
@@ -258,7 +258,7 @@ class Emailer
         } else {
 
             //  Sending to an ID, fetch the user's email
-            $_user = getUserObject()->get_by_id($input->to_id);
+            $_user = getUserObject()->getById($input->to_id);
 
             if (!empty($_user->email)) {
 
@@ -363,11 +363,11 @@ class Emailer
     {
         if (is_numeric($emailIdRef)) {
 
-            $email = $this->get_by_id($emailIdRef);
+            $email = $this->getById($emailIdRef);
 
         } else {
 
-            $email = $this->get_by_ref($emailIdRef);
+            $email = $this->getByRef($emailIdRef);
         }
 
         if (!$email) {
@@ -463,7 +463,7 @@ class Emailer
         //  Get the email if $emailId is not an object
         if (is_numeric($emailId)) {
 
-            $_email = $this->get_by_id($emailId);
+            $_email = $this->getById($emailId);
 
             if (!$_email) {
 
@@ -827,10 +827,10 @@ class Emailer
      * Returns emails from the archive
      * @param  integer $page    The page of results to retrieve
      * @param  integer $perPage The number of results per page
-     * @param  array   $data    Data to pass to _getcount_common_email()
+     * @param  array   $data    Data to pass to getCountCommonEmail()
      * @return array
      */
-    public function get_all($page = null, $perPage = null, $data = array())
+    public function getAll($page = null, $perPage = null, $data = array())
     {
         $this->oDb->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
         $this->oDb->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
@@ -838,7 +838,7 @@ class Emailer
         $this->oDb->select('u.profile_img,u.gender,u.username');
 
         //  Apply common items; pass $data
-        $this->_getcount_common_email($data);
+        $this->getCountCommonEmail($data);
 
         // --------------------------------------------------------------------------
 
@@ -869,7 +869,7 @@ class Emailer
             for ($i = 0; $i < count($emails); $i++) {
 
                 //  Format the object, make it pretty
-                $this->_format_object($emails[$i]);
+                $this->formatObject($emails[$i]);
             }
 
             return $emails;
@@ -888,7 +888,7 @@ class Emailer
      * @param array  $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common_email($data = array())
+    protected function getCountCommonEmail($data = array())
     {
         if (!empty($data['keywords'])) {
 
@@ -929,7 +929,7 @@ class Emailer
         $this->oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTablePrefix . '.user_id', 'LEFT');
         $this->oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTablePrefix . '.user_email', 'LEFT');
 
-        $this->_getcount_common($data);
+        $this->getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -938,9 +938,9 @@ class Emailer
      * Count the number of records in the archive
      * @return int
      */
-    public function count_all($data)
+    public function countAll($data)
     {
-        $this->_getcount_common_email($data, 'COUNT_ALL');
+        $this->getCountCommonEmail($data, 'COUNT_ALL');
         return $this->oDb->count_all_results($this->sTable . ' ' . $this->sTablePrefix);
     }
 
@@ -951,14 +951,14 @@ class Emailer
      * @param  int $id The email's ID
      * @return mixed   stdClass on success, false on failure
      */
-    public function get_by_id($id)
+    public function getById($id)
     {
         $data = array(
             'where' => array(
                 array($this->sTablePrefix . '.id', $id)
             )
         );
-        $emails = $this->get_all(null, null, $data);
+        $emails = $this->getAll(null, null, $data);
 
         if (!$emails) {
 
@@ -979,7 +979,7 @@ class Emailer
      * @param  string  $hash The email's hash
      * @return mixed         stdClass on success, false on failure
      */
-    public function get_by_ref($ref, $guid = false, $hash = false)
+    public function getByRef($ref, $guid = false, $hash = false)
     {
         //  If guid and hash === false then by-pass the check
         if ($guid !== false && $hash !== false) {
@@ -1000,7 +1000,7 @@ class Emailer
                 array($this->sTablePrefix . '.ref', $ref)
             )
         );
-        $emails = $this->get_all(null, null, $data);
+        $emails = $this->getAll(null, null, $data);
 
         if (!$emails) {
 
@@ -1182,7 +1182,7 @@ class Emailer
      */
     public function trackOpen($ref, $guid, $hash)
     {
-        $_email = $this->get_by_ref($ref, $guid, $hash);
+        $_email = $this->getByRef($ref, $guid, $hash);
 
         if ($_email && $_email != 'BAD_HASH') {
 
@@ -1219,7 +1219,7 @@ class Emailer
      */
     public function trackLink($ref, $guid, $hash, $link_id)
     {
-        $_email = $this->get_by_ref($ref, $guid, $hash);
+        $_email = $this->getByRef($ref, $guid, $hash);
 
         if ($_email && $_email != 'BAD_HASH') {
 
@@ -1453,7 +1453,7 @@ class Emailer
      * @param  object $email The raw email object
      * @return void
      */
-    protected function _format_object(&$email)
+    protected function formatObject(&$email)
     {
         $email->email_vars = @unserialize($email->email_vars);
         $email->type       = !empty($this->aEmailType[$email->type]) ? $this->aEmailType[$email->type] : null;

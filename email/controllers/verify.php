@@ -31,7 +31,7 @@ class NAILS_Verify extends NAILS_Email_Controller
         // --------------------------------------------------------------------------
 
         //  Fetch the user
-        $u = $this->user_model->get_by_id($id);
+        $u = $this->user_model->getById($id);
 
         if ($u && $code) {
 
