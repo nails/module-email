@@ -85,7 +85,7 @@ class NAILS_Verify extends NAILS_Email_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $this->user_model->last_error());
+        $this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $this->user_model->lastError());
         redirect('/');
     }
 

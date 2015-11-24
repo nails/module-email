@@ -173,7 +173,7 @@ class Emailer
         //  We got something to work with?
         if (empty($input)) {
 
-            $this->_set_error('EMAILER: No input');
+            $this->setError('EMAILER: No input');
             return false;
         }
 
@@ -190,7 +190,7 @@ class Emailer
         //  Check we have at least a user_id/email and an email type
         if ((empty($input->to_id) && empty($input->to_email)) || empty($input->type)) {
 
-            $this->_set_error('EMAILER: Missing user ID, user email or email type');
+            $this->setError('EMAILER: Missing user ID, user email or email type');
             return false;
         }
 
@@ -237,7 +237,7 @@ class Emailer
 
             } else {
 
-                $this->_set_error('EMAILER: Invalid Email Type "' . $input->type . '"');
+                $this->setError('EMAILER: Invalid Email Type "' . $input->type . '"');
             }
 
             return false;
@@ -302,7 +302,7 @@ class Emailer
 
             } else {
 
-                $this->_set_error('EMAILER: No email address to send to.');
+                $this->setError('EMAILER: No email address to send to.');
                 false;
             }
         }
@@ -331,7 +331,7 @@ class Emailer
 
             } else {
 
-                $this->_set_error('EMAILER: Insert Failed.');
+                $this->setError('EMAILER: Insert Failed.');
                 false;
             }
         }
@@ -372,7 +372,7 @@ class Emailer
 
         if (!$email) {
 
-            $this->_set_error('"' . $emailIdRef . '" is not a valid Email ID or reference.');
+            $this->setError('"' . $emailIdRef . '" is not a valid Email ID or reference.');
             return false;
         }
 
@@ -467,7 +467,7 @@ class Emailer
 
             if (!$_email) {
 
-                $this->_set_error('EMAILER: Invalid email ID');
+                $this->setError('EMAILER: Invalid email ID');
                 return false;
             }
 
@@ -477,7 +477,7 @@ class Emailer
 
         } else {
 
-            $this->_set_error('EMAILER: Invalid email ID');
+            $this->setError('EMAILER: Invalid email ID');
             return false;
         }
 
@@ -585,7 +585,7 @@ class Emailer
 
         //  Clear any errors which might have happened previously
         $_error =& load_class('Exceptions', 'core');
-        $_error->clear_errors();
+        $_error->clearErrors();
 
         //  Load the template
         $body  = $this->oCi->load->view($_send->template_header, $_send->data, true);
@@ -634,7 +634,7 @@ class Emailer
 
             // --------------------------------------------------------------------------
 
-            $this->_set_error('EMAILER: Errors in email template, developers informed');
+            $this->setError('EMAILER: Errors in email template, developers informed');
 
             // --------------------------------------------------------------------------]
 
@@ -724,7 +724,7 @@ class Emailer
 
                     } else {
 
-                        $this->_set_error('EMAILER: Insert Failed.');
+                        $this->setError('EMAILER: Insert Failed.');
                         return false;
                     }
                 }
@@ -791,7 +791,7 @@ class Emailer
 
             if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
 
-                $this->_set_error('Email failed to send at SMTP time, developers informed');
+                $this->setError('Email failed to send at SMTP time, developers informed');
                 sendDeveloperMail($_subject, $_message);
 
             } else {
@@ -811,7 +811,7 @@ class Emailer
 
                 } else {
 
-                    $this->_set_error('Email failed to send at SMTP time.');
+                    $this->setError('Email failed to send at SMTP time.');
                 }
             }
 

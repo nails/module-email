@@ -150,7 +150,7 @@ class Email extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'Message failed to resend. ' . $this->emailer->last_error();
+            $message = 'Message failed to resend. ' . $this->emailer->lastError();
         }
 
         $this->session->Set_flashdata($status, $message);
