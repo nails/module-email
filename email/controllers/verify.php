@@ -36,7 +36,7 @@ class NAILS_Verify extends NAILS_Email_Controller
         if ($u && $code) {
 
             //  User found, attempt to verify
-            if ($this->user_model->email_verify($u->id, $code)) {
+            if ($this->user_model->emailVerify($u->id, $code)) {
 
                 //  Reward referrer (if any
                 if (!empty($u->referred_by)) {
