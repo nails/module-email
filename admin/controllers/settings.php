@@ -24,16 +24,16 @@ class Settings extends BaseAdmin
      */
     public static function announce()
     {
-        $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-        $navGroup->setLabel('Settings');
-        $navGroup->setIcon('fa-wrench');
+        $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $oNavGroup->setLabel('Settings');
+        $oNavGroup->setIcon('fa-wrench');
 
         if (userHasPermission('admin:email:settings:update')) {
 
-            $navGroup->addAction('Email');
+            $oNavGroup->addAction('Email');
         }
 
-        return $navGroup;
+        return $oNavGroup;
     }
 
     // --------------------------------------------------------------------------

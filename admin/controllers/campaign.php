@@ -24,16 +24,16 @@ class Campaign extends BaseAdmin
      */
     public static function announce()
     {
-        $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-        $navGroup->setLabel('Email');
-        $navGroup->setIcon('fa-paper-plane-o');
+        $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $oNavGroup->setLabel('Email');
+        $oNavGroup->setIcon('fa-paper-plane-o');
 
         if (userHasPermission('admin:email:campaign:manage')) {
 
-            $navGroup->addAction('Manage Campaigns');
+            $oNavGroup->addAction('Manage Campaigns');
         }
 
-        return $navGroup;
+        return $oNavGroup;
     }
 
     // --------------------------------------------------------------------------

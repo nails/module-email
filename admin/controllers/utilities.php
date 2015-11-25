@@ -24,16 +24,16 @@ class Utilities extends BaseAdmin
      */
     public static function announce()
     {
-        $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-        $navGroup->setLabel('Utilities');
-        $navGroup->setIcon('fa-sliders');
+        $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $oNavGroup->setLabel('Utilities');
+        $oNavGroup->setIcon('fa-sliders');
 
         if (userHasPermission('admin:email:utilities:sendTest')) {
 
-            $navGroup->addAction('Send Test Email');
+            $oNavGroup->addAction('Send Test Email');
         }
 
-        return $navGroup;
+        return $oNavGroup;
     }
 
     // --------------------------------------------------------------------------
