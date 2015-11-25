@@ -5,7 +5,7 @@
 
 	<hr />
 
-	<p class="system-alert message">
+	<p class="alert alert-warning">
 		<?=lang( 'email_method_unfinished' )?>
 	</p>
 </div>

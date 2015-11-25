@@ -134,7 +134,7 @@
                                 echo anchor(
                                     site_url('email/view_online/' . $email->ref, isPageSecure()),
                                     lang('action_preview'),
-                                    'class="awesome small fancybox" data-fancybox-type="iframe"'
+                                    'class="btn btn-xs btn-primary fancybox" data-fancybox-type="iframe"'
                                 );
 
                                 if (userHasPermission('admin:email:email:resend')) {
@@ -145,7 +145,7 @@
                                         $return .= '?' . $this->input->server('QUERY_STRING');
                                     }
                                     $return = urlencode($return);
-                                    echo anchor('admin/email/email/resend/' . $email->id . '?return=' . $return, 'Resend', 'class="awesome small green"');
+                                    echo anchor('admin/email/email/resend/' . $email->id . '?return=' . $return, 'Resend', 'class="btn btn-xs btn-success"');
                                 }
 
                             ?>

@@ -27,7 +27,7 @@
         <?php
 
     echo '<p>';
-        echo form_submit('submit', 'Send Test Email', 'class="awesome"');
+        echo form_submit('submit', 'Send Test Email', 'class="btn btn-primary"');
     echo '</p>';
     echo form_close();
 
