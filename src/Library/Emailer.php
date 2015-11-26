@@ -940,7 +940,7 @@ class Emailer
      */
     public function countAll($data)
     {
-        $this->getCountCommonEmail($data, 'COUNT_ALL');
+        $this->getCountCommonEmail($data);
         return $this->oDb->count_all_results($this->sTable . ' ' . $this->sTablePrefix);
     }
 
