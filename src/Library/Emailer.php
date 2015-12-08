@@ -314,7 +314,7 @@ class Emailer
         $this->oDb->set('user_id', $input->to_id);
         $this->oDb->set('user_email', $input->to_email);
         $this->oDb->set('type', $input->type);
-        $this->oDb->set('email_vars', serialize($input->data));
+        $this->oDb->set('email_vars', json_encode($input->data));
         $this->oDb->set('internal_ref', $input->internal_ref);
 
         $this->oDb->insert($this->sTable);
@@ -1455,7 +1455,7 @@ class Emailer
      */
     protected function formatObject(&$email)
     {
-        $email->email_vars = @unserialize($email->email_vars);
+        $email->email_vars = json_decode($email->email_vars);
         $email->type       = !empty($this->aEmailType[$email->type]) ? $this->aEmailType[$email->type] : null;
 
         if (empty($email->type)) {
@@ -1470,9 +1470,9 @@ class Emailer
          * defined in the template; if not, fall back to a default subject
          */
 
-        if (!empty($email->email_vars['email_subject'])) {
+        if (!empty($email->email_vars->email_subject)) {
 
-            $email->subject = $email->email_vars['email_subject'];
+            $email->subject = $email->email_vars->email_subject;
 
         } elseif (!empty($email->type->default_subject)) {
 
@@ -1486,19 +1486,19 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Template overrides
-        if (!empty($email->email_vars['template_header'])) {
+        if (!empty($email->email_vars->template_header)) {
 
-            $email->type->template_body = $email->email_vars['template_header'];
+            $email->type->template_body = $email->email_vars->template_header;
         }
 
-        if (!empty($email->email_vars['template_body'])) {
+        if (!empty($email->email_vars->template_body)) {
 
-            $email->type->template_body = $email->email_vars['template_body'];
+            $email->type->template_body = $email->email_vars->template_body;
         }
 
-        if (!empty($email->email_vars['template_footer'])) {
+        if (!empty($email->email_vars->template_footer)) {
 
-            $email->type->template_body = $email->email_vars['template_footer'];
+            $email->type->template_body = $email->email_vars->template_footer;
         }
 
         // --------------------------------------------------------------------------

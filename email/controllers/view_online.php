@@ -56,31 +56,31 @@ class NAILS_View_Online extends NAILS_Email_Controller
         // --------------------------------------------------------------------------
 
         //  Prep data
-        $data                       = $email->email_vars;
-        $data['ci']                 =& get_instance();
-        $data['email_ref']          = $email->ref;
-        $data['sent_from']          = $this->emailer->from;
-        $data['email_subject']      = $email->subject;
-        $data['site_url']           = site_url();
-        $data['secret']             = APP_PRIVATE_KEY;
-        $data['email_type']         = $email->type;
-        $data['sent_to']            = new stdClass();
-        $data['sent_to']->email     = $email->user->email;
-        $data['sent_to']->first     = $email->user->first_name;
-        $data['sent_to']->last      = $email->user->last_name;
-        $data['sent_to']->id        = (int) $email->user->id;
-        $data['sent_to']->username  = $email->user->username;
-        $data['sent_to']->group_id  = $email->user->group_id;
+        $data                     = $email->email_vars;
+        $data->ci                 =& get_instance();
+        $data->email_ref          = $email->ref;
+        $data->sent_from          = $this->emailer->from;
+        $data->email_subject      = $email->subject;
+        $data->site_url           = site_url();
+        $data->secret             = APP_PRIVATE_KEY;
+        $data->email_type         = $email->type;
+        $data->sent_to            = new stdClass();
+        $data->sent_to->email     = $email->user->email;
+        $data->sent_to->first     = $email->user->first_name;
+        $data->sent_to->last      = $email->user->last_name;
+        $data->sent_to->id        = (int) $email->user->id;
+        $data->sent_to->username  = $email->user->username;
+        $data->sent_to->group_id  = $email->user->group_id;
 
         if ($email->user->id) {
 
             $md5Id = md5($email->user->id);
             $md5Pw = md5($email->user->password);
-            $data['sent_to']->login_url = site_url('auth/login/with_hashes/' . $md5Id . '/' . $md5Pw);
+            $data->sent_to->login_url = site_url('auth/login/with_hashes/' . $md5Id . '/' . $md5Pw);
 
         } else {
 
-            $data['sent_to']->login_url = null;
+            $data->sent_to->login_url = null;
         }
 
         //  Check login URLs are allowed
@@ -88,7 +88,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
 
         if (!$this->config->item('authEnableHashedLogin')) {
 
-            $data['sent_to']->login_url = '';
+            $data->sent_to->login_url = '';
         }
 
         // --------------------------------------------------------------------------
