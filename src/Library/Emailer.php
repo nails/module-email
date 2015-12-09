@@ -503,7 +503,7 @@ class Emailer
         $_send->template_footer         = $_email->type->template_footer;
         $_send->template_footer_pt      = $_email->type->template_footer . '_plaintext';
         $_send->data                    = $_email->email_vars;
-        $_send->data['ci']              =& get_instance();
+        $_send->data->ci                =& get_instance();
 
         //  Check login URLs are allowed
         get_instance()->config->load('auth/auth');
@@ -1154,21 +1154,21 @@ class Emailer
         $entitiyBody   = htmlentities($body);
         $plaintextBody = nl2br($plaintext);
 
-        $html  = '<iframe width="100%" height="900" src="" id="renderframe"></iframe>' . "\n";
-        $html .= '<script type="text/javascript">' . "\n";
-        $html .= 'var emailBody = "{$renderedBody}";' . "\n";
-        $html .= 'document.getElementById(\'renderframe\').src = "data:text/html;charset=utf-8," + escape(emailBody);' . "\n";
-        $html .= '</script>' . "\n";
-        $html .= "\n";
-        $html .= '<strong>HTML:</strong>' . "\n";
-        $html .= '-----------------------------------------------------------------' . "\n";
-        $html .= $entitiyBody . "\n";
-        $html .= "\n";
-        $html .= '<strong>Plain Text:</strong>' . "\n";
-        $html .= '-----------------------------------------------------------------' . "\n";
-        $html .= '</pre>' . $plaintextBody . "\n";
+$str = <<<EOT
+<iframe width="100%" height="900" src="" id="renderframe"></iframe>
+<script type="text/javascript">
+var emailBody = "$renderedBody";
+document.getElementById('renderframe').src = "data:text/html;charset=utf-8," + escape(emailBody);
+</script>
 
-        echo $html;
+<strong>HTML:</strong>
+-----------------------------------------------------------------
+$entitiyBody
+
+<strong>Plain Text:</strong>
+-----------------------------------------------------------------
+</pre>$plaintextBody</pre>
+EOT;
     }
 
     // --------------------------------------------------------------------------
