@@ -504,7 +504,6 @@ class Emailer
         $_send->template_footer_pt      = $_email->type->template_footer . '_plaintext';
         $_send->data                    = $_email->email_vars;
         $_send->data->ci                =& get_instance();
-
         //  Check login URLs are allowed
         get_instance()->config->load('auth/auth');
 
@@ -513,20 +512,15 @@ class Emailer
             $_send->to->login_url = '';
         }
 
-        if (!is_array($_send->data)) {
-
-            $_send->data = array();
-        }
-
         // --------------------------------------------------------------------------
 
         //  From user
         $_send->from = new \stdClass();
 
-        if (!empty($_send->data['email_from_email'])) {
+        if (!empty($_send->data->email_from_email)) {
 
-            $_send->from->email = $_send->data['email_from_email'];
-            $_send->from->name  = !empty($_send->data['email_from_name']) ? $_send->data['email_from_name'] : $_send->data['email_from_email'];
+            $_send->from->email = $_send->data->email_from_email;
+            $_send->from->name  = !empty($_send->data->email_from_name) ? $_send->data->email_from_name : $_send->data->email_from_email;
 
         } else {
 
@@ -542,13 +536,13 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Add some extra, common variables for the template
-        $_send->data['email_type']    = $_email->type;
-        $_send->data['email_ref']     = $_email->ref;
-        $_send->data['sent_from']     = $_send->from;
-        $_send->data['sent_to']       = $_send->to;
-        $_send->data['email_subject'] = $_send->subject;
-        $_send->data['site_url']      = site_url();
-        $_send->data['secret']        = APP_PRIVATE_KEY;
+        $_send->data->email_type    = $_email->type;
+        $_send->data->email_ref     = $_email->ref;
+        $_send->data->sent_from     = $_send->from;
+        $_send->data->sent_to       = $_send->to;
+        $_send->data->email_subject = $_send->subject;
+        $_send->data->site_url      = site_url();
+        $_send->data->secret        = APP_PRIVATE_KEY;
 
         // --------------------------------------------------------------------------
 
@@ -694,12 +688,12 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Add any attachments
-        if (isset($_send->data['attachments']) && is_array($_send->data['attachments']) && $_send->data['attachments']) {
+        if (isset($_send->data->attachments) && is_array($_send->data->attachments) && $_send->data->attachments) {
 
-            foreach ($_send->data['attachments'] as $file) {
+            foreach ($_send->data->attachments as $file) {
 
                 /**
-                 * TODO: Support for when custom names can be set.
+                 * @todo: Support for when custom names can be set.
                  * It's in the CI 3.0 dev branch, wonder if it'll ever be
                  * released.
                  */
@@ -728,9 +722,7 @@ class Emailer
                         return false;
                     }
                 }
-
             }
-
         }
 
         // --------------------------------------------------------------------------
