@@ -223,7 +223,7 @@ class Emailer
         //  Make sure that at least empty data is available
         if (empty($input->data)) {
 
-            $input->data = array();
+            $input->data = new \stdClass();
         }
 
         // --------------------------------------------------------------------------
