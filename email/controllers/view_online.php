@@ -46,49 +46,9 @@ class NAILS_View_Online extends NAILS_Email_Controller
         // --------------------------------------------------------------------------
 
         //  Fetch the email
-        $email = $this->emailer->getByRef($ref, $guid, $hash);
-
-        if (!$email || $email == 'BAD_HASH') {
-
-            show_error(lang('invalid_email'));
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Prep data
-        $data                     = $email->email_vars;
-        $data->ci                 =& get_instance();
-        $data->email_ref          = $email->ref;
-        $data->sent_from          = $this->emailer->from;
-        $data->email_subject      = $email->subject;
-        $data->site_url           = site_url();
-        $data->secret             = APP_PRIVATE_KEY;
-        $data->email_type         = $email->type;
-        $data->sent_to            = new stdClass();
-        $data->sent_to->email     = $email->user->email;
-        $data->sent_to->first     = $email->user->first_name;
-        $data->sent_to->last      = $email->user->last_name;
-        $data->sent_to->id        = (int) $email->user->id;
-        $data->sent_to->username  = $email->user->username;
-        $data->sent_to->group_id  = $email->user->group_id;
-
-        if ($email->user->id) {
-
-            $md5Id = md5($email->user->id);
-            $md5Pw = md5($email->user->password);
-            $data->sent_to->login_url = site_url('auth/login/with_hashes/' . $md5Id . '/' . $md5Pw);
-
-        } else {
-
-            $data->sent_to->login_url = null;
-        }
-
-        //  Check login URLs are allowed
-        $this->config->load('auth/auth');
-
-        if (!$this->config->item('authEnableHashedLogin')) {
-
-            $data->sent_to->login_url = '';
+        $oEmail = $this->emailer->getByRef($ref, $guid, $hash);
+        if (!$oEmail || $oEmail == 'BAD_HASH') {
+            show_404();
         }
 
         // --------------------------------------------------------------------------
@@ -96,37 +56,64 @@ class NAILS_View_Online extends NAILS_Email_Controller
         //  Load template
         if ($this->input->get('pt')) {
 
-            $out  = '<html><head><title>' . $email->subject . '</title></head><body><pre>';
-            $out .= $this->load->view($email->type->template_header . '_plaintext', $data, true);
-            $out .= $this->load->view($email->type->template_body . '_plaintext', $data, true);
-            $out .= $this->load->view($email->type->template_footer . '_plaintext', $data, true);
-            $out .= '</pre></body></html>';
+            $sOut  = '<html><head><title>' . $oEmail->subject . '</title></head><body><pre>';
+            $sOut .= $oEmail->body->text;
+            $sOut .= '</pre></body></html>';
 
             //  Sanitise a little
-            $out = preg_replace('/{unwrap}(.*?){\/unwrap}/', '$1', $out);
+            $sOut = preg_replace('/{unwrap}(.*?){\/unwrap}/', '$1', $sOut);
 
         } else {
 
-            $out  = '';
-            $out .= $this->load->view($email->type->template_header, $data, true);
-            $out .= $this->load->view($email->type->template_body, $data, true);
-            $out .= $this->load->view($email->type->template_footer, $data, true);
+            $sOut = $oEmail->body->html;
+        }
 
             if ($this->user_model->isSuperuser() && $this->input->get('show_vars')) {
 
-                $vars  = '<div style="max-width:600px;border:1px solid #CCC;margin:10px;padding:10px;background:#EFEFEF;white-space:pre;">';
-                $vars .= '<p style="margin-top:0;border-bottom:1px solid #CCC;padding-bottom:10px;"><strong>Superusers only: Email Variables</strong></p>';
-                $vars .= print_r($email->email_vars, true);
-                $vars .= '</div>';
+$sVarsObj = print_r($oEmail->data, true);
+$sVars    = <<< EOF
+<style type="text/css">
+    body {
+        margin-top: 421px;
+    }
+    #vars-container {
+        font-size: 13px;
+        font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        line-height: 1.75em;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 400px;
+        border-bottom: 1px solid #CCC;
+        padding: 10px;
+        background: #EFEFEF;
+        overflow: auto;
+    }
+    #vars-container p {
+        margin-top: 0;
+        border-bottom: 1px solid #CCC;
+        padding-bottom: 10px;
+    }
+    #vars-container div {
+        white-space: pre;
+    }
+</style>
+<div id="vars-container">
+    <p>
+        <strong>Superusers only: Email Variables</strong>
+    </p>
+    <div>$sVarsObj</div>
+</div>
 
-                $out = preg_replace('/<body.*?>/', '$0' . $vars, $out);
+EOF;
+                $sOut = preg_replace('/<body.*?>/', '$0' . $sVars, $sOut);
             }
-        }
 
         // --------------------------------------------------------------------------
 
         //  Output
-        $this->output->set_output($out);
+        $this->output->set_output($sOut);
     }
 
     // --------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 namespace Nails\Email\Library;
 
 use Nails\Factory;
+use Nails\Email\Exception\EmailerException;
 
 class Emailer
 {
@@ -28,7 +29,6 @@ class Emailer
     private $aTrackLinkCache;
     private $sTable;
     private $sTablePrefix;
-    private $bIsDebugging;
     private $bHasDeveloperMail;
 
     // --------------------------------------------------------------------------
@@ -105,7 +105,6 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->bIsDebugging = defined('EMAIL_DEBUG') && !empty(EMAIL_DEBUG);
         $this->bHasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
     }
 
@@ -150,6 +149,7 @@ class Emailer
         $temp->slug             = $data->slug;
         $temp->name             = $data->name;
         $temp->description      = $data->description;
+        $temp->isUnsubscribable  = property_exists($data, 'isUnsubscribable') ? (bool) $data->isUnsubscribable : true;
         $temp->template_header  = empty($data->template_header) ? 'email/structure/header' : $data->template_header;
         $temp->template_body    = $data->template_body;
         $temp->template_footer  = empty($data->template_footer) ? 'email/structure/footer' : $data->template_footer;
@@ -233,7 +233,7 @@ class Emailer
 
             if (!$graceful) {
 
-                show_error('EMAILER: Invalid Email Type "' . $input->type . '"');
+                throw new EmailerException('"' . $input->type . '" is not a valid email type', 1);
 
             } else {
 
@@ -298,7 +298,7 @@ class Emailer
 
             if (!$graceful) {
 
-                show_error('EMAILER: No email address to send to.');
+                throw new EmailerException('No email address to send to', 1);
 
             } else {
 
@@ -327,11 +327,11 @@ class Emailer
 
             if (!$graceful) {
 
-                show_error('EMAILER: Insert Failed.');
+                throw new EmailerException('Failed to create the email record', 1);
 
             } else {
 
-                $this->setError('EMAILER: Insert Failed.');
+                $this->setError('EMAILER: Failed to create the email record.');
                 false;
             }
         }
@@ -359,30 +359,30 @@ class Emailer
 
     // --------------------------------------------------------------------------
 
-    public function resend($emailIdRef)
+    /**
+     * Sends an email again
+     * @todo This should probably create a new row
+     * @param  mixed   $mEmailIdRef The email's ID or ref
+     * @return boolean
+     */
+    public function resend($mEmailIdRef)
     {
         if (is_numeric($emailIdRef)) {
 
-            $email = $this->getById($emailIdRef);
+            $oEmail = $this->getById($mEmailIdRef);
 
         } else {
 
-            $email = $this->getByRef($emailIdRef);
+            $oEmail = $this->getByRef($mEmailIdRef);
         }
 
-        if (!$email) {
+        if (empty($oEmail)) {
 
-            $this->setError('"' . $emailIdRef . '" is not a valid Email ID or reference.');
+            $this->setError('"' . $mEmailIdRef . '" is not a valid Email ID or reference.');
             return false;
         }
 
-        $send           = new \stdClass();
-        $send->to_id    = $email->user->id;
-        $send->to_email = $email->user->email;
-        $send->type     = $email->type->slug;
-        $send->data     = $email->email_vars;
-
-        return $this->send($send);
+        return $this->doSend($oEmail);
     }
 
     // --------------------------------------------------------------------------
@@ -463,9 +463,9 @@ class Emailer
         //  Get the email if $emailId is not an object
         if (is_numeric($emailId)) {
 
-            $_email = $this->getById($emailId);
+            $oEmail = $this->getById($emailId);
 
-            if (!$_email) {
+            if (!$oEmail) {
 
                 $this->setError('EMAILER: Invalid email ID');
                 return false;
@@ -473,165 +473,11 @@ class Emailer
 
         } elseif (is_object($emailId)) {
 
-            $_email = $emailId;
+            $oEmail = $emailId;
 
         } else {
 
             $this->setError('EMAILER: Invalid email ID');
-            return false;
-        }
-
-        // --------------------------------------------------------------------------
-
-        $_send                          = new \stdClass();
-        $_send->to                      = new \stdClass();
-        $_send->to->email               = $_email->user->email;
-        $_send->to->email_verified      = (bool) $_email->email_verified;
-        $_send->to->email_verified_code = $_email->email_verified_code;
-        $_send->to->first               = $_email->user->first_name;
-        $_send->to->last                = $_email->user->last_name;
-        $_send->to->id                  = (int) $_email->user->id;
-        $_send->to->username            = $_email->user->username;
-        $_send->to->group_id            = $_email->user->group_id;
-        $_send->to->login_url           = $_email->user->id ? site_url('auth/login/with_hashes/' . md5($_email->user->id) . '/' . md5($_email->user->password)) : null;
-        $_send->email_type              = $_email->type;
-        $_send->subject                 = $_email->subject;
-        $_send->template_header         = $_email->type->template_header;
-        $_send->template_header_pt      = $_email->type->template_header . '_plaintext';
-        $_send->template_body           = $_email->type->template_body;
-        $_send->template_body_pt        = $_email->type->template_body . '_plaintext';
-        $_send->template_footer         = $_email->type->template_footer;
-        $_send->template_footer_pt      = $_email->type->template_footer . '_plaintext';
-        $_send->data                    = $_email->email_vars;
-        $_send->data->ci                =& get_instance();
-        //  Check login URLs are allowed
-        get_instance()->config->load('auth/auth');
-
-        if (!get_instance()->config->item('authEnableHashedLogin')) {
-
-            $_send->to->login_url = '';
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  From user
-        $_send->from = new \stdClass();
-
-        if (!empty($_send->data->email_from_email)) {
-
-            $_send->from->email = $_send->data->email_from_email;
-            $_send->from->name  = !empty($_send->data->email_from_name) ? $_send->data->email_from_name : $_send->data->email_from_email;
-
-        } else {
-
-            $_send->from->email = $this->from->email;
-            $_send->from->name  = $this->from->name;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Fresh start please
-        $this->oCi->email->clear(true);
-
-        // --------------------------------------------------------------------------
-
-        //  Add some extra, common variables for the template
-        $_send->data->email_type    = $_email->type;
-        $_send->data->email_ref     = $_email->ref;
-        $_send->data->sent_from     = $_send->from;
-        $_send->data->sent_to       = $_send->to;
-        $_send->data->email_subject = $_send->subject;
-        $_send->data->site_url      = site_url();
-        $_send->data->secret        = APP_PRIVATE_KEY;
-
-        // --------------------------------------------------------------------------
-
-        //  If we're not on a production server, never send out to any live addresses
-        $_send_to = $_send->to->email;
-
-        if (strtoupper(ENVIRONMENT) != 'PRODUCTION' || EMAIL_OVERRIDE) {
-
-            if (EMAIL_OVERRIDE) {
-
-                $_send_to = EMAIL_OVERRIDE;
-
-            } elseif (APP_DEVELOPER_EMAIL) {
-
-                $_send_to = APP_DEVELOPER_EMAIL;
-
-            } else {
-
-                //  Not sure where this is going; fall over *waaaa*
-                show_error('EMAILER: Non production environment and neither EMAIL_OVERRIDE nor APP_DEVELOPER_EMAIL is set.');
-                return false;
-            }
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Start prepping the email
-        $this->oCi->email->from($this->from->email, $_send->from->name);
-        $this->oCi->email->reply_to($_send->from->email, $_send->from->name);
-        $this->oCi->email->to($_send_to);
-        $this->oCi->email->subject($_send->subject);
-
-        // --------------------------------------------------------------------------
-
-        //  Clear any errors which might have happened previously
-        $_error =& load_class('Exceptions', 'core');
-        $_error->clearErrors();
-
-        //  Load the template
-        $body  = $this->oCi->load->view($_send->template_header, $_send->data, true);
-        $body .= $this->oCi->load->view($_send->template_body, $_send->data, true);
-        $body .= $this->oCi->load->view($_send->template_footer, $_send->data, true);
-
-        /**
-         * If any errors occurred while attempting to generate the body of this email
-         * then abort the sending and log it
-         */
-
-        if ($this->bIsDebugging && $this->bHasDeveloperMail && $_error->error_has_occurred()) {
-
-            //  The templates error'd, abort the send and let dev know
-            $_subject  = 'Email #' . $_email->id . ' failed to send due to errors occurring in the templates';
-            $_message  = 'Hi,' . "\n";
-            $_message .= '' . "\n";
-            $_message .= 'Email #' . $_email->id . ' was aborted due to errors occurring while building the template' . "\n";
-            $_message .= '' . "\n";
-            $_message .= 'Please take a look as a matter of urgency; the errors are noted below:' . "\n";
-            $_message .= '' . "\n";
-            $_message .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $_message .= '' . "\n";
-
-            $_errors = $_error->recent_errors();
-
-            foreach ($_errors as $error) {
-
-                $_message .= 'Severity: ' . $_error->levels[$error->severity] . "\n";
-                $_message .= 'Message: ' . $error->message . "\n";
-                $_message .= 'File: ' . $error->filepath . "\n";
-                $_message .= 'Line: ' . $error->line . "\n";
-                $_message .= '' . "\n";
-            }
-
-            $_message .= '' . "\n";
-            $_message .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $_message .= '' . "\n";
-            $_message .= 'Additional debugging information:' . "\n";
-            $_message .= '' . "\n";
-            $_message .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $_message .= '' . "\n";
-            $_message .= print_r($_send, true) . "\n";
-
-            sendDeveloperMail($_subject, $_message);
-
-            // --------------------------------------------------------------------------
-
-            $this->setError('EMAILER: Errors in email template, developers informed');
-
-            // --------------------------------------------------------------------------]
-
             return false;
         }
 
@@ -646,51 +492,62 @@ class Emailer
 
         if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
 
-            if ($_send->to->id && !$_send->to->email_verified) {
+            if ($oEmail->to->id && !$oEmail->to->email_verified) {
 
-                $_needs_verified = array(
-                    'id'   => $_send->to->id,
-                    'code' => $_send->to->email_verified_code
+                $bNeedsVerified = array(
+                    'id'   => $oEmail->to->id,
+                    'code' => $oEmail->to->email_verified_code
                 );
 
             } else {
 
-                $_needs_verified = false;
+                $bNeedsVerified = false;
             }
 
-            $body = $this->parseLinks($body, $_email->id, $_email->ref, true, $_needs_verified);
+            $sBodyHtml = $this->parseLinks($sBodyHtml, $oEmail->id, $oEmail->ref, true, $bNeedsVerified);
+            $sBodyText = $this->parseLinks($sBodyText, $oEmail->id, $oEmail->ref, false, $bNeedsVerified);
         }
 
         // --------------------------------------------------------------------------
 
-        //  Set the email body
-        $this->oCi->email->message($body);
+        //  If we're not on a production server, never send out to any live addresses
+        if (strtoupper(ENVIRONMENT) != 'PRODUCTION' || EMAIL_OVERRIDE) {
 
-        // --------------------------------------------------------------------------
+            if (EMAIL_OVERRIDE) {
 
-        //  Set the plain text version
-        $plaintext  = $this->oCi->load->view($_send->template_header_pt, $_send->data, true);
-        $plaintext .= $this->oCi->load->view($_send->template_body_pt, $_send->data, true);
-        $plaintext .= $this->oCi->load->view($_send->template_footer_pt, $_send->data, true);
+                $oEmail->to->email = EMAIL_OVERRIDE;
 
-        // --------------------------------------------------------------------------
+            } elseif (APP_DEVELOPER_EMAIL) {
 
-        //  Parse the body for URLs and replace with a tracking URL (production only)
-        if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
+                $oEmail->to->email = APP_DEVELOPER_EMAIL;
 
-            $plaintext = $this->parseLinks($plaintext, $_email->id, $_email->ref, false, $_needs_verified);
+            } else {
+
+                //  Not sure where this is going; fall over *waaaa*
+                throw new EmailerException(
+                    'EMAILER: Non production environment and neither EMAIL_OVERRIDE nor APP_DEVELOPER_EMAIL is set',
+                    1
+                );
+            }
         }
 
         // --------------------------------------------------------------------------
 
-        $this->oCi->email->set_alt_message($plaintext);
+        //  Start prepping the email
+        $this->oCi->email->clear(true);
+        $this->oCi->email->from($this->from->email, $oEmail->from->name);
+        $this->oCi->email->reply_to($oEmail->from->email, $oEmail->from->name);
+        $this->oCi->email->to($oEmail->to->email);
+        $this->oCi->email->subject($oEmail->subject);
+        $this->oCi->email->message($oEmail->body->html);
+        $this->oCi->email->set_alt_message($oEmail->body->text);
 
         // --------------------------------------------------------------------------
 
         //  Add any attachments
-        if (isset($_send->data->attachments) && is_array($_send->data->attachments) && $_send->data->attachments) {
+        if (!empty($oEmail->data->attachments)) {
 
-            foreach ($_send->data->attachments as $file) {
+            foreach ($oEmail->data->attachments as $file) {
 
                 /**
                  * @todo: Support for when custom names can be set.
@@ -714,7 +571,7 @@ class Emailer
 
                     if (!$graceful) {
 
-                        show_error('EMAILER: Failed to add attachment: ' . $_file);
+                        throw new EmailerException('Failed to add attachment "' . $_file . '"', 1);
 
                     } else {
 
@@ -727,16 +584,7 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //  Debugging?
-        if ($this->bIsDebugging) {
-
-            $this->printDebugger($_send, $body, $plaintext, $_error->recent_errors());
-            return false;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Send!Turn off error reporting, if it fails we should handle it gracefully
+        //  Send! Turn off error reporting, if it fails we should handle it gracefully
         $_previous_error_reporting = error_reporting();
         error_reporting(0);
 
@@ -747,7 +595,7 @@ class Emailer
 
             //  Update the counter on the email address
             $this->oDb->set('count_sends', 'count_sends+1', false);
-            $this->oDb->where('email', $_send->to->email);
+            $this->oDb->where('email', $oEmail->to->email);
             $this->oDb->update(NAILS_DB_PREFIX . 'user_email');
 
             return true;
@@ -760,31 +608,31 @@ class Emailer
             // --------------------------------------------------------------------------
 
             //  Failed to send, notify developers
-            $_subject   = 'Email #' . $_email->id . ' failed to send at SMTP time';
-            $_message   = 'Hi,' . "\n";
-            $_message   .= '' . "\n";
-            $_message   .= 'Email #' . $_email->id . ' failed to send at SMTP time' . "\n";
-            $_message   .= '' . "\n";
-            $_message   .= 'Please take a look as a matter of urgency; debugging data is below:' . "\n";
-            $_message   .= '' . "\n";
-            $_message   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $_message   .= '' . "\n";
+            $sSubject   = 'Email #' . $oEmail->id . ' failed to send at SMTP time';
+            $sMessage   = 'Hi,' . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= 'Email #' . $oEmail->id . ' failed to send at SMTP time' . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= 'Please take a look as a matter of urgency; debugging data is below:' . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
+            $sMessage   .= '' . "\n";
 
-            $_message   .= $this->oCi->email->print_debugger();
+            $sMessage   .= $this->oCi->email->print_debugger();
 
-            $_message   .= '' . "\n";
-            $_message   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $_message   .= '' . "\n";
-            $_message   .= 'Additional debugging information:' . "\n";
-            $_message   .= '' . "\n";
-            $_message   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $_message   .= '' . "\n";
-            $_message   .= print_r($_send, true) . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= 'Additional debugging information:' . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
+            $sMessage   .= '' . "\n";
+            $sMessage   .= print_r($oEmail, true) . "\n";
 
             if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
 
                 $this->setError('Email failed to send at SMTP time, developers informed');
-                sendDeveloperMail($_subject, $_message);
+                sendDeveloperMail($sSubject, $sMessage);
 
             } else {
 
@@ -795,11 +643,7 @@ class Emailer
 
                 if (!$graceful) {
 
-                    $error  = 'Email failed to send at SMTP time. Potential configuration error. Investigate, ';
-                    $error .= 'debugging data below: <div style="padding:20px;background:#EEE">';
-                    $error .= $this->oCi->email->print_debugger() . '</div>';
-
-                    show_error($error);
+                    throw new EmailerException('Email failed to send at SMTP time.', 1);
 
                 } else {
 
@@ -1174,17 +1018,17 @@ EOT;
      */
     public function trackOpen($ref, $guid, $hash)
     {
-        $_email = $this->getByRef($ref, $guid, $hash);
+        $oEmail = $this->getByRef($ref, $guid, $hash);
 
-        if ($_email && $_email != 'BAD_HASH') {
+        if ($oEmail && $oEmail != 'BAD_HASH') {
 
             //  Update the read count and a add a track data point
             $this->oDb->set('read_count', 'read_count+1', false);
-            $this->oDb->where('id', $_email->id);
+            $this->oDb->where('id', $oEmail->id);
             $this->oDb->update($this->sTable);
 
             $this->oDb->set('created', 'NOW()', false);
-            $this->oDb->set('email_id', $_email->id);
+            $this->oDb->set('email_id', $oEmail->id);
 
             if (activeUser('id')) {
 
@@ -1211,13 +1055,13 @@ EOT;
      */
     public function trackLink($ref, $guid, $hash, $link_id)
     {
-        $_email = $this->getByRef($ref, $guid, $hash);
+        $oEmail = $this->getByRef($ref, $guid, $hash);
 
-        if ($_email && $_email != 'BAD_HASH') {
+        if ($oEmail && $oEmail != 'BAD_HASH') {
 
             //  Get the link which was clicked
             $this->oDb->select('url');
-            $this->oDb->where('email_id', $_email->id);
+            $this->oDb->where('email_id', $oEmail->id);
             $this->oDb->where('id', $link_id);
             $_link = $this->oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
 
@@ -1225,12 +1069,12 @@ EOT;
 
                 //  Update the read count and a add a track data point
                 $this->oDb->set('link_click_count', 'link_click_count+1', false);
-                $this->oDb->where('id', $_email->id);
+                $this->oDb->where('id', $oEmail->id);
                 $this->oDb->update($this->sTable);
 
                 //  Add a link trackback
                 $this->oDb->set('created', 'NOW()', false);
-                $this->oDb->set('email_id', $_email->id);
+                $this->oDb->set('email_id', $oEmail->id);
                 $this->oDb->set('link_id', $link_id);
 
                 if (activeUser('id')) {
@@ -1445,14 +1289,13 @@ EOT;
      * @param  object $email The raw email object
      * @return void
      */
-    protected function formatObject(&$email)
+    protected function formatObject(&$oEmail)
     {
-        $email->email_vars = json_decode($email->email_vars);
-        $email->type       = !empty($this->aEmailType[$email->type]) ? $this->aEmailType[$email->type] : null;
+        $oEmail->type = !empty($this->aEmailType[$oEmail->type]) ? $this->aEmailType[$oEmail->type] : null;
 
-        if (empty($email->type)) {
+        if (empty($oEmail->type)) {
 
-            showFatalError('Invalid Email Type', 'Email with ID #' . $email->id . ' has an invalid email type.');
+            showFatalError('Invalid Email Type', 'Email with ID #' . $oEmail->id . ' has an invalid email type.');
         }
 
         // --------------------------------------------------------------------------
@@ -1462,60 +1305,215 @@ EOT;
          * defined in the template; if not, fall back to a default subject
          */
 
-        if (!empty($email->email_vars->email_subject)) {
+        if (!empty($oEmail->email_vars->email_subject)) {
 
-            $email->subject = $email->email_vars->email_subject;
+            $oEmail->subject = $oEmail->email_vars->email_subject;
 
-        } elseif (!empty($email->type->default_subject)) {
+        } elseif (!empty($oEmail->type->default_subject)) {
 
-            $email->subject = $email->type->default_subject;
+            $oEmail->subject = $oEmail->type->default_subject;
 
         } else {
 
-            $email->subject = 'An E-mail from ' . APP_NAME;
+            $oEmail->subject = 'An E-mail from ' . APP_NAME;
         }
 
         // --------------------------------------------------------------------------
 
         //  Template overrides
-        if (!empty($email->email_vars->template_header)) {
+        if (!empty($oEmail->email_vars->template_header)) {
 
-            $email->type->template_body = $email->email_vars->template_header;
+            $oEmail->type->template_header = $oEmail->email_vars->template_header;
         }
 
-        if (!empty($email->email_vars->template_body)) {
+        if (!empty($oEmail->email_vars->template_body)) {
 
-            $email->type->template_body = $email->email_vars->template_body;
+            $oEmail->type->template_body = $oEmail->email_vars->template_body;
         }
 
-        if (!empty($email->email_vars->template_footer)) {
+        if (!empty($oEmail->email_vars->template_footer)) {
 
-            $email->type->template_body = $email->email_vars->template_footer;
+            $oEmail->type->template_footer = $oEmail->email_vars->template_footer;
         }
 
         // --------------------------------------------------------------------------
 
-        //  Sent to
-        $email->user              = new \stdClass();
-        $email->user->id          = $email->user_id;
-        $email->user->group_id    = $email->user_group;
-        $email->user->email       = $email->sent_to;
-        $email->user->username    = $email->username;
-        $email->user->password    = $email->user_password;
-        $email->user->first_name  = $email->first_name;
-        $email->user->last_name   = $email->last_name;
-        $email->user->profile_img = $email->profile_img;
-        $email->user->gender      = $email->gender;
+        //  Who the email is being sent to
+        $oEmail->to                      = new \stdClass();
+        $oEmail->to->id                  = $oEmail->user_id;
+        $oEmail->to->group_id            = $oEmail->user_group;
+        $oEmail->to->email               = $oEmail->sent_to;
+        $oEmail->to->username            = $oEmail->username;
+        $oEmail->to->password            = $oEmail->user_password;
+        $oEmail->to->first_name          = $oEmail->first_name;
+        $oEmail->to->last_name           = $oEmail->last_name;
+        $oEmail->to->profile_img         = $oEmail->profile_img;
+        $oEmail->to->gender              = $oEmail->gender;
+        $oEmail->to->gender              = $oEmail->gender;
+        $oEmail->to->email_verified      = $oEmail->email_verified;
+        $oEmail->to->email_verified_code = $oEmail->email_verified_code;
 
-        unset($email->user_id);
-        unset($email->sent_to);
-        unset($email->username);
-        unset($email->first_name);
-        unset($email->last_name);
-        unset($email->profile_img);
-        unset($email->gender);
-        unset($email->user_group);
-        unset($email->user_password);
+        unset($oEmail->user_id);
+        unset($oEmail->sent_to);
+        unset($oEmail->username);
+        unset($oEmail->first_name);
+        unset($oEmail->last_name);
+        unset($oEmail->profile_img);
+        unset($oEmail->gender);
+        unset($oEmail->user_group);
+        unset($oEmail->user_password);
+        unset($oEmail->email_verified);
+        unset($oEmail->email_verified_code);
+
+        //  Who the email is being sent from
+        $oEmail->from        = new \stdClass();
+        $oEmail->from->name  = !empty($oEmail->data->email_from_name) ? $oEmail->data->email_from_name : $this->from->name;
+        $oEmail->from->email = !empty($oEmail->data->email_from_email) ? $oEmail->data->email_from_name : $this->from->email;
+
+        //  Template details
+        $oEmail->template               = new \stdClass();
+        $oEmail->template->header       = new \stdClass();
+        $oEmail->template->header->html = $oEmail->type->template_header;
+        $oEmail->template->header->text = $oEmail->type->template_header . '_plaintext';
+        $oEmail->template->body         = new \stdClass();
+        $oEmail->template->body->html   = $oEmail->type->template_body;
+        $oEmail->template->body->text   = $oEmail->type->template_body . '_plaintext';
+        $oEmail->template->footer       = new \stdClass();
+        $oEmail->template->footer->html = $oEmail->type->template_footer;
+        $oEmail->template->footer->text = $oEmail->type->template_footer . '_plaintext';
+
+        // --------------------------------------------------------------------------
+
+        //  Add some extra, common variables for the template
+        $oEmail->data            = json_decode($oEmail->email_vars) ?: new \stdClass();
+        $oEmail->data->emailType = $oEmail->type;
+        $oEmail->data->emailRef  = $oEmail->ref;
+        $oEmail->data->sentFrom  = $oEmail->from;
+        $oEmail->data->sentTo    = $oEmail->to;
+        $oEmail->data->siteUrl   = site_url();
+
+        //  Common URLs
+        $oEmail->data->url = new \stdClass();
+
+        //  AutoLogin
+        $oEmail->data->url->autoLogin = '';
+
+        // //  Check login URLs are allowed
+        $this->oCi->config->load('auth/auth');
+
+        if (!empty($oEmail->to->id) && $this->oCi->config->item('authEnableHashedLogin')) {
+
+            $sIdHash = md5($oEmail->to->id);
+            $sPwHash = md5($oEmail->to->password);
+            $oEmail->data->url->autoLogin = site_url('auth/login/with_hashes/' . $sIdHash . '/' . $sPwHash);
+        }
+
+        //  View Online
+        $iTime = time();
+        $sHash = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
+        $oEmail->data->url->viewOnline = site_url(
+            'email/view_online/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash
+        );
+
+        //  1-Click Unsubscribe
+        $oEmail->data->url->unsubscribe = '';
+        if ($oEmail->type->isUnsubscribable && !empty($oEmail->to->id)) {
+
+            $sUrl = site_url('email/unsubscribe?token=');
+
+            /**
+             * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
+             * 20 times before giving up @TODO: make this less hacky
+             */
+
+            $iCounter  = 0;
+            $iAttempts = 20;
+            $oEncrypt  = Factory::service('Encrypt');
+
+            do {
+
+                $sToken = $oEncrypt->encode(
+                    $oEmail->type->slug . '|' . $oEmail->data->emailRef . '|' . $oEmail->to->id,
+                    APP_PRIVATE_KEY
+                );
+                $iCounter++;
+
+            } while ($iCounter <= $iAttempts && strpos($sToken, '+') !== false);
+
+            //  Link, autologin if possible
+            if (!empty($oEmail->data->url->autoLogin)) {
+
+                $oEmail->data->url->unsubscribe = $oEmail->data->url->autoLogin . '?return_to=' . urlencode($sUrl . $sToken);
+
+            } else {
+
+                $oEmail->data->url->unsubscribe = $sUrl . $sToken;
+            }
+        }
+
+        //  Tracker Image
+        $oEmail->data->url->trackerImg = '';
+        if (ENVIRONMENT == 'PRODUCTION' && !$this->user_model->isAdmin() && !$this->user_model->wasAdmin()) {
+
+            $iTime  = time();
+            $sHash  = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
+            $imgSrc = site_url('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
+
+            $oEmail->data->url->trackerImg = $imgSrc;
+        }
+
+        unset($oEmail->email_vars);
+
+        // --------------------------------------------------------------------------
+
+        $oMustache = Factory::service('Mustache');
+
+        //  Subject
+        $oEmail->subject = $oEmail->subject;
+        $oEmail->subject = $oMustache->render($oEmail->subject, $oEmail->data);
+
+        //  Add the rendered subject to the data array so the body can sue it
+        $oEmail->data->email_subject = $oEmail->subject;
+
+        //  Body
+        $oEmail->body = new \stdClass();
+
+        //  HTML Version
+        $oEmail->body->html = $this->oCi->load->view(
+            $oEmail->template->header->html,
+            array('emailObject' => $oEmail),
+            true
+        );
+        $oEmail->body->html .= $this->oCi->load->view(
+            $oEmail->template->body->html,
+            array('emailObject' => $oEmail),
+            true
+        );
+        $oEmail->body->html .= $this->oCi->load->view(
+            $oEmail->template->footer->html,
+            array('emailObject' => $oEmail),
+            true
+        );
+
+        //  Plain text version
+        $oEmail->body->text = $this->oCi->load->view(
+            $oEmail->template->header->text,
+            array('emailObject' => $oEmail),
+            true
+        );
+        $oEmail->body->text .= $this->oCi->load->view(
+            $oEmail->template->body->text,
+            array('emailObject' => $oEmail),
+            true
+        );
+        $oEmail->body->text .= $this->oCi->load->view(
+            $oEmail->template->footer->text,
+            array('emailObject' => $oEmail),
+            true
+        );
+
+        $oEmail->body->html = $oMustache->render($oEmail->body->html, $oEmail->data);
+        $oEmail->body->text = $oMustache->render($oEmail->body->text, $oEmail->data);
     }
 
     // --------------------------------------------------------------------------

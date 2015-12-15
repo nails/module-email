@@ -26,32 +26,27 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
             unauthorised();
         }
 
-        $token = $this->input->get('token');
-        $token = $this->encrypt->decode($token, APP_PRIVATE_KEY);
+        $sToken = $this->input->get('token');
+        $aToken = $this->encrypt->decode($sToken, APP_PRIVATE_KEY);
 
-        if (!$token) {
-
+        if (!$aToken) {
             show_404();
         }
 
-        $token = explode('|', $token);
+        $aToken = explode('|', $aToken);
 
-        if (count($token) != 3) {
-
+        if (count($aToken) != 3) {
             show_404();
         }
 
-        $user = $this->user_model->getByEmail($token[2]);
-
-        if (!$user || $user->id != activeUser('id ')) {
-
+        $oUser = $this->user_model->getById($aToken[2]);
+        if (!$oUser || $oUser->id != activeUser('id ')) {
             show_404();
         }
 
-        $email = $this->emailer->getByRef($token[1]);
+        $oEmail = $this->emailer->getByRef($aToken[1]);
 
-        if (!$email) {
-
+        if (!$oEmail || empty($oEmail->type->isUnsubscribable)) {
             show_404();
         }
 
@@ -60,16 +55,16 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
         //  All seems above board, action the request
         if ($this->input->get('undo')) {
 
-            if ($this->emailer->userHasUnsubscribed(activeUser('id'), $token[0])) {
+            if ($this->emailer->userHasUnsubscribed(activeUser('id'), $aToken[0])) {
 
-                $this->emailer->subscribeUser(activeUser('id'), $token[0]);
+                $this->emailer->subscribeUser(activeUser('id'), $aToken[0]);
             }
 
         } else {
 
-            if (!$this->emailer->userHasUnsubscribed(activeUser('id'), $token[0])) {
+            if (!$this->emailer->userHasUnsubscribed(activeUser('id'), $aToken[0])) {
 
-                $this->emailer->unsubscribeUser(activeUser('id'), $token[0]);
+                $this->emailer->unsubscribeUser(activeUser('id'), $aToken[0]);
             }
         }
 

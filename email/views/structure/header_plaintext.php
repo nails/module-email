@@ -1,11 +1,8 @@
-<?=strtoupper($email_subject)?>
+{{email_subject}}
 
 ---------------
 
-<?php
+{{#sentTo.first_name}}
+Hi {{sentTo.first_name}},
+{{/sentTo.first_name}}
 
-if (isset($sent_to->first) && $sent_to->first && empty($email_no_greeting)) {
-
-    echo 'Hi ' . $sent_to->first . ',' . "\n\n";
-
-}

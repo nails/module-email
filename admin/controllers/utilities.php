@@ -86,11 +86,13 @@ class Utilities extends BaseAdmin
             //  Execute
             if ($oFormValidation->run()) {
 
-                //  Prepare date
-                $email           = new \stdClass();
-                $email->to_email = $this->input->post('recipient');
-                $email->type     = 'test_email';
-                $email->data     = array();
+                //  Prepare data
+                $oDate = Factory::factory('DateTime');
+                $email               = new \stdClass();
+                $email->to_email     = $this->input->post('recipient');
+                $email->type         = 'test_email';
+                $email->data         = new \stdClass();
+                $email->data->sentAt = $oDate->format('Y-m-d H:i:s');
 
                 //  Send the email
                 if ($this->emailer->send($email)) {
