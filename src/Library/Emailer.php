@@ -367,7 +367,7 @@ class Emailer
      */
     public function resend($mEmailIdRef)
     {
-        if (is_numeric($emailIdRef)) {
+        if (is_numeric($mEmailIdRef)) {
 
             $oEmail = $this->getById($mEmailIdRef);
 
@@ -504,8 +504,20 @@ class Emailer
                 $bNeedsVerified = false;
             }
 
-            $sBodyHtml = $this->parseLinks($sBodyHtml, $oEmail->id, $oEmail->ref, true, $bNeedsVerified);
-            $sBodyText = $this->parseLinks($sBodyText, $oEmail->id, $oEmail->ref, false, $bNeedsVerified);
+            $oEmail->body->html = $this->parseLinks(
+                $oEmail->body->html,
+                $oEmail->id,
+                $oEmail->ref,
+                true,
+                $bNeedsVerified
+            );
+            $oEmail->body->text = $this->parseLinks(
+                $oEmail->body->text,
+                $oEmail->id,
+                $oEmail->ref,
+                false,
+                $bNeedsVerified
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -1286,7 +1298,7 @@ EOT;
 
     /**
      * Format an email object
-     * @param  object $email The raw email object
+     * @param  object $oEmail The raw email object
      * @return void
      */
     protected function formatObject(&$oEmail)
@@ -1452,8 +1464,9 @@ EOT;
         }
 
         //  Tracker Image
+        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         $oEmail->data->url->trackerImg = '';
-        if (ENVIRONMENT == 'PRODUCTION' && !$this->user_model->isAdmin() && !$this->user_model->wasAdmin()) {
+        if (ENVIRONMENT == 'PRODUCTION' && !$oUserModel->isAdmin() && !$oUserModel->wasAdmin()) {
 
             $iTime  = time();
             $sHash  = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
