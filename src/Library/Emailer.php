@@ -678,7 +678,7 @@ class Emailer
      * @param  array   $data    Data to pass to getCountCommonEmail()
      * @return array
      */
-    public function getAll($page = null, $perPage = null, $data = array())
+    public function getAllRawQuery($page = null, $perPage = null, $data = array())
     {
         $this->oDb->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
         $this->oDb->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
@@ -708,24 +708,29 @@ class Emailer
             $this->oDb->limit($perPage, $offset);
         }
 
-        // --------------------------------------------------------------------------
+        return $this->oDb->get($this->sTable . ' ' . $this->sTablePrefix);
+    }
 
-        if (empty($data['RETURN_QUERY_OBJECT'])) {
+    // --------------------------------------------------------------------------
 
-            $emails = $this->oDb->get($this->sTable . ' ' . $this->sTablePrefix)->result();
+    /**
+     * Fetches all emails from the archive and formats them, optionally paginated
+     * @param int    $iPage    The page number of the results, if null then no pagination
+     * @param int    $iPerPage How many items per page of paginated results
+     * @param mixed  $aData    Any data to pass to getCountCommon()
+     * @return array
+     */
+    public function getAll($iPage = null, $iPerPage = null, $aData = array())
+    {
+        $oResults   = $this->getAllRawQuery($iPage, $iPerPage, $aData);
+        $aResults   = $oResults->result();
+        $numResults = count($aResults);
 
-            for ($i = 0; $i < count($emails); $i++) {
-
-                //  Format the object, make it pretty
-                $this->formatObject($emails[$i]);
-            }
-
-            return $emails;
-
-        } else {
-
-            return $this->oDb->get($this->sTable . ' ' . $this->sTablePrefix);
+        for ($i = 0; $i < $numResults; $i++) {
+            $this->formatObject($aResults[$i], $aData);
         }
+
+        return $aResults;
     }
 
     // --------------------------------------------------------------------------
