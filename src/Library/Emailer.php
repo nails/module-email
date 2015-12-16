@@ -676,7 +676,7 @@ class Emailer
      * @param  integer $page    The page of results to retrieve
      * @param  integer $perPage The number of results per page
      * @param  array   $data    Data to pass to getCountCommonEmail()
-     * @return array
+     * @return object
      */
     public function getAllRawQuery($page = null, $perPage = null, $data = array())
     {
