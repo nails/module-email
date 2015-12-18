@@ -83,8 +83,7 @@ class NAILS_Tracker extends NAILS_Email_Controller
 
         //  Check the reference is present
         if (!$ref) {
-
-            show_error(lang('argument_missing', 'EMAIL_REF'));
+            show_404();
         }
 
         // --------------------------------------------------------------------------
