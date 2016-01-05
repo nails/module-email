@@ -134,6 +134,18 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
+     * Returns the available email types in the system, sorted alphabetically by name
+     * @return array
+     */
+    public function getTypes()
+    {
+        array_sort_multi($this->aEmailType, 'name');
+        return $this->aEmailType;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Adds a new email type to the stack
      * @param  stdClass $data An object representing the email type
      * @return boolean
@@ -746,7 +758,6 @@ class Emailer
         if (!empty($data['keywords'])) {
 
             if (empty($data['or_like'])) {
-
                 $data['or_like'] = array();
             }
 
@@ -776,6 +787,18 @@ class Emailer
                     'value'  => $keywordAsId
                 );
             }
+        }
+
+        if (!empty($data['type'])) {
+
+            if (empty($data['where'])) {
+                $data['where'] = array();
+            }
+
+            $data['where'][] = array(
+                'column' => $this->sTablePrefix . '.type',
+                'value'  => $data['type']
+            );
         }
 
         //  Common joins

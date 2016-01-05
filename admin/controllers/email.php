@@ -103,20 +103,65 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $oTypeOptions = array('Choose Type');
+        $aEmailTypes  = $this->emailer->getTypes();
+        foreach ($aEmailTypes as $oType) {
+            $oTypeOptions[$oType->slug] = $oType->name;
+        }
+
+        $cbFilters = array();
+        $ddFilters = array('type' => Helper::searchFilterObject('', 'Type', $oTypeOptions));
+
+        // --------------------------------------------------------------------------
+
         //  Define the $data variable for the queries
         $data = array(
             'sort' => array(
                 array($sortOn, $sortOrder)
             ),
-            'keywords' => $keywords
+            'keywords'  => $keywords,
+            'ddFilters' => $ddFilters
         );
+
+        // --------------------------------------------------------------------------
+
+        /**
+         * Determine if we're restricting to a certain type
+         * @todo find a better, consolidated way of doing this
+         *
+         * Due to the way the search component works, we need to "listen" to the $_GET
+         * array by hand. Each filter above will be indexed in either ddF (DropDownFilter)
+         * or cbF (CheckBoxFilter). For ddF values the value at the index is the
+         * selected option.
+         */
+
+        if (!empty($_GET['ddF']['type'])) {
+
+            $sType = Helper::searchFilterGetValueAtKey(
+                $ddFilters['type'],
+                $_GET['ddF']['type']
+            );
+
+            $data['type'] = $sType;
+        }
+
+        // --------------------------------------------------------------------------
 
         //  Get the items for the page
         $totalRows            = $this->emailer->countAll($data);
         $this->data['emails'] = $this->emailer->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['search'] = Helper::searchObject(
+            true,
+            $sortColumns,
+            $sortOn,
+            $sortOrder,
+            $perPage,
+            $keywords,
+            $cbFilters,
+            $ddFilters
+        );
         $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
