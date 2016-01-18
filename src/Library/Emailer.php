@@ -355,7 +355,11 @@ class Emailer
             $this->oDb->where('id', $input->id);
             $this->oDb->update($this->sTable);
 
-            return $input->ref;
+            $oOut      = new \stdClass();
+            $oOut->id  = $input->id;
+            $oOut->ref = $input->ref;
+
+            return $oOut;
 
         } else {
 
