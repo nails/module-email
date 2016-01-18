@@ -1,13 +1,14 @@
-
-<?php if (isset($email_ref)) { ?>
-<?php $_time = time(); ?>
-
 ---------------
 
+{{#url.viewOnline}}
 Trouble viewing this email? View it online here:
 
-<?=site_url('email/view_online/' . $email_ref . '/' . $_time . '/' . md5($_time . $secret . $email_ref))?>
+{{url.viewOnline}}
+{{/url.viewOnline}}
 
+{{#url.unsubscribe}}
+Rather not receive this type of email? Unsubscribe here:
+{{url.unsubscribe}}
+{{/url.unsubscribe}}
 
-Email Ref: <?=$email_ref?>
-<?php } ?>
+Email Ref: {{emailRef}}
