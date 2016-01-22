@@ -6,7 +6,7 @@
         <style type="text/css">
 
             body,
-            #BodyImposter {
+            #body-imposter {
                 margin: 0;
                 padding: 0;
                 font-size: 13px;
@@ -15,6 +15,13 @@
                 max-width: 600px;
                 margin: auto;
                 color: #333;
+            }
+            #non-production-environment {
+                border: 1px solid #FD9005;
+                background: #FFCD9F;
+                color: #A75D00;
+                padding: 1em;
+                border-radius: 2px;
             }
             .padder {
                 padding: 20px;
@@ -191,8 +198,12 @@
                 font-size: 0.8em;
                 padding: 2px 7px;
             }
-            a.button:hover,
-            a.btn:hover {
+            .button:hover,
+            .btn:hover,
+            button:hover,
+            input[type="submit"]:hover,
+            input[type="reset"]:hover,
+            input[type="button"]:hover {
                 color: #222222;
                 background: #DDDDDD; /* Old browsers */
                 background: #DDDDDD -moz-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(0,0,0,.3) 100%); /* FF3.6+ */
@@ -206,6 +217,7 @@
                 border-left: 1px solid #AAAAAA;
             }
             .button:active,
+            .btn:active,
             button:active,
             input[type="submit"]:active,
             input[type="reset"]:active,
@@ -219,19 +231,8 @@
                 background: #CCCCCC -ms-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* IE10+ */
                 background: #CCCCCC linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* W3C */
             }
-            a.button:active,
-            a.btn:active
-            {
-                border: 1px solid #666666;
-                background: #CCCCCC; /* Old browsers */
-                background: #CCCCCC -moz-linear-gradient(top, rgba(255,255,255,.35) 0%, rgba(10,10,10,.4) 100%); /* FF3.6+ */
-                background: #CCCCCC -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.35)), color-stop(100%,rgba(10,10,10,.4))); /* Chrome,Safari4+ */
-                background: #CCCCCC -webkit-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* Chrome10+,Safari5.1+ */
-                background: #CCCCCC -o-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* Opera11.10+ */
-                background: #CCCCCC -ms-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* IE10+ */
-                background: #CCCCCC linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* W3C */
-            }
             .button.full-width,
+            .btn.btn-block,
             button.full-width,
             input[type="submit"].full-width,
             input[type="reset"].full-width,
@@ -245,8 +246,20 @@
         </style>
     </head>
     <body>
-    <div id="BodyImposter">
+    <div id="body-imposter">
     <div class="padder">
+        <?php
+
+        if (ENVIRONMENT !== 'STAGING') {
+
+            ?>
+            <div id="non-production-environment">
+                This email was sent from a testing environment.
+            </div>
+            <?php
+        }
+
+        ?>
         <h1>
             {{email_subject}}
             <hr />
