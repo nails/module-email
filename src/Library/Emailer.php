@@ -13,6 +13,7 @@
 namespace Nails\Email\Library;
 
 use Nails\Factory;
+use Nails\Environment;
 use Nails\Email\Exception\EmailerException;
 
 class Emailer
@@ -507,7 +508,7 @@ class Emailer
 
         $this->aTrackLinkCache = array();
 
-        if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
+        if (Environment::is('PRODUCTION')) {
 
             if ($oEmail->to->id && !$oEmail->to->email_verified) {
 
@@ -540,7 +541,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  If we're not on a production server, never send out to any live addresses
-        if (strtoupper(ENVIRONMENT) != 'PRODUCTION' || EMAIL_OVERRIDE) {
+        if (Environment::not('PRODUCTION') || EMAIL_OVERRIDE) {
 
             if (EMAIL_OVERRIDE) {
 
@@ -658,7 +659,7 @@ class Emailer
             $sMessage   .= '' . "\n";
             $sMessage   .= print_r($oEmail, true) . "\n";
 
-            if (strtoupper(ENVIRONMENT) == 'PRODUCTION') {
+            if (Environment::is('PRODUCTION')) {
 
                 $this->setError('Email failed to send at SMTP time, developers informed');
                 sendDeveloperMail($sSubject, $sMessage);
@@ -1499,7 +1500,7 @@ EOT;
         //  Tracker Image
         $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         $oEmail->data->url->trackerImg = '';
-        if (ENVIRONMENT == 'PRODUCTION' && !$oUserModel->isAdmin() && !$oUserModel->wasAdmin()) {
+        if (Environment::is('PRODUCTION') && !$oUserModel->isAdmin() && !$oUserModel->wasAdmin()) {
 
             $iTime  = time();
             $sHash  = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
