@@ -116,7 +116,7 @@
             font-size:0.65em;
         }
 
-        #logoContainer
+        #logo-container
         {
             width: 125px;
             margin: auto;
@@ -134,69 +134,67 @@
     <div id="container">
         <?php
 
-            $paths   = array();
+        $paths   = array();
+
+        $paths[] = array(
+            FCPATH . 'assets/img/error_404.png',
+            BASE_URL . 'assets/img/error_404.png'
+        );
+
+        $paths[] = array(
+            FCPATH . 'assets/img/logo.png',
+            BASE_URL . 'assets/img/logo.png'
+        );
+
+        $paths[] = array(
+            FCPATH . 'assets/img/logo.jpg',
+            BASE_URL . 'assets/img/logo.jpg'
+        );
+
+        $paths[] = array(
+            FCPATH . 'assets/img/logo.gif',
+            BASE_URL . 'assets/img/logo.gif'
+        );
+
+        $paths[] = array(
+            FCPATH . 'assets/img/logo/logo.png',
+            BASE_URL . 'assets/img/logo/logo.png'
+        );
+
+        $paths[] = array(
+            FCPATH . 'assets/img/logo/logo.jpg',
+            BASE_URL . 'assets/img/logo/logo.jpg'
+        );
+
+        $paths[] = array(
+            FCPATH . 'assets/img/logo/logo.gif',
+            BASE_URL . 'assets/img/logo/logo.gif'
+        );
+
+        if (NAILS_BRANDING) {
 
             $paths[] = array(
-                FCPATH . 'assets/img/error_404.png',
-                BASE_URL . 'assets/img/error_404.png'
+                NAILS_ASSETS_PATH . 'img/nails/icon/icon@2x.png',
+                NAILS_ASSETS_URL . 'img/nails/icon/icon@2x.png'
             );
+        }
 
-            $paths[] = array(
-                FCPATH . 'assets/img/logo.png',
-                BASE_URL . 'assets/img/logo.png'
-            );
 
-            $paths[] = array(
-                FCPATH . 'assets/img/logo.jpg',
-                BASE_URL . 'assets/img/logo.jpg'
-            );
+        foreach ($paths as $path) {
 
-            $paths[] = array(
-                FCPATH . 'assets/img/logo.gif',
-                BASE_URL . 'assets/img/logo.gif'
-            );
+            if (is_file($path[0])) {
 
-            $paths[] = array(
-                FCPATH . 'assets/img/logo/logo.png',
-                BASE_URL . 'assets/img/logo/logo.png'
-            );
-
-            $paths[] = array(
-                FCPATH . 'assets/img/logo/logo.jpg',
-                BASE_URL . 'assets/img/logo/logo.jpg'
-            );
-
-            $paths[] = array(
-                FCPATH . 'assets/img/logo/logo.gif',
-                BASE_URL . 'assets/img/logo/logo.gif'
-            );
-
-            if (NAILS_BRANDING) {
-
-                $paths[] = array(
-                    NAILS_ASSETS_PATH . 'img/nails/icon/icon@2x.png',
-                    NAILS_ASSETS_URL . 'img/nails/icon/icon@2x.png'
-                );
+                ?>
+                <h1>
+                    <div id="logo-container">
+                        <img src="<?=$path[1]?>" id="logo" />
+                    </div>
+                </h1>
+                <?php
+                break;
             }
+        }
 
-
-            foreach ($paths as $path) {
-
-                if (is_file($path[0])) {
-
-                    ?>
-                    <h1>
-                        <div id="logoContainer">
-                            <img src="<?=$path[1]?>" id="logo" />
-                        </div>
-                    </h1>
-                    <?php
-                    break;
-                }
-            }
-
-        ?>
-        <?php
 
         if ($this->input->get('undo')) {
 
