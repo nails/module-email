@@ -78,7 +78,8 @@ class Settings extends BaseAdmin
 
             if (!empty($settings)) {
 
-                if ($this->app_setting_model->set($settings, 'email')) {
+                $oAppSettingModel = Factory::model('AppSetting');
+                if ($oAppSettingModel->set($settings, 'email')) {
 
                     $this->data['success'] = 'Email settings have been saved.';
 

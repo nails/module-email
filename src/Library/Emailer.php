@@ -41,7 +41,7 @@ class Emailer
     public function __construct($config = array())
     {
         $this->oCi =& get_instance();
-        $this->oDb =& Factory::service('Database');
+        $this->oDb = Factory::service('Database');
 
         // --------------------------------------------------------------------------
 
