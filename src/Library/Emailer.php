@@ -1346,14 +1346,20 @@ EOT;
 
         // --------------------------------------------------------------------------
 
+        //  Some fields can be manipulated by the contents of email_vars
+        $oEmail->data = json_decode($oEmail->email_vars) ?: new \stdClass();
+        unset($oEmail->email_vars);
+
+        // --------------------------------------------------------------------------
+
         /**
          * If a subject is defined in the variables use that, if not check to see if one was
          * defined in the template; if not, fall back to a default subject
          */
 
-        if (!empty($oEmail->email_vars->email_subject)) {
+        if (!empty($oEmail->data->email_subject)) {
 
-            $oEmail->subject = $oEmail->email_vars->email_subject;
+            $oEmail->subject = $oEmail->data->email_subject;
 
         } elseif (!empty($oEmail->type->default_subject)) {
 
@@ -1367,19 +1373,16 @@ EOT;
         // --------------------------------------------------------------------------
 
         //  Template overrides
-        if (!empty($oEmail->email_vars->template_header)) {
-
-            $oEmail->type->template_header = $oEmail->email_vars->template_header;
+        if (!empty($oEmail->data->template_header)) {
+            $oEmail->type->template_header = $oEmail->data->template_header;
         }
 
-        if (!empty($oEmail->email_vars->template_body)) {
-
-            $oEmail->type->template_body = $oEmail->email_vars->template_body;
+        if (!empty($oEmail->data->template_body)) {
+            $oEmail->type->template_body = $oEmail->data->template_body;
         }
 
-        if (!empty($oEmail->email_vars->template_footer)) {
-
-            $oEmail->type->template_footer = $oEmail->email_vars->template_footer;
+        if (!empty($oEmail->data->template_footer)) {
+            $oEmail->type->template_footer = $oEmail->data->template_footer;
         }
 
         // --------------------------------------------------------------------------
@@ -1414,7 +1417,7 @@ EOT;
         //  Who the email is being sent from
         $oEmail->from        = new \stdClass();
         $oEmail->from->name  = !empty($oEmail->data->email_from_name) ? $oEmail->data->email_from_name : $this->from->name;
-        $oEmail->from->email = !empty($oEmail->data->email_from_email) ? $oEmail->data->email_from_name : $this->from->email;
+        $oEmail->from->email = !empty($oEmail->data->email_from_email) ? $oEmail->data->email_from_email : $this->from->email;
 
         //  Template details
         $oEmail->template               = new \stdClass();
@@ -1431,7 +1434,6 @@ EOT;
         // --------------------------------------------------------------------------
 
         //  Add some extra, common variables for the template
-        $oEmail->data            = json_decode($oEmail->email_vars) ?: new \stdClass();
         $oEmail->data->emailType = $oEmail->type;
         $oEmail->data->emailRef  = $oEmail->ref;
         $oEmail->data->sentFrom  = $oEmail->from;
@@ -1508,8 +1510,6 @@ EOT;
 
             $oEmail->data->url->trackerImg = $imgSrc;
         }
-
-        unset($oEmail->email_vars);
 
         // --------------------------------------------------------------------------
 
