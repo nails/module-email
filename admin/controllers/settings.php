@@ -79,7 +79,7 @@ class Settings extends BaseAdmin
             if (!empty($settings)) {
 
                 $oAppSettingModel = Factory::model('AppSetting');
-                if ($oAppSettingModel->set($settings, 'email')) {
+                if ($oAppSettingModel->set($settings, 'nailsapp/module-email')) {
 
                     $this->data['success'] = 'Email settings have been saved.';
 
@@ -97,7 +97,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['settings'] = appSetting(null, 'email', true);
+        $this->data['settings'] = appSetting(null, 'nailsapp/module-email', true);
 
         // --------------------------------------------------------------------------
 

@@ -6,7 +6,7 @@
  * Finalised:   08/12/2015
  *
  * @package     Nails
- * @subpackage  module-admin
+ * @subpackage  module-email
  * @category    Database Migration
  * @author      Nails Dev Team
  * @link

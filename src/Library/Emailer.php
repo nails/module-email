@@ -47,19 +47,8 @@ class Emailer
 
         //  Set email related settings
         $this->from        = new \stdClass();
-        $this->from->name  = appSetting('from_name', 'email');
-        $this->from->email = appSetting('from_email', 'email');
-
-        if (empty($this->from->name)) {
-
-            $this->from->name = APP_NAME;
-        }
-
-        if (empty($this->from->email)) {
-
-            $_url = parse_url(site_url());
-            $this->from->email = 'nobody@' . $_url['host'];
-        }
+        $this->from->name  = $this->getFromName();
+        $this->from->email = $this->getFromEmail();
 
         // --------------------------------------------------------------------------
 
@@ -1583,5 +1572,27 @@ EOT;
     public function getTablePrefix()
     {
         return $this->sTablePrefix;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the defined sending from name, or falls abck to APP_NAME
+     * @return string
+     */
+    public function getFromName()
+    {
+        return appSetting('from_name', 'nailsapp/module-email') ?: APP_NAME;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the defined sending from email, or falls abck to nobody@host
+     * @return string
+     */
+    public function getFromEmail()
+    {
+        return appSetting('from_email', 'nailsapp/module-email') ?: 'nobody@' . $_url['host'];
     }
 }
