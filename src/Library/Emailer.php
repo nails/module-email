@@ -1593,6 +1593,6 @@ EOT;
      */
     public function getFromEmail()
     {
-        return appSetting('from_email', 'nailsapp/module-email') ?: 'nobody@' . $_url['host'];
+        return appSetting('from_email', 'nailsapp/module-email') ?: 'nobody@' . gethostname();
     }
 }
