@@ -43,6 +43,7 @@
         {
             "moduleName": "email",
             "type": "module",
+            "namespace": "Nails\\Email\\",
             "autoload": {
                 "services": [
                     {
