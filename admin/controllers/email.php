@@ -76,9 +76,12 @@ class Email extends BaseAdmin
     public function index()
     {
         if (!userHasPermission('admin:email:email:browse')) {
-
             unauthorised();
         }
+
+        // --------------------------------------------------------------------------
+
+        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
 
         // --------------------------------------------------------------------------
 
@@ -88,9 +91,10 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
+        $prefix    = $oEmailer->getTablePrefix();
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : 'ea.sent';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $prefix . '.sent';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -98,19 +102,25 @@ class Email extends BaseAdmin
 
         //  Define the sortable columns
         $sortColumns = array(
-            'ea.sent'   => 'Sent Date'
+            $prefix . '.sent'   => 'Sent Date'
         );
 
         // --------------------------------------------------------------------------
 
-        $oTypeOptions = array('Choose Type');
-        $aEmailTypes  = $this->emailer->getTypes();
+        $aTypeOptions = array('All email types');
+        $aEmailTypes  = $oEmailer->getTypes();
         foreach ($aEmailTypes as $oType) {
-            $oTypeOptions[$oType->slug] = $oType->name;
+            $aTypeOptions[$oType->slug] = $oType->name;
         }
 
         $cbFilters = array();
-        $ddFilters = array('type' => Helper::searchFilterObject('', 'Type', $oTypeOptions));
+        $ddFilters = array(
+            Helper::searchFilterObject(
+                $prefix . '.type',
+                'Type',
+                $aTypeOptions
+            )
+        );
 
         // --------------------------------------------------------------------------
 
@@ -123,33 +133,12 @@ class Email extends BaseAdmin
             'ddFilters' => $ddFilters
         );
 
-        // --------------------------------------------------------------------------
-
-        /**
-         * Determine if we're restricting to a certain type
-         * @todo find a better, consolidated way of doing this
-         *
-         * Due to the way the search component works, we need to "listen" to the $_GET
-         * array by hand. Each filter above will be indexed in either ddF (DropDownFilter)
-         * or cbF (CheckBoxFilter). For ddF values the value at the index is the
-         * selected option.
-         */
-
-        if (!empty($_GET['ddF']['type'])) {
-
-            $sType = Helper::searchFilterGetValueAtKey(
-                $ddFilters['type'],
-                $_GET['ddF']['type']
-            );
-
-            $data['type'] = $sType;
-        }
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->emailer->countAll($data);
-        $this->data['emails'] = $this->emailer->getAll($page, $perPage, $data);
+        $totalRows            = $oEmailer->countAll($data);
+        $this->data['emails'] = $oEmailer->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search'] = Helper::searchObject(
@@ -178,16 +167,19 @@ class Email extends BaseAdmin
     public function resend()
     {
         if (!userHasPermission('admin:email:email:resend')) {
-
             unauthorised();
         }
+
+        // --------------------------------------------------------------------------
+
+        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
 
         // --------------------------------------------------------------------------
 
         $emailId = $this->uri->segment(5);
         $return  = $this->input->get('return') ? $this->input->get('return') : 'admin/email/index';
 
-        if ($this->emailer->resend($emailId)) {
+        if ($oEmailer->resend($emailId)) {
 
             $status  = 'success';
             $message = 'Message was resent successfully.';
@@ -195,7 +187,7 @@ class Email extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'Message failed to resend. ' . $this->emailer->lastError();
+            $message = 'Message failed to resend. ' . $oEmailer->lastError();
         }
 
         $this->session->Set_flashdata($status, $message);
