@@ -1,5 +1,7 @@
 <?php
 
+use Nails\Factory;
+
 //  Include _email.php; executes common functionality
 require_once '_email.php';
 
@@ -30,23 +32,33 @@ class NAILS_View_Online extends NAILS_Email_Controller
          * hash check in getByRef();
          */
 
-        $ref = $this->uri->segment(3, 'null');
+        $oUri       = Factory::service('Uri');
+        $oInput     = Factory::service('Input');
+        $oOutput    = Factory::service('Output');
+        $oEmailer   = Factory::service('Emailer', 'nailsapp/module-email');
+        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+        $sRef        = $oUri->segment(3, 'null');
 
-        if ($this->user_model->isAdmin()) {
+        if ($oUserModel->isAdmin()) {
 
-            $guid = false;
-            $hash = false;
+            $sGuid = false;
+            $sHash = false;
 
         } else {
 
-            $guid = $this->uri->segment(4, 'null');
-            $hash = $this->uri->segment(5, 'null');
+            $sGuid = $oUri->segment(4, 'null');
+            $sHash = $oUri->segment(5, 'null');
         }
 
         // --------------------------------------------------------------------------
 
         //  Fetch the email
-        $oEmail = $this->emailer->getByRef($ref, $guid, $hash);
+        if (is_numeric($sRef)) {
+            $oEmail = $oEmailer->getById($sRef, $sGuid, $sHash);
+        } else {
+            $oEmail = $oEmailer->getByRef($sRef, $sGuid, $sHash);
+        }
+
         if (!$oEmail || $oEmail == 'BAD_HASH') {
             show_404();
         }
@@ -54,7 +66,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
         // --------------------------------------------------------------------------
 
         //  Load template
-        if ($this->input->get('pt')) {
+        if ($oInput->get('pt')) {
 
             $sOut  = '<html><head><title>' . $oEmail->subject . '</title></head><body><pre>';
             $sOut .= $oEmail->body->text;
@@ -68,7 +80,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
             $sOut = $oEmail->body->html;
         }
 
-            if ($this->user_model->isSuperuser() && $this->input->get('show_vars')) {
+            if ($oUserModel->isSuperuser() && $oInput->get('show_vars')) {
 
 $sVarsObj = print_r($oEmail->data, true);
 $sVars    = <<< EOF
@@ -113,7 +125,7 @@ EOF;
         // --------------------------------------------------------------------------
 
         //  Output
-        $this->output->set_output($sOut);
+        $oOutput->set_output($sOut);
     }
 
     // --------------------------------------------------------------------------
