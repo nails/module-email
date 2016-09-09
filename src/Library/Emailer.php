@@ -1566,7 +1566,7 @@ EOT;
     // --------------------------------------------------------------------------
 
     /**
-     * Returns protected property $tablePrefix
+     * Returns protected property $tableAlias
      * @return string
      */
     public function getTableAlias()
