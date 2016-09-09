@@ -29,7 +29,7 @@ class Emailer
     private $aEmailType;
     private $aTrackLinkCache;
     private $sTable;
-    private $sTablePrefix;
+    private $sTableAlias;
     private $bHasDeveloperMail;
 
     // --------------------------------------------------------------------------
@@ -91,7 +91,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         $this->sTable       = NAILS_DB_PREFIX . 'email_archive';
-        $this->sTablePrefix = 'ea';
+        $this->sTableAlias = 'ea';
 
         // --------------------------------------------------------------------------
 
@@ -715,7 +715,7 @@ class Emailer
             $this->oDb->limit($perPage, $offset);
         }
 
-        return $this->oDb->get($this->sTable . ' ' . $this->sTablePrefix);
+        return $this->oDb->get($this->sTable . ' ' . $this->sTableAlias);
     }
 
     // --------------------------------------------------------------------------
@@ -757,15 +757,15 @@ class Emailer
             }
 
             $data['or_like'][] = array(
-                'column' => $this->sTablePrefix . '.ref',
+                'column' => $this->sTableAlias . '.ref',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->sTablePrefix . '.user_id',
+                'column' => $this->sTableAlias . '.user_id',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->sTablePrefix . '.user_email',
+                'column' => $this->sTableAlias . '.user_email',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
@@ -791,14 +791,14 @@ class Emailer
             }
 
             $data['where'][] = array(
-                'column' => $this->sTablePrefix . '.type',
+                'column' => $this->sTableAlias . '.type',
                 'value'  => $data['type']
             );
         }
 
         //  Common joins
-        $this->oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTablePrefix . '.user_id', 'LEFT');
-        $this->oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTablePrefix . '.user_email', 'LEFT');
+        $this->oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTableAlias . '.user_id', 'LEFT');
+        $this->oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTableAlias . '.user_email', 'LEFT');
 
         $this->getCountCommon($data);
     }
@@ -812,7 +812,7 @@ class Emailer
     public function countAll($data)
     {
         $this->getCountCommonEmail($data);
-        return $this->oDb->count_all_results($this->sTable . ' ' . $this->sTablePrefix);
+        return $this->oDb->count_all_results($this->sTable . ' ' . $this->sTableAlias);
     }
 
     // --------------------------------------------------------------------------
@@ -826,7 +826,7 @@ class Emailer
     {
         $data = array(
             'where' => array(
-                array($this->sTablePrefix . '.id', $id)
+                array($this->sTableAlias . '.id', $id)
             )
         );
         $emails = $this->getAll(null, null, $data);
@@ -868,7 +868,7 @@ class Emailer
 
         $data = array(
             'where' => array(
-                array($this->sTablePrefix . '.ref', $ref)
+                array($this->sTableAlias . '.ref', $ref)
             )
         );
         $emails = $this->getAll(null, null, $data);
@@ -1569,9 +1569,9 @@ EOT;
      * Returns protected property $tablePrefix
      * @return string
      */
-    public function getTablePrefix()
+    public function getTableAlias()
     {
-        return $this->sTablePrefix;
+        return $this->sTableAlias;
     }
 
     // --------------------------------------------------------------------------

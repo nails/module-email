@@ -91,7 +91,7 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
-        $prefix    = $oEmailer->getTablePrefix();
+        $prefix    = $oEmailer->getTableAlias();
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $prefix . '.sent';
