@@ -10,7 +10,9 @@
  * @link
  */
 
-class NAILS_Email_Controller extends NAILS_Controller
+use App\Controller\Base;
+
+class NAILS_Email_Controller extends Base
 {
 	/**
 	 * Constructor
