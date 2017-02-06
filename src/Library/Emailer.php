@@ -80,7 +80,7 @@ class Emailer
             $emailTypeLocations[] = $module->path . $module->moduleName . '/config/email_types.php';
         }
 
-        $emailTypeLocations[] = FCPATH . APPPATH . 'config/email_types.php';
+        $emailTypeLocations[] = APPPATH . 'config/email_types.php';
 
         //  Find definitions
         foreach ($emailTypeLocations as $path) {
