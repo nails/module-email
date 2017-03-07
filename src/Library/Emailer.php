@@ -249,22 +249,16 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  If we're sending to an email address, try and associate it to a registered user
+        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         if ($input->to_email) {
-
-            $_user = getUserObject()->getByEmail($input->to_email);
-
+            $_user = $oUserModel->getByEmail($input->to_email);
             if ($_user) {
-
                 $input->to_id = $_user->id;
             }
-
         } else {
-
             //  Sending to an ID, fetch the user's email
-            $_user = getUserObject()->getById($input->to_id);
-
+            $_user = $oUserModel->getById($input->to_id);
             if (!empty($_user->email)) {
-
                 $input->to_email = $_user->email;
             }
         }
@@ -1489,9 +1483,8 @@ EOT;
         }
 
         //  Tracker Image
-        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         $oEmail->data->url->trackerImg = '';
-        if (Environment::is('PRODUCTION') && !$oUserModel->isAdmin() && !$oUserModel->wasAdmin()) {
+        if (Environment::is('PRODUCTION') && !isAdmin() && !wasAdmin()) {
 
             $iTime  = time();
             $sHash  = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
