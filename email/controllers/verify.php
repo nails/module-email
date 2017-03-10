@@ -57,7 +57,7 @@ class NAILS_Verify extends NAILS_Email_Controller
                     $this->session->set_flashdata('message', lang('email_verify_ok_subtle'));
                     redirect($this->input->get('return_to'));
 
-                } elseif (!$this->user_model->isLoggedIn()) {
+                } elseif (!isLoggedIn()) {
 
                     //  Set success message
                     $this->session->set_flashdata('success', lang('email_verify_ok'));

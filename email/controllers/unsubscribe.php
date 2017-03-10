@@ -21,7 +21,7 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
      */
     public function index()
     {
-        if (!$this->user_model->isLoggedIn()) {
+        if (!isLoggedIn()) {
 
             unauthorised();
         }

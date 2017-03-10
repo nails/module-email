@@ -39,7 +39,7 @@ class NAILS_View_Online extends NAILS_Email_Controller
         $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         $sRef        = $oUri->segment(3, 'null');
 
-        if ($oUserModel->isAdmin()) {
+        if (isAdmin()) {
 
             $sGuid = false;
             $sHash = false;
