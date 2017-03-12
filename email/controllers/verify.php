@@ -13,6 +13,8 @@ require_once '_email.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Verify extends NAILS_Email_Controller
 {
     /**
@@ -31,17 +33,18 @@ class NAILS_Verify extends NAILS_Email_Controller
         // --------------------------------------------------------------------------
 
         //  Fetch the user
-        $u = $this->user_model->getById($id);
+        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+        $u          = $oUserModel->getById($id);
 
         if ($u && $code) {
 
             //  User found, attempt to verify
-            if ($this->user_model->emailVerify($u->id, $code)) {
+            if ($oUserModel->emailVerify($u->id, $code)) {
 
                 //  Reward referrer (if any
                 if (!empty($u->referred_by)) {
 
-                    $this->user_model->rewardReferral($u->id, $u->referred_by);
+                    $oUserModel->rewardReferral($u->id, $u->referred_by);
                 }
 
                 // --------------------------------------------------------------------------
@@ -71,7 +74,7 @@ class NAILS_Verify extends NAILS_Email_Controller
                     } else {
 
                         //  Nope, log in as normal
-                        $this->user_model->setLoginData($u->id);
+                        $oUserModel->setLoginData($u->id);
                         redirect($u->group_homepage);
                     }
 
@@ -85,7 +88,7 @@ class NAILS_Verify extends NAILS_Email_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $this->user_model->lastError());
+        $this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $oUserModel->lastError());
         redirect('/');
     }
 

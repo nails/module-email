@@ -13,6 +13,8 @@ require_once '_email.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Unsubscribe extends NAILS_Email_Controller
 {
     /**
@@ -39,7 +41,8 @@ class NAILS_Unsubscribe extends NAILS_Email_Controller
             show_404();
         }
 
-        $oUser = $this->user_model->getById($aToken[2]);
+        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+        $oUser      = $oUserModel->getById($aToken[2]);
         if (!$oUser || $oUser->id != activeUser('id ')) {
             show_404();
         }
