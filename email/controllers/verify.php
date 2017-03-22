@@ -1,8 +1,5 @@
 <?php
 
-//  Include _email.php; executes common functionality
-require_once '_email.php';
-
 /**
  * This class allows users to verify their email address
  *
@@ -13,131 +10,82 @@ require_once '_email.php';
  * @link
  */
 
+use Nails\Email\Controller\Base;
 use Nails\Factory;
 
-class NAILS_Verify extends NAILS_Email_Controller
+class Verify extends Base
 {
     /**
      * Attempt to validate the user's activation code
-     *
-     * @access  public
-     * @param   none
-     * @return  void
-     **/
+     */
     public function index()
     {
-        //  Define the key variables
-        $id   = $this->uri->segment(3, null);
-        $code = $this->uri->segment(4, null);
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch the user
+        $oUri       = Factory::service('Uri');
+        $oInput     = Factory::service('Input');
+        $oSession   = Factory::service('Session', 'nailsapp/module-auth');
         $oUserModel = Factory::model('User', 'nailsapp/module-auth');
-        $u          = $oUserModel->getById($id);
 
-        if ($u && $code) {
+        $iId      = $oUri->segment(3);
+        $sCode    = $oUri->segment(4);
+        $sStatus  = '';
+        $sMessage = '';
+        $oUser    = $oUserModel->getById($iId);
 
-            //  User found, attempt to verify
-            if ($oUserModel->emailVerify($u->id, $code)) {
+        if ($oUser && !$oUser->email_is_verified && $sCode) {
 
-                //  Reward referrer (if any
-                if (!empty($u->referred_by)) {
+            try {
 
-                    $oUserModel->rewardReferral($u->id, $u->referred_by);
+                if (!$oUserModel->emailVerify($oUser->id, $sCode)) {
+                    throw new \Exception($oUserModel->lastError());
                 }
 
-                // --------------------------------------------------------------------------
-
-                //  Send user on their way
-                if ($this->input->get('return_to')) {
-
-                    /**
-                     * Let the next page handle whether the user is logged in or not etc.
-                     * Ahh, go on set a wee notice that the user's email has been verified
-                     */
-
-                    $this->session->set_flashdata('message', lang('email_verify_ok_subtle'));
-                    redirect($this->input->get('return_to'));
-
-                } elseif (!isLoggedIn()) {
-
-                    //  Set success message
-                    $this->session->set_flashdata('success', lang('email_verify_ok'));
-
-                    //  If a password change is requested, then redirect here
-                    if ($u->temp_pw) {
-
-                        //  Send user on their merry way
-                        redirect('auth/reset_password/' . $u->id . '/' . md5($u->salt));
-
-                    } else {
-
-                        //  Nope, log in as normal
-                        $oUserModel->setLoginData($u->id);
-                        redirect($u->group_homepage);
-                    }
-
-                } else {
-
-                    $this->session->set_flashdata('success', lang('email_verify_ok'));
-                    redirect($u->group_homepage);
+                //  Reward referrer (if any)
+                if (!empty($oUser->referred_by)) {
+                    $oUserModel->rewardReferral($oUser->id, $oUser->referred_by);
                 }
+
+                $sStatus  = 'success';
+                $sMessage = lang('email_verify_ok');
+
+            } catch (\Exception $e) {
+                $sStatus  = 'error';
+                $sMessage = lang('email_verify_fail_error') . ' ' . $e->getMessage();
             }
         }
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata('error', lang('email_verify_fail_error') . ' ' . $oUserModel->lastError());
-        redirect('/');
-    }
+        if ($oInput->get('return_to')) {
+            $sRedirect = $oInput->get('return_to');
+        } elseif (!isLoggedIn() && $oUser) {
+            if ($oUser->temp_pw) {
+                $sRedirect = 'auth/reset_password/' . $oUser->id . '/' . md5($oUser->salt);
+            } else {
+                $oUserModel->setLoginData($oUser->id);
+                $sRedirect = $oUser->group_homepage;
+            }
+        } elseif ($oUser) {
+            $sRedirect = $oUser->group_homepage;
+        } else {
+            $sRedirect = '/';
+        }
 
+        if (!empty($sStatus)) {
+            $oSession->set_flashdata(
+                $sStatus,
+                $sMessage
+            );
+        }
+        redirect($sRedirect);
+    }
 
     // --------------------------------------------------------------------------
 
-
     /**
      *  Map the class so that index() does all the work
-     *
-     * @access  public
-     * @param   none
-     * @return  void
-     **/
+     */
     public function _remap()
     {
         $this->index();
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' EMAIL MODULE
- *
- * The following block of code makes it simple to extend one of the core email
- * controllers. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION')) {
-
-    class Verify extends NAILS_Verify
-    {
     }
 }

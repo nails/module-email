@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This class provides some common Email controller functionality in admin
+ * This class provides some common email controller functionality
  *
  * @package     Nails
  * @subpackage  module-email
@@ -12,13 +12,14 @@
 
 namespace Nails\Email\Controller;
 
-use Nails\Admin\Controller\Base;
-
-class BaseAdmin extends Base
+class Base extends \App\Controller\Base
 {
+    /**
+     * Base constructor.
+     */
     public function __construct()
     {
         parent::__construct();
-        $this->asset->load('admin.css', 'nailsapp/module-email');
+        $this->lang->load( 'email' );
     }
 }
