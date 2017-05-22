@@ -190,7 +190,8 @@ class Email extends BaseAdmin
             $message = 'Message failed to resend. ' . $oEmailer->lastError();
         }
 
-        $this->session->Set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->Set_flashdata($status, $message);
         redirect($return);
     }
 }
