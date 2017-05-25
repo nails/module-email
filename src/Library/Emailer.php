@@ -12,20 +12,21 @@
 
 namespace Nails\Email\Library;
 
-use Nails\Factory;
-use Nails\Environment;
+use Nails\Common\Traits\ErrorHandling;
+use Nails\Common\Traits\GetCountCommon;
 use Nails\Email\Exception\EmailerException;
+use Nails\Environment;
+use Nails\Factory;
 
 class Emailer
 {
-    use \Nails\Common\Traits\ErrorHandling;
-    use \Nails\Common\Traits\GetCountCommon;
+    use ErrorHandling;
+    use GetCountCommon;
 
     // --------------------------------------------------------------------------
 
-    public $from;
+    public  $from;
     private $oCi;
-    private $oDb;
     private $aEmailType;
     private $aTrackLinkCache;
     private $sTable;
@@ -36,12 +37,12 @@ class Emailer
 
     /**
      * Construct the library
+     *
      * @param array $config An optional config array
      */
-    public function __construct($config = array())
+    public function __construct($config = [])
     {
         $this->oCi =& get_instance();
-        $this->oDb = Factory::service('Database');
 
         // --------------------------------------------------------------------------
 
@@ -64,19 +65,18 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Set defaults
-        $this->aEmailType      = array();
-        $this->aTrackLinkCache = array();
+        $this->aEmailType      = [];
+        $this->aTrackLinkCache = [];
 
         // --------------------------------------------------------------------------
 
         //  Define where we should look for email types
-        $emailTypeLocations   = array();
+        $emailTypeLocations   = [];
         $emailTypeLocations[] = NAILS_COMMON_PATH . 'config/email_types.php';
 
         $modules = _NAILS_GET_MODULES();
 
         foreach ($modules as $module) {
-
             $emailTypeLocations[] = $module->path . $module->moduleName . '/config/email_types.php';
         }
 
@@ -84,13 +84,12 @@ class Emailer
 
         //  Find definitions
         foreach ($emailTypeLocations as $path) {
-
             $this->loadTypes($path);
         }
 
         // --------------------------------------------------------------------------
 
-        $this->sTable       = NAILS_DB_PREFIX . 'email_archive';
+        $this->sTable      = NAILS_DB_PREFIX . 'email_archive';
         $this->sTableAlias = 'ea';
 
         // --------------------------------------------------------------------------
@@ -102,19 +101,17 @@ class Emailer
 
     /**
      * Loads email types located in a config file at $path
+     *
      * @param  string $path The path to load
+     *
      * @return void
      */
     protected function loadTypes($path)
     {
         if (file_exists($path)) {
-
             include $path;
-
             if (!empty($config['email_types'])) {
-
                 foreach ($config['email_types'] as $type) {
-
                     $this->addType($type);
                 }
             }
@@ -138,7 +135,9 @@ class Emailer
 
     /**
      * Adds a new email type to the stack
-     * @param  stdClass $data An object representing the email type
+     *
+     * @param  \stdClass $data An object representing the email type
+     *
      * @return boolean
      */
     protected function addType($data)
@@ -152,7 +151,7 @@ class Emailer
         $temp->slug             = $data->slug;
         $temp->name             = $data->name;
         $temp->description      = $data->description;
-        $temp->isUnsubscribable  = property_exists($data, 'isUnsubscribable') ? (bool) $data->isUnsubscribable : true;
+        $temp->isUnsubscribable = property_exists($data, 'isUnsubscribable') ? (bool) $data->isUnsubscribable : true;
         $temp->template_header  = empty($data->template_header) ? 'email/structure/header' : $data->template_header;
         $temp->template_body    = $data->template_body;
         $temp->template_footer  = empty($data->template_footer) ? 'email/structure/footer' : $data->template_footer;
@@ -167,15 +166,17 @@ class Emailer
 
     /**
      * Send an email
+     *
      * @param  object  $input    The email object
      * @param  boolean $graceful Whether to gracefully fail or not
-     * @return void
+     *
+     * @throws EmailerException
+     * @return boolean|\stdClass
      */
     public function send($input, $graceful = false)
     {
         //  We got something to work with?
         if (empty($input)) {
-
             $this->setError('EMAILER: No input');
             return false;
         }
@@ -184,7 +185,6 @@ class Emailer
 
         //  Ensure $input is an object
         if (!is_object($input)) {
-
             $input = (object) $input;
         }
 
@@ -192,40 +192,27 @@ class Emailer
 
         //  Check we have at least a user_id/email and an email type
         if ((empty($input->to_id) && empty($input->to_email)) || empty($input->type)) {
-
             $this->setError('EMAILER: Missing user ID, user email or email type');
             return false;
         }
 
-        // --------------------------------------------------------------------------
-
         //  If no email has been given make sure it's null
         if (empty($input->to_email)) {
-
             $input->to_email = null;
         }
 
-        // --------------------------------------------------------------------------
-
         //  If no id has been given make sure it's null
         if (empty($input->to_id)) {
-
             $input->to_id = null;
         }
 
-        // --------------------------------------------------------------------------
-
         //  If no internal_ref has been given make sure it's null
         if (empty($input->internal_ref)) {
-
             $input->internal_ref = null;
         }
 
-        // --------------------------------------------------------------------------
-
         //  Make sure that at least empty data is available
         if (empty($input->data)) {
-
             $input->data = new \stdClass();
         }
 
@@ -235,11 +222,8 @@ class Emailer
         if (empty($this->aEmailType[$input->type])) {
 
             if (!$graceful) {
-
                 throw new EmailerException('"' . $input->type . '" is not a valid email type', 1);
-
             } else {
-
                 $this->setError('EMAILER: Invalid Email Type "' . $input->type . '"');
             }
 
@@ -249,22 +233,16 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  If we're sending to an email address, try and associate it to a registered user
+        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         if ($input->to_email) {
-
-            $_user = getUserObject()->getByEmail($input->to_email);
-
+            $_user = $oUserModel->getByEmail($input->to_email);
             if ($_user) {
-
                 $input->to_id = $_user->id;
             }
-
         } else {
-
             //  Sending to an ID, fetch the user's email
-            $_user = getUserObject()->getById($input->to_id);
-
+            $_user = $oUserModel->getById($input->to_id);
             if (!empty($_user->email)) {
-
                 $input->to_email = $_user->email;
             }
         }
@@ -273,9 +251,7 @@ class Emailer
 
         //  Check to see if the user has opted out of receiving these emails
         if ($input->to_id) {
-
             if ($this->userHasUnsubscribed($input->to_id, $input->type)) {
-
                 //  User doesn't want to receive these notifications; abort.
                 return true;
             }
@@ -298,13 +274,9 @@ class Emailer
          */
 
         if (empty($input->to_email)) {
-
             if (!$graceful) {
-
                 throw new EmailerException('No email address to send to', 1);
-
             } else {
-
                 $this->setError('EMAILER: No email address to send to.');
                 false;
             }
@@ -313,27 +285,22 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Add to the archive table
-        $this->oDb->set('ref', $input->ref);
-        $this->oDb->set('user_id', $input->to_id);
-        $this->oDb->set('user_email', $input->to_email);
-        $this->oDb->set('type', $input->type);
-        $this->oDb->set('email_vars', json_encode($input->data));
-        $this->oDb->set('internal_ref', $input->internal_ref);
+        $oDb = Factory::service('Database');
+        $oDb->set('ref', $input->ref);
+        $oDb->set('user_id', $input->to_id);
+        $oDb->set('user_email', $input->to_email);
+        $oDb->set('type', $input->type);
+        $oDb->set('email_vars', json_encode($input->data));
+        $oDb->set('internal_ref', $input->internal_ref);
 
-        $this->oDb->insert($this->sTable);
+        $oDb->insert($this->sTable);
 
-        if ($this->oDb->affected_rows()) {
-
-            $input->id = $this->oDb->insert_id();
-
+        if ($oDb->affected_rows()) {
+            $input->id = $oDb->insert_id();
         } else {
-
             if (!$graceful) {
-
                 throw new EmailerException('Failed to create the email record', 1);
-
             } else {
-
                 $this->setError('EMAILER: Failed to create the email record.');
                 false;
             }
@@ -342,9 +309,9 @@ class Emailer
         if ($this->doSend($input->id, $graceful)) {
 
             //  Mail sent, mark the time
-            $this->oDb->set('sent', 'NOW()', false);
-            $this->oDb->where('id', $input->id);
-            $this->oDb->update($this->sTable);
+            $oDb->set('sent', 'NOW()', false);
+            $oDb->where('id', $input->id);
+            $oDb->update($this->sTable);
 
             $oOut      = new \stdClass();
             $oOut->id  = $input->id;
@@ -354,11 +321,10 @@ class Emailer
 
         } else {
 
-
             //  Mail failed, update the status
-            $this->oDb->set('status', 'FAILED');
-            $this->oDb->where('id', $input->id);
-            $this->oDb->update($this->sTable);
+            $oDb->set('status', 'FAILED');
+            $oDb->where('id', $input->id);
+            $oDb->update($this->sTable);
 
             return false;
         }
@@ -369,7 +335,9 @@ class Emailer
     /**
      * Sends an email again
      * @todo This should probably create a new row
-     * @param  mixed   $mEmailIdRef The email's ID or ref
+     *
+     * @param  mixed $mEmailIdRef The email's ID or ref
+     *
      * @return boolean
      */
     public function resend($mEmailIdRef)
@@ -396,73 +364,83 @@ class Emailer
 
     /**
      * Determines whether the user has unsubscribed from this email type
+     *
      * @param  int    $user_id The user ID to check for
      * @param  string $type    The type of email to check against
+     *
      * @return boolean
      */
     public function userHasUnsubscribed($user_id, $type)
     {
-        $this->oDb->where('user_id', $user_id);
-        $this->oDb->where('type', $type);
+        $oDb = Factory::service('Database');
+        $oDb->where('user_id', $user_id);
+        $oDb->where('type', $type);
 
-        return (bool) $this->oDb->count_all_results(NAILS_DB_PREFIX . 'user_email_blocker');
+        return (bool) $oDb->count_all_results(NAILS_DB_PREFIX . 'user_email_blocker');
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Unsubscribes a user from a particular email type
+     *
      * @param  int    $user_id The user ID to unsubscribe
      * @param  string $type    The type of email to unsubscribe from
+     *
      * @return boolean
      */
     public function unsubscribeUser($user_id, $type)
     {
         if ($this->userHasUnsubscribed($user_id, $type)) {
-
             return true;
         }
 
         // --------------------------------------------------------------------------
 
-        $this->oDb->set('user_id', $user_id);
-        $this->oDb->set('type', $type);
-        $this->oDb->set('created', 'NOW()', false);
-        $this->oDb->insert(NAILS_DB_PREFIX . 'user_email_blocker');
+        $oDb = Factory::service('Database');
+        $oDb->set('user_id', $user_id);
+        $oDb->set('type', $type);
+        $oDb->set('created', 'NOW()', false);
+        $oDb->insert(NAILS_DB_PREFIX . 'user_email_blocker');
 
-        return (bool) $this->oDb->affected_rows();
+        return (bool) $oDb->affected_rows();
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Subscribe a user to a particular email type
+     *
      * @param  int    $user_id The user ID to subscribe
      * @param  string $type    The type of email to subscribe to
+     *
      * @return boolean
      */
     public function subscribeUser($user_id, $type)
     {
         if (!$this->userHasUnsubscribed($user_id, $type)) {
-
             return true;
         }
 
         // --------------------------------------------------------------------------
 
-        $this->oDb->where('user_id', $user_id);
-        $this->oDb->where('type', $type);
-        $this->oDb->delete(NAILS_DB_PREFIX . 'user_email_blocker');
+        $oDb = Factory::service('Database');
+        $oDb->where('user_id', $user_id);
+        $oDb->where('type', $type);
+        $oDb->delete(NAILS_DB_PREFIX . 'user_email_blocker');
 
-        return (bool) $this->oDb->affected_rows();
+        return (bool) $oDb->affected_rows();
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Sends a templated email immediately
-     * @param  int     $emailId The ID of the email to send, or the email object itself
-     * @param  boolean $graceful Whether or not to faiul gracefully
+     *
+     * @param  int|bool $emailId  The ID of the email to send, or the email object itself
+     * @param  boolean  $graceful Whether or not to fail gracefully
+     *
+     * @throws EmailerException
      * @return boolean
      */
     protected function doSend($emailId = false, $graceful = false)
@@ -471,19 +449,14 @@ class Emailer
         if (is_numeric($emailId)) {
 
             $oEmail = $this->getById($emailId);
-
             if (!$oEmail) {
-
                 $this->setError('EMAILER: Invalid email ID');
                 return false;
             }
 
         } elseif (is_object($emailId)) {
-
             $oEmail = $emailId;
-
         } else {
-
             $this->setError('EMAILER: Invalid email ID');
             return false;
         }
@@ -495,19 +468,18 @@ class Emailer
          * First clear out any previous link caches (production only)
          */
 
-        $this->aTrackLinkCache = array();
+        $this->aTrackLinkCache = [];
 
         if (Environment::is('PRODUCTION')) {
 
             if ($oEmail->to->id && !$oEmail->to->email_verified) {
 
-                $bNeedsVerified = array(
+                $bNeedsVerified = [
                     'id'   => $oEmail->to->id,
-                    'code' => $oEmail->to->email_verified_code
-                );
+                    'code' => $oEmail->to->email_verified_code,
+                ];
 
             } else {
-
                 $bNeedsVerified = false;
             }
 
@@ -531,21 +503,14 @@ class Emailer
 
         //  If we're not on a production server, never send out to any live addresses
         if (Environment::not('PRODUCTION') || EMAIL_OVERRIDE) {
-
             if (EMAIL_OVERRIDE) {
-
                 $oEmail->to->email = EMAIL_OVERRIDE;
-
             } elseif (APP_DEVELOPER_EMAIL) {
-
                 $oEmail->to->email = APP_DEVELOPER_EMAIL;
-
             } else {
-
                 //  Not sure where this is going; fall over *waaaa*
                 throw new EmailerException(
-                    'EMAILER: Non production environment and neither EMAIL_OVERRIDE nor APP_DEVELOPER_EMAIL is set',
-                    1
+                    'EMAILER: Non production environment and neither EMAIL_OVERRIDE nor APP_DEVELOPER_EMAIL is set'
                 );
             }
         }
@@ -575,25 +540,18 @@ class Emailer
                  */
 
                 if (is_array($file)) {
-
                     $_file     = isset($file[0]) ? $file[0] : null;
                     $_filename = isset($file[1]) ? $file[1] : null;
-
                 } else {
-
                     $_file     = $file;
                     $_filename = null;
                 }
 
                 //  In case custom names support is added
                 if (!$this->addAttachment($_file, $_filename)) {
-
                     if (!$graceful) {
-
                         throw new EmailerException('Failed to add attachment "' . $_file . '"', 1);
-
                     } else {
-
                         $this->setError('EMAILER: Insert Failed.');
                         return false;
                     }
@@ -613,9 +571,10 @@ class Emailer
             error_reporting($_previous_error_reporting);
 
             //  Update the counter on the email address
-            $this->oDb->set('count_sends', 'count_sends+1', false);
-            $this->oDb->where('email', $oEmail->to->email);
-            $this->oDb->update(NAILS_DB_PREFIX . 'user_email');
+            $oDb = Factory::service('Database');
+            $oDb->set('count_sends', 'count_sends+1', false);
+            $oDb->where('email', $oEmail->to->email);
+            $oDb->update(NAILS_DB_PREFIX . 'user_email');
 
             return true;
 
@@ -627,26 +586,26 @@ class Emailer
             // --------------------------------------------------------------------------
 
             //  Failed to send, notify developers
-            $sSubject   = 'Email #' . $oEmail->id . ' failed to send at SMTP time';
-            $sMessage   = 'Hi,' . "\n";
-            $sMessage   .= '' . "\n";
-            $sMessage   .= 'Email #' . $oEmail->id . ' failed to send at SMTP time' . "\n";
-            $sMessage   .= '' . "\n";
-            $sMessage   .= 'Please take a look as a matter of urgency; debugging data is below:' . "\n";
-            $sMessage   .= '' . "\n";
-            $sMessage   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $sMessage   .= '' . "\n";
+            $sSubject = 'Email #' . $oEmail->id . ' failed to send at SMTP time';
+            $sMessage = 'Hi,' . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= 'Email #' . $oEmail->id . ' failed to send at SMTP time' . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= 'Please take a look as a matter of urgency; debugging data is below:' . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
+            $sMessage .= '' . "\n";
 
-            $sMessage   .= $this->oCi->email->print_debugger();
+            $sMessage .= $this->oCi->email->print_debugger();
 
-            $sMessage   .= '' . "\n";
-            $sMessage   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $sMessage   .= '' . "\n";
-            $sMessage   .= 'Additional debugging information:' . "\n";
-            $sMessage   .= '' . "\n";
-            $sMessage   .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $sMessage   .= '' . "\n";
-            $sMessage   .= print_r($oEmail, true) . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= 'Additional debugging information:' . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
+            $sMessage .= '' . "\n";
+            $sMessage .= print_r($oEmail, true) . "\n";
 
             if (Environment::is('PRODUCTION')) {
 
@@ -661,16 +620,11 @@ class Emailer
                  */
 
                 if (!$graceful) {
-
                     throw new EmailerException('Email failed to send at SMTP time.', 1);
-
                 } else {
-
                     $this->setError('Email failed to send at SMTP time.');
                 }
             }
-
-            // --------------------------------------------------------------------------
 
             return false;
         }
@@ -680,17 +634,20 @@ class Emailer
 
     /**
      * Returns emails from the archive
+     *
      * @param  integer $page    The page of results to retrieve
      * @param  integer $perPage The number of results per page
      * @param  array   $data    Data to pass to getCountCommonEmail()
+     *
      * @return object
      */
-    public function getAllRawQuery($page = null, $perPage = null, $data = array())
+    public function getAllRawQuery($page = null, $perPage = null, $data = [])
     {
-        $this->oDb->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
-        $this->oDb->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
-        $this->oDb->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
-        $this->oDb->select('u.profile_img,u.gender,u.username');
+        $oDb = Factory::service('Database');
+        $oDb->select('ea.id,ea.ref,ea.type,ea.email_vars,ea.user_email sent_to,ue.is_verified email_verified');
+        $oDb->select('ue.code email_verified_code,ea.sent,ea.status,ea.read_count,ea.link_click_count');
+        $oDb->select('u.first_name,u.last_name,u.id user_id,u.password user_password,u.group_id user_group');
+        $oDb->select('u.profile_img,u.gender,u.username');
 
         //  Apply common items; pass $data
         $this->getCountCommonEmail($data);
@@ -712,22 +669,24 @@ class Emailer
             $perPage = is_null($perPage) ? 50 : (int) $perPage;
             $offset  = $page * $perPage;
 
-            $this->oDb->limit($perPage, $offset);
+            $oDb->limit($perPage, $offset);
         }
 
-        return $this->oDb->get($this->sTable . ' ' . $this->sTableAlias);
+        return $oDb->get($this->sTable . ' ' . $this->sTableAlias);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Fetches all emails from the archive and formats them, optionally paginated
-     * @param int    $iPage    The page number of the results, if null then no pagination
-     * @param int    $iPerPage How many items per page of paginated results
-     * @param mixed  $aData    Any data to pass to getCountCommon()
+     *
+     * @param int   $iPage    The page number of the results, if null then no pagination
+     * @param int   $iPerPage How many items per page of paginated results
+     * @param mixed $aData    Any data to pass to getCountCommon()
+     *
      * @return array
      */
-    public function getAll($iPage = null, $iPerPage = null, $aData = array())
+    public function getAll($iPage = null, $iPerPage = null, $aData = [])
     {
         $oResults   = $this->getAllRawQuery($iPage, $iPerPage, $aData);
         $aResults   = $oResults->result();
@@ -745,60 +704,63 @@ class Emailer
     /**
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
-     * @param array  $data Data passed from the calling method
+     *
+     * @param array $data Data passed from the calling method
+     *
      * @return void
      **/
-    protected function getCountCommonEmail($data = array())
+    protected function getCountCommonEmail($data = [])
     {
         if (!empty($data['keywords'])) {
 
             if (empty($data['or_like'])) {
-                $data['or_like'] = array();
+                $data['or_like'] = [];
             }
 
-            $data['or_like'][] = array(
+            $data['or_like'][] = [
                 'column' => $this->sTableAlias . '.ref',
-                'value'  => $data['keywords']
-            );
-            $data['or_like'][] = array(
+                'value'  => $data['keywords'],
+            ];
+            $data['or_like'][] = [
                 'column' => $this->sTableAlias . '.user_id',
-                'value'  => $data['keywords']
-            );
-            $data['or_like'][] = array(
+                'value'  => $data['keywords'],
+            ];
+            $data['or_like'][] = [
                 'column' => $this->sTableAlias . '.user_email',
-                'value'  => $data['keywords']
-            );
-            $data['or_like'][] = array(
+                'value'  => $data['keywords'],
+            ];
+            $data['or_like'][] = [
                 'column' => 'ue.email',
-                'value'  => $data['keywords']
-            );
+                'value'  => $data['keywords'],
+            ];
 
             $keywordAsId = (int) preg_replace('/[^0-9]/', '', $data['keywords']);
 
             if ($keywordAsId) {
 
-                $data['or_like'][] = array(
+                $data['or_like'][] = [
                     'column' => 'u.id',
-                    'value'  => $keywordAsId
-                );
+                    'value'  => $keywordAsId,
+                ];
             }
         }
 
         if (!empty($data['type'])) {
 
             if (empty($data['where'])) {
-                $data['where'] = array();
+                $data['where'] = [];
             }
 
-            $data['where'][] = array(
+            $data['where'][] = [
                 'column' => $this->sTableAlias . '.type',
-                'value'  => $data['type']
-            );
+                'value'  => $data['type'],
+            ];
         }
 
         //  Common joins
-        $this->oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTableAlias . '.user_id', 'LEFT');
-        $this->oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTableAlias . '.user_email', 'LEFT');
+        $oDb = Factory::service('Database');
+        $oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTableAlias . '.user_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTableAlias . '.user_email', 'LEFT');
 
         $this->getCountCommon($data);
     }
@@ -812,27 +774,29 @@ class Emailer
     public function countAll($data)
     {
         $this->getCountCommonEmail($data);
-        return $this->oDb->count_all_results($this->sTable . ' ' . $this->sTableAlias);
+        $oDb = Factory::service('Database');
+        return $oDb->count_all_results($this->sTable . ' ' . $this->sTableAlias);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Get en email from the archive by its ID
+     *
      * @param  int $id The email's ID
+     *
      * @return mixed   stdClass on success, false on failure
      */
     public function getById($id)
     {
-        $data = array(
-            'where' => array(
-                array($this->sTableAlias . '.id', $id)
-            )
-        );
+        $data   = [
+            'where' => [
+                [$this->sTableAlias . '.id', $id],
+            ],
+        ];
         $emails = $this->getAll(null, null, $data);
 
         if (!$emails) {
-
             return false;
         }
 
@@ -845,9 +809,11 @@ class Emailer
 
     /**
      * Get an email from the archive by its reference
-     * @param  string  $ref  The email's reference
-     * @param  string  $guid The email's GUID
-     * @param  string  $hash The email's hash
+     *
+     * @param  string         $ref  The email's reference
+     * @param  string|boolean $guid The email's GUID
+     * @param  string|boolean $hash The email's hash
+     *
      * @return mixed         stdClass on success, false on failure
      */
     public function getByRef($ref, $guid = false, $hash = false)
@@ -859,22 +825,20 @@ class Emailer
             $_check = md5($guid . APP_PRIVATE_KEY . $ref);
 
             if ($_check !== $hash) {
-
                 return 'BAD_HASH';
             }
         }
 
         // --------------------------------------------------------------------------
 
-        $data = array(
-            'where' => array(
-                array($this->sTableAlias . '.ref', $ref)
-            )
-        );
+        $data   = [
+            'where' => [
+                [$this->sTableAlias . '.ref', $ref],
+            ],
+        ];
         $emails = $this->getAll(null, null, $data);
 
         if (!$emails) {
-
             return false;
         }
 
@@ -885,35 +849,34 @@ class Emailer
 
     /**
      * Adds an attachment to an email
+     *
      * @param string $file     The file's path
      * @param string $filename The filename ot give the attachment
+     *
+     * @return boolean
      */
     protected function addAttachment($file, $filename = null)
     {
         if (!file_exists($file)) {
-
             return false;
         }
 
-        if (!$this->oCi->email->attach($file, 'attachment', $filename)) {
-
-            return false;
-
-        } else {
-
-            return true;
-        }
+        return $this->oCi->email->attach($file, 'attachment', $filename);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Generates a unique reference for an email, optionally exclude strings
-     * @param  array  $exclude Strings to exclude from the reference
+     *
+     * @param  array $exclude Strings to exclude from the reference
+     *
      * @return string
      */
-    protected function generateReference($exclude = array())
+    protected function generateReference($exclude = [])
     {
+        $oDb = Factory::service('Database');
+
         do {
 
             $refOk = false;
@@ -922,18 +885,15 @@ class Emailer
 
                 $ref = strtoupper(random_string('alnum', 10));
                 if (array_search($ref, $exclude) === false) {
-
                     $refOk = true;
                 }
 
             } while (!$refOk);
 
-            $this->oDb->where('ref', $ref);
-            $result = $this->oDb->get($this->sTable);
+            $oDb->where('ref', $ref);
+            $result = $oDb->get($this->sTable);
 
         } while ($result->num_rows());
-
-        // --------------------------------------------------------------------------
 
         return $ref;
     }
@@ -942,10 +902,12 @@ class Emailer
 
     /**
      * Renders the debugger
-     * @param  string $input         The email input object
-     * @param  string $body          The email's body
-     * @param  string $plaintext     The email's plaintext body
-     * @param  array  $recent_errors An array of any recent errors
+     *
+     * @param  \stdClass $input         The email input object
+     * @param  string    $body          The email's body
+     * @param  string    $plaintext     The email's plaintext body
+     * @param  array     $recent_errors An array of any recent errors
+     *
      * @return void
      */
     protected function printDebugger($input, $body, $plaintext, $recent_errors)
@@ -956,7 +918,6 @@ class Emailer
          */
 
         if (isset($input->data['ci'])) {
-
             $input->data['ci'] = '**REFERENCE TO CODEIGNITER INSTANCE**';
         }
 
@@ -1009,9 +970,9 @@ class Emailer
         echo '-----------------------------------------------------------------' . "\n";
 
         $_rendered_body = str_replace('"', '\\"', $body);
-        $_rendered_body = str_replace(array("\r\n", "\r"), "\n", $_rendered_body);
-        $_lines = explode("\n", $_rendered_body);
-        $_new_lines = array();
+        $_rendered_body = str_replace(["\r\n", "\r"], "\n", $_rendered_body);
+        $_lines         = explode("\n", $_rendered_body);
+        $_new_lines     = [];
 
         foreach ($_lines as $line) {
 
@@ -1025,7 +986,7 @@ class Emailer
         $entitiyBody   = htmlentities($body);
         $plaintextBody = nl2br($plaintext);
 
-$str = <<<EOT
+        $str = <<<EOT
 <iframe width="100%" height="900" src="" id="renderframe"></iframe>
 <script type="text/javascript">
 var emailBody = "$renderedBody";
@@ -1046,9 +1007,11 @@ EOT;
 
     /**
      * Increments an email's open count and adds a tracking note
+     *
      * @param  string $ref  The email's reference
      * @param  string $guid The email's GUID
      * @param  string $hash The email's hash
+     *
      * @return boolean
      */
     public function trackOpen($ref, $guid, $hash)
@@ -1058,19 +1021,19 @@ EOT;
         if ($oEmail && $oEmail != 'BAD_HASH') {
 
             //  Update the read count and a add a track data point
-            $this->oDb->set('read_count', 'read_count+1', false);
-            $this->oDb->where('id', $oEmail->id);
-            $this->oDb->update($this->sTable);
+            $oDb = Factory::service('Database');
+            $oDb->set('read_count', 'read_count+1', false);
+            $oDb->where('id', $oEmail->id);
+            $oDb->update($this->sTable);
 
-            $this->oDb->set('created', 'NOW()', false);
-            $this->oDb->set('email_id', $oEmail->id);
+            $oDb->set('created', 'NOW()', false);
+            $oDb->set('email_id', $oEmail->id);
 
             if (activeUser('id')) {
-
-                $this->oDb->set('user_id', activeUser('id'));
+                $oDb->set('user_id', activeUser('id'));
             }
 
-            $this->oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
+            $oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
 
             return true;
         }
@@ -1082,10 +1045,12 @@ EOT;
 
     /**
      * Increments a link's open count and adds a tracking note
+     *
      * @param  string $ref     The email's reference
      * @param  string $guid    The email's GUID
      * @param  string $hash    The email's hash
      * @param  string $link_id The link's ID
+     *
      * @return string
      */
     public function trackLink($ref, $guid, $hash, $link_id)
@@ -1095,29 +1060,29 @@ EOT;
         if ($oEmail && $oEmail != 'BAD_HASH') {
 
             //  Get the link which was clicked
-            $this->oDb->select('url');
-            $this->oDb->where('email_id', $oEmail->id);
-            $this->oDb->where('id', $link_id);
-            $_link = $this->oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
+            $oDb = Factory::service('Database');
+            $oDb->select('url');
+            $oDb->where('email_id', $oEmail->id);
+            $oDb->where('id', $link_id);
+            $_link = $oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
 
             if ($_link) {
 
                 //  Update the read count and a add a track data point
-                $this->oDb->set('link_click_count', 'link_click_count+1', false);
-                $this->oDb->where('id', $oEmail->id);
-                $this->oDb->update($this->sTable);
+                $oDb->set('link_click_count', 'link_click_count+1', false);
+                $oDb->where('id', $oEmail->id);
+                $oDb->update($this->sTable);
 
                 //  Add a link trackback
-                $this->oDb->set('created', 'NOW()', false);
-                $this->oDb->set('email_id', $oEmail->id);
-                $this->oDb->set('link_id', $link_id);
+                $oDb->set('created', 'NOW()', false);
+                $oDb->set('email_id', $oEmail->id);
+                $oDb->set('link_id', $link_id);
 
                 if (activeUser('id')) {
-
-                    $this->oDb->set('user_id', activeUser('id'));
+                    $oDb->set('user_id', activeUser('id'));
                 }
 
-                $this->oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
+                $oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
 
                 //  Return the URL to go to
                 return $_link->url;
@@ -1135,11 +1100,14 @@ EOT;
 
     /**
      * Parses a string for <a> links and replaces them with a trackable URL
-     * @param  string  $body           The string to parse
+     *
+     * @param  string  $body          The string to parse
      * @param  int     $emailId       The email's ID
      * @param  string  $emailRef      The email's reference
      * @param  boolean $isHtml        Whether or not this is the HTML version of the email
-     * @param  boolean $needsVerified Whether or not this user needs verified (i.e route tracking links through the verifier)
+     * @param  boolean $needsVerified Whether or not this user needs verified (i.e route tracking links through the
+     *                                verifier)
+     *
      * @return string
      */
     protected function parseLinks($body, $emailId, $emailRef, $isHtml = true, $needsVerified = false)
@@ -1152,14 +1120,11 @@ EOT;
         // --------------------------------------------------------------------------
 
         if ($isHtml) {
-
-            $pattern    = '/<a .*?(href="(https?.*?)").*?>(.*?)<\/a>/';
-            $body       = preg_replace_callback($pattern, array($this, 'processLinkHtml'), $body);
-
+            $pattern = '/<a .*?(href="(https?.*?)").*?>(.*?)<\/a>/';
+            $body    = preg_replace_callback($pattern, [$this, 'processLinkHtml'], $body);
         } else {
-
-            $pattern    = '/(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/';
-            $body       = preg_replace_callback($pattern, array($this, 'processLinkUrl'), $body);
+            $pattern = '/(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/';
+            $body    = preg_replace_callback($pattern, [$this, 'processLinkUrl'], $body);
         }
 
         // --------------------------------------------------------------------------
@@ -1178,7 +1143,9 @@ EOT;
 
     /**
      * Processes a link found by _parse_links()
+     *
      * @param  array $link The link elements
+     *
      * @return string
      */
     protected function processLinkHtml($link)
@@ -1196,7 +1163,6 @@ EOT;
          */
 
         if ($_html && $_url) {
-
             $_html = $this->processLinkGenerate($_html, $_url, $_title, true);
         }
 
@@ -1207,7 +1173,9 @@ EOT;
 
     /**
      * Process the URL of a link found by processLinkHtml()
+     *
      * @param  array $url The URL elements
+     *
      * @return string
      */
     protected function processLinkUrl($url)
@@ -1218,9 +1186,8 @@ EOT;
 
         // --------------------------------------------------------------------------
 
-        //  Only process if theres a URL to process
+        //  Only process if there's a URL to process
         if ($_html && $_url) {
-
             $_html = $this->processLinkGenerate($_html, $_url, $_title, false);
         }
 
@@ -1231,10 +1198,12 @@ EOT;
 
     /**
      * Generate a tracking URL
+     *
      * @param  string  $html    The Link HTML
      * @param  string  $url     The Link's URL
      * @param  string  $title   The Link's Title
      * @param  boolean $is_html Whether this is HTML or not
+     *
      * @return string
      */
     protected function processLinkGenerate($html, $url, $title, $is_html)
@@ -1276,30 +1245,29 @@ EOT;
                     $_url = site_url('email/verify/' . $_user_id . '/' . $_code . '?return_to=' . $_return);
 
                 } else {
-
                     $_url = $url;
                 }
 
             } else {
-
                 $_url = $url;
             }
 
-            $this->oDb->set('email_id', $this->_generate_tracking_email_id);
-            $this->oDb->set('url', $_url);
-            $this->oDb->set('title', $title);
-            $this->oDb->set('created', 'NOW()', false);
-            $this->oDb->set('is_html', $is_html);
-            $this->oDb->insert(NAILS_DB_PREFIX . 'email_archive_link');
+            $oDb = Factory::service('Database');
+            $oDb->set('email_id', $this->_generate_tracking_email_id);
+            $oDb->set('url', $_url);
+            $oDb->set('title', $title);
+            $oDb->set('created', 'NOW()', false);
+            $oDb->set('is_html', $is_html);
+            $oDb->insert(NAILS_DB_PREFIX . 'email_archive_link');
 
-            $_id = $this->oDb->insert_id();
+            $_id = $oDb->insert_id();
 
             if ($_id) {
 
-                $_time        = time();
-                $trackingUrl  = 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
-                $trackingUrl .= md5($_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref). '/' . $_id;
-                $trackingUrl  = site_url($trackingUrl);
+                $_time       = time();
+                $trackingUrl = 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
+                $trackingUrl .= md5($_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref) . '/' . $_id;
+                $trackingUrl = site_url($trackingUrl);
 
                 $this->aTrackLinkCache[md5($url)] = $trackingUrl;
 
@@ -1321,7 +1289,9 @@ EOT;
 
     /**
      * Format an email object
+     *
      * @param  object $oEmail The raw email object
+     *
      * @return void
      */
     protected function formatObject(&$oEmail)
@@ -1329,7 +1299,6 @@ EOT;
         $oEmail->type = !empty($this->aEmailType[$oEmail->type]) ? $this->aEmailType[$oEmail->type] : null;
 
         if (empty($oEmail->type)) {
-
             showFatalError('Invalid Email Type', 'Email with ID #' . $oEmail->id . ' has an invalid email type.');
         }
 
@@ -1347,15 +1316,10 @@ EOT;
          */
 
         if (!empty($oEmail->data->email_subject)) {
-
             $oEmail->subject = $oEmail->data->email_subject;
-
         } elseif (!empty($oEmail->type->default_subject)) {
-
             $oEmail->subject = $oEmail->type->default_subject;
-
         } else {
-
             $oEmail->subject = 'An E-mail from ' . APP_NAME;
         }
 
@@ -1439,15 +1403,14 @@ EOT;
         $this->oCi->config->load('auth/auth');
 
         if (!empty($oEmail->to->id) && $this->oCi->config->item('authEnableHashedLogin')) {
-
-            $sIdHash = md5($oEmail->to->id);
-            $sPwHash = md5($oEmail->to->password);
+            $sIdHash                      = md5($oEmail->to->id);
+            $sPwHash                      = md5($oEmail->to->password);
             $oEmail->data->url->autoLogin = site_url('auth/login/with_hashes/' . $sIdHash . '/' . $sPwHash);
         }
 
         //  View Online
-        $iTime = time();
-        $sHash = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
+        $iTime                         = time();
+        $sHash                         = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
         $oEmail->data->url->viewOnline = site_url(
             'email/view_online/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash
         );
@@ -1479,19 +1442,15 @@ EOT;
 
             //  Link, autologin if possible
             if (!empty($oEmail->data->url->autoLogin)) {
-
                 $oEmail->data->url->unsubscribe = $oEmail->data->url->autoLogin . '?return_to=' . urlencode($sUrl . $sToken);
-
             } else {
-
                 $oEmail->data->url->unsubscribe = $sUrl . $sToken;
             }
         }
 
         //  Tracker Image
-        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
         $oEmail->data->url->trackerImg = '';
-        if (Environment::is('PRODUCTION') && !$oUserModel->isAdmin() && !$oUserModel->wasAdmin()) {
+        if (Environment::is('PRODUCTION') && !isAdmin() && !wasAdmin()) {
 
             $iTime  = time();
             $sHash  = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
@@ -1505,7 +1464,6 @@ EOT;
         $oMustache = Factory::service('Mustache');
 
         //  Subject
-        $oEmail->subject = $oEmail->subject;
         $oEmail->subject = $oMustache->render($oEmail->subject, $oEmail->data);
 
         //  Add the rendered subject to the data array so the body can sue it
@@ -1515,36 +1473,37 @@ EOT;
         $oEmail->body = new \stdClass();
 
         //  HTML Version
-        $oEmail->body->html = $this->oCi->load->view(
+        $oView              = Factory::service('View');
+        $oEmail->body->html = $oView->load(
             $oEmail->template->header->html,
-            array('emailObject' => $oEmail),
+            ['emailObject' => $oEmail],
             true
         );
-        $oEmail->body->html .= $this->oCi->load->view(
+        $oEmail->body->html .= $oView->load(
             $oEmail->template->body->html,
-            array('emailObject' => $oEmail),
+            ['emailObject' => $oEmail],
             true
         );
-        $oEmail->body->html .= $this->oCi->load->view(
+        $oEmail->body->html .= $oView->load(
             $oEmail->template->footer->html,
-            array('emailObject' => $oEmail),
+            ['emailObject' => $oEmail],
             true
         );
 
         //  Plain text version
-        $oEmail->body->text = $this->oCi->load->view(
+        $oEmail->body->text = $oView->load(
             $oEmail->template->header->text,
-            array('emailObject' => $oEmail),
+            ['emailObject' => $oEmail],
             true
         );
-        $oEmail->body->text .= $this->oCi->load->view(
+        $oEmail->body->text .= $oView->load(
             $oEmail->template->body->text,
-            array('emailObject' => $oEmail),
+            ['emailObject' => $oEmail],
             true
         );
-        $oEmail->body->text .= $this->oCi->load->view(
+        $oEmail->body->text .= $oView->load(
             $oEmail->template->footer->text,
-            array('emailObject' => $oEmail),
+            ['emailObject' => $oEmail],
             true
         );
 
@@ -1577,7 +1536,7 @@ EOT;
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the defined sending from name, or falls abck to APP_NAME
+     * Returns the defined sending from name, or falls back to APP_NAME
      * @return string
      */
     public function getFromName()
@@ -1588,7 +1547,7 @@ EOT;
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the defined sending from email, or falls abck to nobody@host
+     * Returns the defined sending from email, or falls back to nobody@host
      * @return string
      */
     public function getFromEmail()

@@ -102,7 +102,8 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Assets
-        $this->asset->load('nails.admin.settings.min.js', 'NAILS');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('nails.admin.settings.min.js', 'NAILS');
 
         // --------------------------------------------------------------------------
 

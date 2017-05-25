@@ -10,15 +10,17 @@
  * @link
  */
 
-namespace Nails\email\Controller;
+namespace Nails\Email\Controller;
 
 use Nails\Admin\Controller\Base;
+use Nails\Factory;
 
 class BaseAdmin extends Base
 {
     public function __construct()
     {
         parent::__construct();
-        $this->asset->load('admin.css', 'nailsapp/module-email');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.css', 'nailsapp/module-email');
     }
 }
