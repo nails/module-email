@@ -45,11 +45,7 @@
             "type": "module",
             "namespace": "Nails\\Email\\",
             "autoload": {
-                "services": [
-                    {
-                        "emailer": "Emailer"
-                    }
-                ]
+                "services": ["Emailer"]
             }
         }
     }
