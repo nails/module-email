@@ -250,7 +250,8 @@
     <div class="padder">
         <?php
 
-        if (nailsEnvironment('not', 'PRODUCTION')) {
+
+        if (\Nails\Environment::not('PRODUCTION')) {
 
             ?>
             <div id="non-production-environment">
