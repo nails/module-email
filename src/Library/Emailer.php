@@ -561,6 +561,17 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
+        //  Add any CC/BCC's
+        if (!empty($oEmail->data->cc)) {
+            $this->oCi->email->cc($oEmail->data->cc);
+        }
+
+        if (!empty($oEmail->data->bcc)) {
+            $this->oCi->email->bcc($oEmail->data->bcc);
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Send! Turn off error reporting, if it fails we should handle it gracefully
         $_previous_error_reporting = error_reporting();
         error_reporting(0);
