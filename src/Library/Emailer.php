@@ -177,7 +177,11 @@ class Emailer
     {
         //  We got something to work with?
         if (empty($input)) {
-            $this->setError('EMAILER: No input');
+            if (!$graceful) {
+                throw new EmailerException('No Input');
+            } else {
+                $this->setError('EMAILER: No input');
+            }
             return false;
         }
 
@@ -192,7 +196,11 @@ class Emailer
 
         //  Check we have at least a user_id/email and an email type
         if ((empty($input->to_id) && empty($input->to_email)) || empty($input->type)) {
-            $this->setError('EMAILER: Missing user ID, user email or email type');
+            if (!$graceful) {
+                throw new EmailerException('Missing user ID, user email or email type');
+            } else {
+                $this->setError('EMAILER: Missing user ID, user email or email type');
+            }
             return false;
         }
 
