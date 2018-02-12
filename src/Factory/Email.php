@@ -178,11 +178,11 @@ class Email
      *
      * @return $this
      */
-    public function setData($mKey, $mValue = null)
+    public function data($mKey, $mValue = null)
     {
         if (is_array($mKey)) {
             foreach ($mKey as $sKey => $mValue) {
-                $this->setData($sKey, $mValue);
+                $this->data($sKey, $mValue);
             }
         } else {
             $this->aData[$mKey] = $mValue;
