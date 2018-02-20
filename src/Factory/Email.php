@@ -77,7 +77,7 @@ class Email
      */
     public function __construct()
     {
-        Factory::helper('Email');
+        Factory::helper('email');
     }
 
     // --------------------------------------------------------------------------
