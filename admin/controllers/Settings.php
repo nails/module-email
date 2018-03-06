@@ -12,15 +12,15 @@
 
 namespace Nails\Admin\Email;
 
-use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
+use Nails\Factory;
 
 class Settings extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups
-     * @return stdClass
+     * @return \stdClass
      */
     public static function announce()
     {
@@ -68,7 +68,7 @@ class Settings extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $settings = array();
+            $settings = [];
 
             if (userHasPermission('admin:email:settings:update:sender')) {
 
