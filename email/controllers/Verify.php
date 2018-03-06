@@ -59,7 +59,7 @@ class Verify extends Base
             $sRedirect = $oInput->get('return_to');
         } elseif (!isLoggedIn() && $oUser) {
             if ($oUser->temp_pw) {
-                $sRedirect = 'auth/reset_password/' . $oUser->id . '/' . md5($oUser->salt);
+                $sRedirect = 'auth/password/reset/' . $oUser->id . '/' . md5($oUser->salt);
             } else {
                 $oUserModel->setLoginData($oUser->id);
                 $sRedirect = $oUser->group_homepage;

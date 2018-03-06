@@ -77,7 +77,7 @@ class Utilities extends BaseAdmin
             $oFormValidation = Factory::service('FormValidation');
 
             //  Define rules
-            $oFormValidation->set_rules('recipient', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('recipient', '', 'required|valid_email');
 
             //  Set Messages
             $oFormValidation->set_message('required', lang('fv_required'));
@@ -89,7 +89,7 @@ class Utilities extends BaseAdmin
                 //  Prepare data
                 $oDate = Factory::factory('DateTime');
                 $email               = new \stdClass();
-                $email->to_email     = $this->input->post('recipient');
+                $email->to_email     = $this->input->post('recipient', true);
                 $email->type         = 'test_email';
                 $email->data         = new \stdClass();
                 $email->data->sentAt = $oDate->format('Y-m-d H:i:s');
