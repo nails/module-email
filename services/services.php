@@ -3,10 +3,10 @@
 return [
     'services'  => [
         'Emailer' => function () {
-            if (class_exists('\App\Email\Library\Emailer')) {
-                return new \App\Email\Library\Emailer();
+            if (class_exists('\App\Email\Service\Emailer')) {
+                return new \App\Email\Service\Emailer();
             } else {
-                return new \Nails\Email\Library\Emailer();
+                return new \Nails\Email\Service\Emailer();
             }
         },
     ],

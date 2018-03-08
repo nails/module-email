@@ -1,6 +1,6 @@
 <?php
 
-namespace Nails\Email\Library;
+namespace Nails\Email\Service;
 
 class EmailerTest extends \PHPUnit_Framework_TestCase
 {

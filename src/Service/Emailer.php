@@ -10,7 +10,7 @@
  * @link
  */
 
-namespace Nails\Email\Library;
+namespace Nails\Email\Service;
 
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
@@ -25,13 +25,17 @@ class Emailer
 
     // --------------------------------------------------------------------------
 
-    public  $from;
-    private $oCi;
-    private $aEmailType;
-    private $aTrackLinkCache;
-    private $sTable;
-    private $sTableAlias;
-    private $bHasDeveloperMail;
+    public $from;
+
+    protected $oCi;
+    protected $aEmailType;
+    protected $aTrackLinkCache;
+    protected $sTable;
+    protected $sTableAlias;
+    protected $bHasDeveloperMail;
+    protected $_generate_tracking_email_id;
+    protected $_generate_tracking_email_ref;
+    protected $_generate_tracking_needs_verified;
 
     // --------------------------------------------------------------------------
 
@@ -143,7 +147,6 @@ class Emailer
     protected function addType($data)
     {
         if (empty($data->slug) || empty($data->template_body)) {
-
             return false;
         }
 
@@ -712,7 +715,7 @@ class Emailer
         $numResults = count($aResults);
 
         for ($i = 0; $i < $numResults; $i++) {
-            $this->formatObject($aResults[$i], $aData);
+            $this->formatObject($aResults[$i]);
         }
 
         return $aResults;
@@ -788,7 +791,10 @@ class Emailer
 
     /**
      * Count the number of records in the archive
-     * @return int
+     *
+     * @param array $data Data passed from the calling method
+     *
+     * @return mixed
      */
     public function countAll($data)
     {
@@ -1002,7 +1008,7 @@ class Emailer
         }
 
         $renderedBody  = implode($_new_lines);
-        $entitiyBody   = htmlentities($body);
+        $entityBody    = htmlentities($body);
         $plaintextBody = nl2br($plaintext);
 
         $str = <<<EOT
@@ -1014,7 +1020,7 @@ document.getElementById('renderframe').src = "data:text/html;charset=utf-8," + e
 
 <strong>HTML:</strong>
 -----------------------------------------------------------------
-$entitiyBody
+$entityBody
 
 <strong>Plain Text:</strong>
 -----------------------------------------------------------------
