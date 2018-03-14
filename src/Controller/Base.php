@@ -12,7 +12,24 @@
 
 namespace Nails\Email\Controller;
 
-class Base extends \App\Controller\Base
+// --------------------------------------------------------------------------
+
+/**
+ * Allow the app to add functionality, if needed
+ */
+if (class_exists('\App\Email\Controller\Base')) {
+    abstract class BaseMiddle extends \App\Email\Controller\Base
+    {
+    }
+} else {
+    abstract class BaseMiddle extends \Nails\Common\Controller\Base
+    {
+    }
+}
+
+// --------------------------------------------------------------------------
+
+abstract class Base extends BaseMiddle
 {
     /**
      * Base constructor.
