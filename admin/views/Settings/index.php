@@ -51,7 +51,7 @@
                     echo form_field([
                         'key'         => 'from_email',
                         'label'       => 'From Email',
-                        'default'     => getFromArray('from_email', $aSettings, $sDeault),
+                        'default'     => getFromArray('from_email', $aSettings, $sDefault),
                         'placeholder' => 'The email address of the sender which recipients should see.',
                         'info'        => '<strong>Note:</strong> If sending using SMTP to send email ensure this email is a valid account on the mail server. If it\'s not valid, some services will junk the email.',
                     ]);
