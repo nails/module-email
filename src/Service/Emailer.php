@@ -15,6 +15,7 @@ namespace Nails\Email\Service;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Email\Exception\EmailerException;
+use Nails\Email\Exception\HostNotKnownException;
 use Nails\Environment;
 use Nails\Factory;
 
@@ -36,6 +37,7 @@ class Emailer
     protected $_generate_tracking_email_id;
     protected $_generate_tracking_email_ref;
     protected $_generate_tracking_needs_verified;
+    protected $sDomain;
 
     // --------------------------------------------------------------------------
 
@@ -99,6 +101,23 @@ class Emailer
         // --------------------------------------------------------------------------
 
         $this->bHasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
+
+        // --------------------------------------------------------------------------
+
+        if (site_url() === '/') {
+            $oInput    = Factory::service('Input');
+            $sHost     = $oInput->server('SERVER_NAME');
+            $sProtocol = $oInput->server('REQUEST_SCHEME') ?: 'http';
+            if (empty($sHost)) {
+                throw new HostNotKnownException('Failed to resolve host; email links will be incomplete.');
+            } else {
+                $this->sDomain = $sProtocol . '://' . $sHost . '/';
+            }
+        } else {
+            $this->sDomain = site_url();
+        }
+
+        $this->sDomain = rtrim($this->sDomain, '/');
     }
 
     // --------------------------------------------------------------------------
@@ -476,39 +495,36 @@ class Emailer
 
         /**
          * Parse the body for <a> links and replace with a tracking URL
-         * First clear out any previous link caches (production only)
+         * First clear out any previous link caches
          */
 
         $this->aTrackLinkCache = [];
 
-        if (Environment::is('PRODUCTION')) {
+        if ($oEmail->to->id && !$oEmail->to->email_verified) {
 
-            if ($oEmail->to->id && !$oEmail->to->email_verified) {
+            $bNeedsVerified = [
+                'id'   => $oEmail->to->id,
+                'code' => $oEmail->to->email_verified_code,
+            ];
 
-                $bNeedsVerified = [
-                    'id'   => $oEmail->to->id,
-                    'code' => $oEmail->to->email_verified_code,
-                ];
-
-            } else {
-                $bNeedsVerified = false;
-            }
-
-            $oEmail->body->html = $this->parseLinks(
-                $oEmail->body->html,
-                $oEmail->id,
-                $oEmail->ref,
-                true,
-                $bNeedsVerified
-            );
-            $oEmail->body->text = $this->parseLinks(
-                $oEmail->body->text,
-                $oEmail->id,
-                $oEmail->ref,
-                false,
-                $bNeedsVerified
-            );
+        } else {
+            $bNeedsVerified = false;
         }
+
+        $oEmail->body->html = $this->parseLinks(
+            $oEmail->body->html,
+            $oEmail->id,
+            $oEmail->ref,
+            true,
+            $bNeedsVerified
+        );
+        $oEmail->body->text = $this->parseLinks(
+            $oEmail->body->text,
+            $oEmail->id,
+            $oEmail->ref,
+            false,
+            $bNeedsVerified
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1145,10 +1161,10 @@ EOT;
         // --------------------------------------------------------------------------
 
         if ($isHtml) {
-            $pattern = '/<a .*?(href="(https?.*?)").*?>(.*?)<\/a>/';
+            $pattern = '/<a .*?(href="(https?.*?|\/.*?)").*?>(.*?)<\/a>/';
             $body    = preg_replace_callback($pattern, [$this, 'processLinkHtml'], $body);
         } else {
-            $pattern = '/(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/';
+            $pattern = '/(https?:\/\/|\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/';
             $body    = preg_replace_callback($pattern, [$this, 'processLinkUrl'], $body);
         }
 
@@ -1233,6 +1249,11 @@ EOT;
      */
     protected function processLinkGenerate($html, $url, $title, $is_html)
     {
+        //  Ensure URLs have a domain
+        if (preg_match('/^\//', $url)) {
+            $url = $this->sDomain . $url;
+        }
+
         /**
          * Generate a tracking URL for this link
          * Firstly, check this URL hasn't been processed already (for this email)
@@ -1473,15 +1494,13 @@ EOT;
             }
         }
 
-        //  Tracker Image
+        //  Tracker Image (not on view online links though)
         $oEmail->data->url->trackerImg = '';
-        if (Environment::is('PRODUCTION') && !isAdmin() && !wasAdmin()) {
-
-            $iTime  = time();
-            $sHash  = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
-            $imgSrc = site_url('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
-
-            $oEmail->data->url->trackerImg = $imgSrc;
+        if (!preg_match('/^email\/view_online\/[a-zA-Z0-9]+\/[0-9]+\/[a-zA-Z0-9]+$/', uri_string())) {
+            $iTime   = time();
+            $sHash   = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
+            $sImgSrc = site_url('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
+            $oEmail->data->url->trackerImg = $sImgSrc;
         }
 
         // --------------------------------------------------------------------------
