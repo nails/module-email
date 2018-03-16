@@ -31,12 +31,4 @@ if (class_exists('\App\Email\Controller\Base')) {
 
 abstract class Base extends BaseMiddle
 {
-    /**
-     * Base constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->lang->load( 'email' );
-    }
 }

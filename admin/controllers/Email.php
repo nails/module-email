@@ -54,17 +54,6 @@ class Email extends BaseAdmin
     // --------------------------------------------------------------------------
 
     /**
-     * Construct the controller
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->lang->load('admin_email');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
      * Browse the email archive
      * @return void
      */
