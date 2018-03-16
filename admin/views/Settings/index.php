@@ -39,7 +39,7 @@
                     echo form_field([
                         'key'         => 'from_name',
                         'label'       => 'From Name',
-                        'default'     => getFromArray('from_name', $aSettings, APPNAME),
+                        'default'     => getFromArray('from_name', $aSettings, APP_NAME),
                         'placeholder' => 'The name of the sender which recipients should see.',
                     ]);
 
