@@ -12,9 +12,9 @@
 
 namespace Nails\Admin\Email;
 
-use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Email\Controller\BaseAdmin;
+use Nails\Factory;
 
 class Email extends BaseAdmin
 {
@@ -29,8 +29,7 @@ class Email extends BaseAdmin
         $oNavGroup->setIcon('fa-paper-plane-o');
 
         if (userHasPermission('admin:email:email:browse')) {
-
-            $oNavGroup->addAction('Message Archive');
+            $oNavGroup->addAction('Email Archive');
         }
 
         return $oNavGroup;
@@ -44,12 +43,12 @@ class Email extends BaseAdmin
      */
     public static function permissions()
     {
-        $permissions = parent::permissions();
+        $aPermissions = parent::permissions();
 
-        $permissions['browse'] = 'Can browse email archive';
-        $permissions['resend'] = 'Can resend email';
+        $aPermissions['browse'] = 'Can browse email archive';
+        $aPermissions['resend'] = 'Can resend email';
 
-        return $permissions;
+        return $aPermissions;
     }
 
     // --------------------------------------------------------------------------
@@ -91,67 +90,66 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
-        $prefix    = $oEmailer->getTableAlias();
-        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
-        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $prefix . '.sent';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
-        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+        $sPrefix    = $oEmailer->getTableAlias();
+        $iPage      = $this->input->get('page') ? $this->input->get('page') : 0;
+        $iPerPage   = $this->input->get('perPage') ? $this->input->get('perPage') : 50;
+        $sSortOn    = $this->input->get('sortOn') ? $this->input->get('sortOn') : $sPrefix . '.sent';
+        $sSortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sKeywords  = $this->input->get('keywords') ? $this->input->get('keywords') : '';
 
         // --------------------------------------------------------------------------
 
         //  Define the sortable columns
-        $sortColumns = array(
-            $prefix . '.sent'   => 'Sent Date'
-        );
+        $aSortColumns = [
+            $sPrefix . '.sent' => 'Sent Date',
+        ];
 
         // --------------------------------------------------------------------------
 
-        $aTypeOptions = array('All email types');
+        $aTypeOptions = ['All email types'];
         $aEmailTypes  = $oEmailer->getTypes();
         foreach ($aEmailTypes as $oType) {
             $aTypeOptions[$oType->slug] = $oType->name;
         }
 
-        $cbFilters = array();
-        $ddFilters = array(
+        $aCbFilters = [];
+        $aDdFilters = [
             Helper::searchFilterObject(
-                $prefix . '.type',
+                $sPrefix . '.type',
                 'Type',
                 $aTypeOptions
-            )
-        );
+            ),
+        ];
 
         // --------------------------------------------------------------------------
 
         //  Define the $data variable for the queries
-        $data = array(
-            'sort' => array(
-                array($sortOn, $sortOrder)
-            ),
-            'keywords'  => $keywords,
-            'ddFilters' => $ddFilters
-        );
-
+        $aData = [
+            'sort'      => [
+                [$sSortOn, $sSortOrder],
+            ],
+            'keywords'  => $sKeywords,
+            'ddFilters' => $aDdFilters,
+        ];
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $oEmailer->countAll($data);
-        $this->data['emails'] = $oEmailer->getAll($page, $perPage, $data);
+        $totalRows            = $oEmailer->countAll($aData);
+        $this->data['aEmails'] = $oEmailer->getAll($iPage, $iPerPage, $aData);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search'] = Helper::searchObject(
+        $this->data['oSearch']     = Helper::searchObject(
             true,
-            $sortColumns,
-            $sortOn,
-            $sortOrder,
-            $perPage,
-            $keywords,
-            $cbFilters,
-            $ddFilters
+            $aSortColumns,
+            $sSortOn,
+            $sSortOrder,
+            $iPerPage,
+            $sKeywords,
+            $aCbFilters,
+            $aDdFilters
         );
-        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['oPagination'] = Helper::paginationObject($iPage, $iPerPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
@@ -176,22 +174,19 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $emailId = $this->uri->segment(5);
-        $return  = $this->input->get('return') ? $this->input->get('return') : 'admin/email/index';
+        $iEmailId = $this->uri->segment(5);
+        $sReturn  = $this->input->get('return') ? $this->input->get('return') : 'admin/email/index';
 
-        if ($oEmailer->resend($emailId)) {
-
-            $status  = 'success';
-            $message = 'Message was resent successfully.';
-
+        if ($oEmailer->resend($iEmailId)) {
+            $sStatus  = 'success';
+            $sMessage = 'Message was resent successfully.';
         } else {
-
-            $status  = 'error';
-            $message = 'Message failed to resend. ' . $oEmailer->lastError();
+            $sStatus  = 'error';
+            $sMessage = 'Message failed to resend. ' . $oEmailer->lastError();
         }
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->Set_flashdata($status, $message);
-        redirect($return);
+        $oSession->Set_flashdata($sStatus, $sMessage);
+        redirect($sReturn);
     }
 }

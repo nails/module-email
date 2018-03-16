@@ -2,8 +2,8 @@
     <p>
         <?=lang('email_index_intro')?>
     </p>
-    <?=adminHelper('loadSearch', $search)?>
-    <?=adminHelper('loadPagination', $pagination)?>
+    <?=adminHelper('loadSearch', $oSearch)?>
+    <?=adminHelper('loadPagination', $oPagination)?>
     <div class="table-responsive">
         <table>
             <thead>
@@ -22,121 +22,110 @@
             <tbody>
                 <?php
 
-                if ($emails) {
+                if ($aEmails) {
 
-                    foreach ($emails as $email) {
+                    foreach ($aEmails as $oEmail) {
 
                         ?>
                         <tr>
-                            <td class="id"><?=number_format($email->id)?></td>
-                            <td class="ref"><?=$email->ref?></td>
-                            <?=adminHelper('loadUserCell', $email->to)?>
-                            <?=adminHelper('loadDatetimeCell', $email->sent)?>
+                            <td class="id"><?=number_format($oEmail->id)?></td>
+                            <td class="ref"><?=$oEmail->ref?></td>
+                            <?=adminHelper('loadUserCell', $oEmail->to)?>
+                            <?=adminHelper('loadDatetimeCell', $oEmail->sent)?>
                             <td class="type">
-                                <?=$email->type->name?>
-                                <small><?=lang('email_index_subject', $email->subject)?></small>
+                                <?=$oEmail->type->name?>
+                                <small><?=lang('email_index_subject', $oEmail->subject)?></small>
                             </td>
                             <?php
 
-                            switch ($email->status) {
-
+                            switch ($oEmail->status) {
                                 case 'SENT':
-
-                                    $rowStatus = 'success';
-                                    $rowText   = 'Sent';
-                                    $icon      = 'fa-check-circle';
+                                    $aRowStatus = 'success';
+                                    $sRowText   = 'Sent';
+                                    $sIcon      = 'fa-check-circle';
                                     break;
 
                                 case 'BOUNCED':
-
-                                    $rowStatus = 'error';
-                                    $rowText   = 'Bounced';
-                                    $icon      = 'fa-times-circle';
+                                    $aRowStatus = 'error';
+                                    $sRowText   = 'Bounced';
+                                    $sIcon      = 'fa-times-circle';
                                     break;
 
                                 case 'OPENED':
-
-                                    $rowStatus = 'success';
-                                    $rowText   = 'Opened';
-                                    $icon      = 'fa-check-circle';
+                                    $aRowStatus = 'success';
+                                    $sRowText   = 'Opened';
+                                    $sIcon      = 'fa-check-circle';
                                     break;
 
                                 case 'REJECTED':
-
-                                    $rowStatus = 'error';
-                                    $rowText   = 'Rejected';
-                                    $icon      = 'fa-times-circle';
+                                    $aRowStatus = 'error';
+                                    $sRowText   = 'Rejected';
+                                    $sIcon      = 'fa-times-circle';
                                     break;
 
                                 case 'DELAYED':
-
-                                    $rowStatus = 'message';
-                                    $rowText   = 'Delayed';
-                                    $icon      = 'fa-warning';
+                                    $aRowStatus = 'message';
+                                    $sRowText   = 'Delayed';
+                                    $sIcon      = 'fa-warning';
                                     break;
 
                                 case 'SOFT_BOUNCED':
-
-                                    $rowStatus = 'message';
-                                    $rowText   = 'Bounced (Soft)';
-                                    $icon      = 'fa-warning';
+                                    $aRowStatus = 'message';
+                                    $sRowText   = 'Bounced (Soft)';
+                                    $sIcon      = 'fa-warning';
                                     break;
 
                                 case 'MARKED_AS_SPAM':
-
-                                    $rowStatus = 'message';
-                                    $rowText   = 'Marked as Spam';
-                                    $icon      = 'fa-warning';
+                                    $aRowStatus = 'message';
+                                    $sRowText   = 'Marked as Spam';
+                                    $sIcon      = 'fa-warning';
                                     break;
 
                                 case 'CLICKED':
-
-                                    $rowStatus = 'success';
-                                    $rowText   = 'Clicked';
-                                    $icon      = 'fa-check-circle';
+                                    $aRowStatus = 'success';
+                                    $sRowText   = 'Clicked';
+                                    $sIcon      = 'fa-check-circle';
                                     break;
 
                                 case 'FAILED':
-
-                                    $rowStatus = 'error';
-                                    $rowText   = 'Failed';
-                                    $icon      = 'fa-times-circle';
+                                    $aRowStatus = 'error';
+                                    $sRowText   = 'Failed';
+                                    $sIcon      = 'fa-times-circle';
                                     break;
 
                                 default:
-
-                                    $rowStatus = '';
-                                    $rowText   = ucfirst(strtolower(str_replace('_', ' ', $email->status)));
-                                    $icon      = '';
+                                    $aRowStatus = '';
+                                    $sRowText   = ucfirst(strtolower(str_replace('_', ' ', $oEmail->status)));
+                                    $sIcon      = '';
                                     break;
                             }
 
-                            echo '<td class="status ' . $rowStatus . '">';
-                            echo !empty($icon) ? '<b class="fa fa-lg ' . $icon . '"></b>' : '';
-                            echo !empty($rowText) ? $rowText : '';
+                            echo '<td class="status ' . $aRowStatus . '">';
+                            echo !empty($sIcon) ? '<b class="fa fa-lg ' . $sIcon . '"></b>' : '';
+                            echo !empty($sRowText) ? $sRowText : '';
                             echo '</td>';
 
                             ?>
-                            <td class="reads"><?=$email->read_count?></td>
-                            <td class="clicks"><?=$email->link_click_count?></td>
+                            <td class="reads"><?=$oEmail->read_count?></td>
+                            <td class="clicks"><?=$oEmail->link_click_count?></td>
                             <td class="actions">
                                 <?php
 
                                 echo anchor(
-                                    site_url($email->data->url->viewOnline, isPageSecure()),
+                                    site_url($oEmail->data->url->viewOnline, isPageSecure()),
                                     lang('action_preview'),
                                     'class="btn btn-xs btn-primary fancybox" data-fancybox-type="iframe"'
                                 );
 
                                 if (userHasPermission('admin:email:email:resend')) {
 
-                                    $return = uri_string();
+                                    $sReturn = uri_string();
                                     if ($this->input->server('QUERY_STRING')) {
 
-                                        $return .= '?' . $this->input->server('QUERY_STRING');
+                                        $sReturn .= '?' . $this->input->server('QUERY_STRING');
                                     }
-                                    $return = urlencode($return);
-                                    echo anchor('admin/email/email/resend/' . $email->id . '?return=' . $return, 'Resend', 'class="btn btn-xs btn-success"');
+                                    $sReturn = urlencode($sReturn);
+                                    echo anchor('admin/email/email/resend/' . $oEmail->id . '?return=' . $sReturn, 'Resend', 'class="btn btn-xs btn-success"');
                                 }
 
                                 ?>
@@ -162,5 +151,5 @@
             </tbody>
         </table>
     </div>
-    <?=adminHelper('loadPagination', $pagination)?>
+    <?=adminHelper('loadPagination', $oPagination)?>
 </div>

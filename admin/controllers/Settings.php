@@ -29,7 +29,6 @@ class Settings extends BaseAdmin
         $oNavGroup->setIcon('fa-wrench');
 
         if (userHasPermission('admin:email:settings:update')) {
-
             $oNavGroup->addAction('Email');
         }
 
@@ -44,11 +43,11 @@ class Settings extends BaseAdmin
      */
     public static function permissions()
     {
-        $permissions = parent::permissions();
+        $aPermissions = parent::permissions();
 
-        $permissions['update:sender'] = 'Can update sender settings';
+        $aPermissions['update:sender'] = 'Can update sender settings';
 
-        return $permissions;
+        return $aPermissions;
     }
 
     // --------------------------------------------------------------------------
@@ -60,36 +59,30 @@ class Settings extends BaseAdmin
     public function index()
     {
         if (!userHasPermission('admin:email:settings:update:.*')) {
-
             unauthorised();
         }
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->post()) {
+        $oInput = Factory::service('Input');
+        if ($oInput->post()) {
 
-            $settings = [];
+            $aSettings = [];
 
             if (userHasPermission('admin:email:settings:update:sender')) {
-
-                $settings['from_name']  = $this->input->post('from_name');
-                $settings['from_email'] = $this->input->post('from_email');
+                $aSettings['from_name']  = $oInput->post('from_name');
+                $aSettings['from_email'] = $oInput->post('from_email');
             }
 
-            if (!empty($settings)) {
-
+            if (!empty($aSettings)) {
                 $oAppSettingModel = Factory::model('AppSetting');
-                if ($oAppSettingModel->set($settings, 'nailsapp/module-email')) {
-
+                if ($oAppSettingModel->set($aSettings, 'nailsapp/module-email')) {
                     $this->data['success'] = 'Email settings have been saved.';
-
                 } else {
-
                     $this->data['error'] = 'There was a problem saving email settings.';
                 }
 
             } else {
-
                 $this->data['message'] = 'No settings to save.';
             }
         }
@@ -97,7 +90,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['settings'] = appSetting(null, 'nailsapp/module-email', true);
+        $this->data['aSettings'] = appSetting(null, 'nailsapp/module-email', true);
 
         // --------------------------------------------------------------------------
 
