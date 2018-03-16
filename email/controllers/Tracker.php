@@ -105,7 +105,7 @@ class Tracker extends Base
                 $oOutput->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
                 $oOutput->set_header('Pragma: no-cache');
                 $oOutput->set_header($oInput->server('SERVER_PROTOCOL') . ' 400 Bad Request');
-                $oOutput->set_output(json_encode(['status' => 400, 'error' => lang('invalid_email')]));
+                $oOutput->set_output(json_encode(['status' => 400, 'error' => 'Could not validate email.']));
                 log_message('error', 'Emailer link failed with reason BAD_HASH');
                 break;
 
@@ -115,7 +115,7 @@ class Tracker extends Base
                 $oOutput->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
                 $oOutput->set_header('Pragma: no-cache');
                 $oOutput->set_header($oInput->server('SERVER_PROTOCOL') . ' 400 Bad Request');
-                $oOutput->set_output(json_encode(['status' => 400, 'error' => lang('invalid_link')]));
+                $oOutput->set_output(json_encode(['status' => 400, 'error' => 'Could not validate link.']));
                 log_message('error', 'Emailer link failed with reason BAD_LINK');
                 break;
 

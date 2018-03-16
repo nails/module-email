@@ -45,11 +45,11 @@ class Verify extends Base
                 }
 
                 $sStatus  = 'success';
-                $sMessage = lang('email_verify_ok');
+                $sMessage = 'Success! Email verified successfully, thanks!';
 
             } catch (\Exception $e) {
                 $sStatus  = 'error';
-                $sMessage = lang('email_verify_fail_error') . ' ' . $e->getMessage();
+                $sMessage = 'Sorry, we couldn\'t verify your email address. ' . $e->getMessage();
             }
         }
 

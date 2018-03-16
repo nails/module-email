@@ -74,7 +74,7 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Set method info
-        $this->data['page']->title = lang('email_index_title');
+        $this->data['page']->title = 'Message Archive';
 
         // --------------------------------------------------------------------------
 

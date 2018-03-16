@@ -1,6 +1,6 @@
 <div class="group-email archive">
     <p>
-        <?=lang('email_index_intro')?>
+        This page shows you all the mail which has been sent by the system.
     </p>
     <?=adminHelper('loadSearch', $oSearch)?>
     <?=adminHelper('loadPagination', $oPagination)?>
@@ -8,15 +8,15 @@
         <table>
             <thead>
                 <tr>
-                    <th class="id"><?=lang('email_index_thead_id')?></th>
-                    <th class="ref"><?=lang('email_index_thead_ref')?></th>
-                    <th class="user"><?=lang('email_index_thead_to')?></th>
-                    <th class="sent"><?=lang('email_index_thead_sent')?></th>
-                    <th class="type"><?=lang('email_index_thead_type')?></th>
-                    <th class="status"><?=lang('email_index_thead_status')?></th>
-                    <th class="reads"><?=lang('email_index_thead_reads')?></th>
-                    <th class="clicks"><?=lang('email_index_thead_clicks')?></th>
-                    <th class="actions"><?=lang('email_index_thead_actions')?></th>
+                    <th class="id">ID</th>
+                    <th class="ref">Ref</th>
+                    <th class="user">To</th>
+                    <th class="sent">Sent</th>
+                    <th class="type">Type</th>
+                    <th class="status">Status</th>
+                    <th class="reads">Opens</th>
+                    <th class="clicks">Clicks</th>
+                    <th class="actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,7 +34,7 @@
                             <?=adminHelper('loadDatetimeCell', $oEmail->sent)?>
                             <td class="type">
                                 <?=$oEmail->type->name?>
-                                <small><?=lang('email_index_subject', $oEmail->subject)?></small>
+                                <small>Subject: <?=$oEmail->subject?></small>
                             </td>
                             <?php
 
@@ -140,7 +140,7 @@
                     ?>
                     <tr>
                         <td class="no-data" colspan="9">
-                            <?=lang('email_index_noemail')?>
+                            'No Emails Found
                         </td>
                     </tr>
                     <?php
