@@ -373,16 +373,12 @@ class Emailer
     public function resend($mEmailIdRef)
     {
         if (is_numeric($mEmailIdRef)) {
-
             $oEmail = $this->getById($mEmailIdRef);
-
         } else {
-
             $oEmail = $this->getByRef($mEmailIdRef);
         }
 
         if (empty($oEmail)) {
-
             $this->setError('"' . $mEmailIdRef . '" is not a valid Email ID or reference.');
             return false;
         }
@@ -824,26 +820,22 @@ class Emailer
     /**
      * Get en email from the archive by its ID
      *
-     * @param  int $id The email's ID
+     * @param  int  $iId   The email's ID
+     * @param array $aData The data array
      *
      * @return mixed   stdClass on success, false on failure
      */
-    public function getById($id)
+    public function getById($iId, $aData = [])
     {
-        $data   = [
-            'where' => [
-                [$this->sTableAlias . '.id', $id],
-            ],
-        ];
-        $emails = $this->getAll(null, null, $data);
-
-        if (!$emails) {
-            return false;
+        if (empty($aData['where'])) {
+            $aData['where'] = [];
         }
 
-        // --------------------------------------------------------------------------
+        $aData['where'][] = [$this->sTableAlias . '.id', $iId];
 
-        return $emails[0];
+        $aEmails = $this->getAll(null, null, $aData);
+
+        return !empty($aEmails) ? reset($aEmails) : false;
     }
 
     // --------------------------------------------------------------------------
@@ -851,39 +843,53 @@ class Emailer
     /**
      * Get an email from the archive by its reference
      *
-     * @param  string         $ref  The email's reference
-     * @param  string|boolean $guid The email's GUID
-     * @param  string|boolean $hash The email's hash
+     * @param string $sRef  The email's reference
+     * @param array  $aData The data array
      *
-     * @return mixed         stdClass on success, false on failure
+     * @return mixed        stdClass on success, false on failure
      */
-    public function getByRef($ref, $guid = false, $hash = false)
+    public function getByRef($sRef, $aData = [])
     {
-        //  If guid and hash === false then by-pass the check
-        if ($guid !== false && $hash !== false) {
-
-            //  Check hash
-            $_check = md5($guid . APP_PRIVATE_KEY . $ref);
-
-            if ($_check !== $hash) {
-                return 'BAD_HASH';
-            }
+        if (empty($aData['where'])) {
+            $aData['where'] = [];
         }
 
-        // --------------------------------------------------------------------------
+        $aData['where'][] = [$this->sTableAlias . '.ref', $sRef];
 
-        $data   = [
-            'where' => [
-                [$this->sTableAlias . '.ref', $ref],
-            ],
-        ];
-        $emails = $this->getAll(null, null, $data);
+        $aEmails = $this->getAll(null, null, $aData);
 
-        if (!$emails) {
-            return false;
-        }
+        return !empty($aEmails) ? reset($aEmails) : false;
+    }
 
-        return $emails[0];
+    // --------------------------------------------------------------------------
+
+    /**
+     * Validates an email hash
+     *
+     * @param string $sRef  The email's ref
+     * @param string $sGuid The email's guid
+     * @param string $sHash The hash to validate
+     *
+     * @return bool
+     */
+    public function validateHash($sRef, $sGuid, $sHash)
+    {
+        return isAdmin() || $this->generateHash($sRef, $sGuid) === $sHash;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Generates an email hash
+     *
+     * @param string $sRef  The email's ref
+     * @param string $sGuid The email's guid
+     *
+     * @return string
+     */
+    public function generateHash($sRef, $sGuid)
+    {
+        return md5($sGuid . APP_PRIVATE_KEY . $sRef);
     }
 
     // --------------------------------------------------------------------------
@@ -1049,17 +1055,14 @@ EOT;
     /**
      * Increments an email's open count and adds a tracking note
      *
-     * @param  string $ref  The email's reference
-     * @param  string $guid The email's GUID
-     * @param  string $hash The email's hash
+     * @param  string $ref The email's reference
      *
-     * @return boolean
+     * @return void
      */
-    public function trackOpen($ref, $guid, $hash)
+    public function trackOpen($ref)
     {
-        $oEmail = $this->getByRef($ref, $guid, $hash);
-
-        if ($oEmail && $oEmail != 'BAD_HASH') {
+        $oEmail = $this->getByRef($ref);
+        if ($oEmail) {
 
             //  Update the read count and a add a track data point
             $oDb = Factory::service('Database');
@@ -1075,11 +1078,7 @@ EOT;
             }
 
             $oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
-
-            return true;
         }
-
-        return false;
     }
 
     // --------------------------------------------------------------------------
@@ -1087,27 +1086,25 @@ EOT;
     /**
      * Increments a link's open count and adds a tracking note
      *
-     * @param  string $ref     The email's reference
-     * @param  string $guid    The email's GUID
-     * @param  string $hash    The email's hash
-     * @param  string $link_id The link's ID
+     * @param  string  $sRef    The email's reference
+     * @param  integer $iLinkId The link's ID
      *
      * @return string
      */
-    public function trackLink($ref, $guid, $hash, $link_id)
+    public function trackLink($sRef, $iLinkId)
     {
-        $oEmail = $this->getByRef($ref, $guid, $hash);
+        $oEmail = $this->getByRef($sRef);
 
-        if ($oEmail && $oEmail != 'BAD_HASH') {
+        if ($oEmail) {
 
             //  Get the link which was clicked
             $oDb = Factory::service('Database');
             $oDb->select('url');
             $oDb->where('email_id', $oEmail->id);
-            $oDb->where('id', $link_id);
-            $_link = $oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
+            $oDb->where('id', $iLinkId);
+            $oLink = $oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
 
-            if ($_link) {
+            if ($oLink) {
 
                 //  Update the read count and a add a track data point
                 $oDb->set('link_click_count', 'link_click_count+1', false);
@@ -1117,7 +1114,7 @@ EOT;
                 //  Add a link trackback
                 $oDb->set('created', 'NOW()', false);
                 $oDb->set('email_id', $oEmail->id);
-                $oDb->set('link_id', $link_id);
+                $oDb->set('link_id', $iLinkId);
 
                 if (activeUser('id')) {
                     $oDb->set('user_id', activeUser('id'));
@@ -1126,15 +1123,14 @@ EOT;
                 $oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
 
                 //  Return the URL to go to
-                return $_link->url;
+                return $oLink->url;
 
             } else {
-
-                return 'BAD_LINK';
+                return false;
             }
         }
 
-        return 'BAD_HASH';
+        return false;
     }
 
     // --------------------------------------------------------------------------
@@ -1312,7 +1308,7 @@ EOT;
 
                 $_time       = time();
                 $trackingUrl = 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
-                $trackingUrl .= md5($_time . APP_PRIVATE_KEY . $this->_generate_tracking_email_ref) . '/' . $_id;
+                $trackingUrl .= $this->generateHash($this->_generate_tracking_email_ref, $_time) . '/' . $_id;
                 $trackingUrl = site_url($trackingUrl);
 
                 $this->aTrackLinkCache[md5($url)] = $trackingUrl;
@@ -1456,9 +1452,9 @@ EOT;
 
         //  View Online
         $iTime                         = time();
-        $sHash                         = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
+        $sHash                         = $this->generateHash($oEmail->data->emailRef, $iTime);
         $oEmail->data->url->viewOnline = site_url(
-            'email/view_online/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash
+            'email/view/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash
         );
 
         //  1-Click Unsubscribe
@@ -1496,10 +1492,10 @@ EOT;
 
         //  Tracker Image (not on view online links though)
         $oEmail->data->url->trackerImg = '';
-        if (!preg_match('/^email\/view_online\/[a-zA-Z0-9]+\/[0-9]+\/[a-zA-Z0-9]+$/', uri_string())) {
-            $iTime   = time();
-            $sHash   = md5($iTime . APP_PRIVATE_KEY . $oEmail->data->emailRef);
-            $sImgSrc = site_url('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
+        if (!preg_match('/^email\/view\/[a-zA-Z0-9]+\/[0-9]+\/[a-zA-Z0-9]+$/', uri_string())) {
+            $iTime                         = time();
+            $sHash                         = $this->generateHash($oEmail->data->emailRef, $iTime);
+            $sImgSrc                       = site_url('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
             $oEmail->data->url->trackerImg = $sImgSrc;
         }
 

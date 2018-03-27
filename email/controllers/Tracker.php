@@ -20,22 +20,23 @@ class Tracker extends Base
      */
     public function track_open()
     {
-        /**
-         * Fetch data; return a string if not set so as not to accidentally skip the
-         * hash check in getByRef();
-         */
-
         $oUri     = Factory::service('Uri');
         $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
 
-        $sRef  = $oUri->segment(3, 'null');
-        $sGuid = $oUri->segment(4, 'null');
-        $sHash = $oUri->segment(5, 'null');
+        $sRef  = $oUri->segment(3);
+        $sGuid = $oUri->segment(4);
+        $sHash = $oUri->segment(5);
+
+        // --------------------------------------------------------------------------
+
+        if (!$sRef || !$oEmailer->validateHash($sRef, $sGuid, $sHash)) {
+            show_404();
+        }
 
         // --------------------------------------------------------------------------
 
         //  Fetch the email
-        $oEmailer->trackOpen($sRef, $sGuid, $sHash);
+        $oEmailer->trackOpen($sRef);
 
         // --------------------------------------------------------------------------
 
@@ -70,59 +71,28 @@ class Tracker extends Base
      */
     public function track_link()
     {
-        /**
-         * Fetch data; return a string if not set so as not to accidentally skip the
-         * hash check in getByRef();
-         */
-
         $oUri     = Factory::service('Uri');
         $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
-        $oOutput  = Factory::service('Output');
-        $oInput   = Factory::service('Input');
 
         $sRef    = $oUri->segment(4);
-        $sGuid   = $oUri->segment(5, 'null');
-        $sHash   = $oUri->segment(6, 'null');
-        $sLinkId = $oUri->segment(7, 'null');
+        $sGuid   = $oUri->segment(5);
+        $sHash   = $oUri->segment(6);
+        $sLinkId = $oUri->segment(7);
 
         // --------------------------------------------------------------------------
 
-        //  Check the reference is present
-        if (!$sRef) {
+        if (!$sRef || !$oEmailer->validateHash($sRef, $sGuid, $sHash)) {
             show_404();
         }
 
         // --------------------------------------------------------------------------
 
-        //  Fetch the email
-        $sUrl = $oEmailer->trackLink($sRef, $sGuid, $sHash, $sLinkId);
-
-        switch ($sUrl) {
-
-            case 'BAD_HASH':
-                $oOutput->set_content_type('application/json');
-                $oOutput->set_header('Cache-Control: no-store, no-cache, must-revalidate');
-                $oOutput->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-                $oOutput->set_header('Pragma: no-cache');
-                $oOutput->set_header($oInput->server('SERVER_PROTOCOL') . ' 400 Bad Request');
-                $oOutput->set_output(json_encode(['status' => 400, 'error' => 'Could not validate email.']));
-                log_message('error', 'Emailer link failed with reason BAD_HASH');
-                break;
-
-            case 'BAD_LINK':
-                $oOutput->set_content_type('application/json');
-                $oOutput->set_header('Cache-Control: no-store, no-cache, must-revalidate');
-                $oOutput->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-                $oOutput->set_header('Pragma: no-cache');
-                $oOutput->set_header($oInput->server('SERVER_PROTOCOL') . ' 400 Bad Request');
-                $oOutput->set_output(json_encode(['status' => 400, 'error' => 'Could not validate link.']));
-                log_message('error', 'Emailer link failed with reason BAD_LINK');
-                break;
-
-            default:
-                redirect($sUrl);
-                break;
+        $sUrl = $oEmailer->trackLink($sRef, $sLinkId);
+        if ($sUrl === false) {
+            show_404();
         }
+
+        redirect($sUrl);
     }
 
     // --------------------------------------------------------------------------
