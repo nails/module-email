@@ -149,8 +149,7 @@ class Emailer
      */
     public function getTypes()
     {
-        Factory::helper('array');
-        array_sort_multi($this->aEmailType, 'name');
+        arraySortMulti($this->aEmailType, 'name');
         return $this->aEmailType;
     }
 
