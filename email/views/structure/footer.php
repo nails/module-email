@@ -13,7 +13,7 @@
                     </ul>
                 </div>
                 {{#url.trackerImg}}
-                    <img src="{{url.trackerImg}}" width="0" height="0" style="width:0px;height:0px;" />
+                    <img src="{{url.trackerImg}}" width="0" height="0" style="width:0px;height:0px;" alt="" />
                 {{/url.trackerImg}}
             </div>
         </div>
