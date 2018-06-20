@@ -71,7 +71,7 @@ class Verify extends Base
         }
 
         if (!empty($sStatus)) {
-            $oSession->set_flashdata(
+            $oSession->setFlashData(
                 $sStatus,
                 $sMessage
             );

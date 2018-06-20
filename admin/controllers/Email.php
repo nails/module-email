@@ -175,7 +175,7 @@ class Email extends BaseAdmin
         }
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->Set_flashdata($sStatus, $sMessage);
+        $oSession->setFlashData($sStatus, $sMessage);
         redirect($sReturn);
     }
 }
