@@ -11,6 +11,7 @@
 
 namespace Nails\Email\Factory;
 
+use Nails\Common\Exception\ValidationException;
 use Nails\Email\Exception\EmailerException;
 use Nails\Factory;
 
@@ -100,8 +101,8 @@ class Email
     /**
      * Add a recipient
      *
-     * @param integer|string $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool           $bAppend        Whether to add to the list of recipients or not
+     * @param integer|string|array $mUserIdOrEmail The user ID to send to, or an email address
+     * @param bool                 $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -115,8 +116,8 @@ class Email
     /**
      * Add a recipient (on CC)
      *
-     * @param integer|string $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool           $bAppend        Whether to add to the list of recipients or not
+     * @param integer|string|array $mUserIdOrEmail The user ID to send to, or an email address
+     * @param bool                 $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -162,10 +163,29 @@ class Email
                 $this->addRecipient($sUserIdOrEmail, true, $aArray);
             }
         } else {
+            $this->validateEmail($mUserIdOrEmail);
             $aArray[] = $mUserIdOrEmail;
         }
 
         return $this;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Validates an email address
+     *
+     * @param integer|string $sEmail The email address to validate
+     *
+     * @throws ValidationException
+     */
+    protected function validateEmail($sEmail)
+    {
+        if (empty($sEmail)) {
+            throw new ValidationException('No email address supplied');
+        } elseif (is_string($sEmail) && !valid_email($sEmail)) {
+            throw new ValidationException('"' . $sEmail . '" is not a valid email');
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -230,8 +250,6 @@ class Email
         if (!empty($aEmail['aBcc']) & empty($aData['data']->bcc)) {
             $aData['data']->bcc = $aEmail['aBcc'];
         }
-
-        // --------------------------------------------------------------------------
 
         $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
 
