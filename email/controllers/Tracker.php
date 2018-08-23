@@ -77,7 +77,7 @@ class Tracker extends Base
         $sRef    = $oUri->segment(4);
         $sGuid   = $oUri->segment(5);
         $sHash   = $oUri->segment(6);
-        $sLinkId = $oUri->segment(7);
+        $iLinkId = (int) $oUri->segment(7) ?: null;
 
         // --------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ class Tracker extends Base
 
         // --------------------------------------------------------------------------
 
-        $sUrl = $oEmailer->trackLink($sRef, $sLinkId);
+        $sUrl = $oEmailer->trackLink($sRef, $iLinkId);
         if ($sUrl === false) {
             show_404();
         }

@@ -1098,7 +1098,7 @@ EOT;
 
             //  Get the link which was clicked
             $oDb = Factory::service('Database');
-            $oDb->select('url');
+            $oDb->select('id, url');
             $oDb->where('email_id', $oEmail->id);
             $oDb->where('id', $iLinkId);
             $oLink = $oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
@@ -1113,7 +1113,7 @@ EOT;
                 //  Add a link trackback
                 $oDb->set('created', 'NOW()', false);
                 $oDb->set('email_id', $oEmail->id);
-                $oDb->set('link_id', $iLinkId);
+                $oDb->set('link_id', $oLink->id);
 
                 if (activeUser('id')) {
                     $oDb->set('user_id', activeUser('id'));
