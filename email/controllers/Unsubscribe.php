@@ -27,8 +27,8 @@ class Unsubscribe extends Base
 
         $oInput     = Factory::service('Input');
         $oEncrypt   = Factory::service('Encrypt');
-        $oEmailer   = Factory::service('Emailer', 'nailsapp/module-email');
-        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+        $oEmailer   = Factory::service('Emailer', 'nails/module-email');
+        $oUserModel = Factory::model('User', 'nails/module-auth');
 
         $sToken = $oInput->get('token');
         $aToken = $oEncrypt->decode($sToken, APP_PRIVATE_KEY);

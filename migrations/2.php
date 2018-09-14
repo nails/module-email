@@ -6,7 +6,7 @@
  * Finalised:   06/02/2015
  */
 
-namespace Nails\Database\Migration\Nailsapp\ModuleEmail;
+namespace Nails\Database\Migration\Nails\ModuleEmail;
 
 use Nails\Common\Console\Migrate\Base;
 

@@ -24,7 +24,7 @@ class Email extends BaseAdmin
      */
     public static function announce()
     {
-        $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $oNavGroup = Factory::factory('Nav', 'nails/module-admin');
         $oNavGroup->setLabel('Email');
         $oNavGroup->setIcon('fa-paper-plane-o');
 
@@ -69,7 +69,7 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         // --------------------------------------------------------------------------
 
@@ -159,7 +159,7 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         // --------------------------------------------------------------------------
 
@@ -174,7 +174,7 @@ class Email extends BaseAdmin
             $sMessage = 'Message failed to resend. ' . $oEmailer->lastError();
         }
 
-        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession = Factory::service('Session', 'nails/module-auth');
         $oSession->setFlashData($sStatus, $sMessage);
         redirect($sReturn);
     }

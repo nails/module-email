@@ -21,7 +21,7 @@ class View extends Base
     public function index()
     {
         $oUri     = Factory::service('Uri');
-        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
         $sRef     = $oUri->segment(3);
         $sGuid    = $oUri->segment(4);
         $sHash    = $oUri->segment(5);
@@ -44,7 +44,7 @@ class View extends Base
         if (\Nails\Environment::is('DEVELOPMENT')) {
 
             $oAsset = Factory::service('Asset');
-            $oAsset->load('debugger.css', 'nailsapp/module-email');
+            $oAsset->load('debugger.css', 'nails/module-email');
 
             Factory::service('View')
                    ->setData([

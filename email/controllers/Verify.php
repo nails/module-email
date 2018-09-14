@@ -22,8 +22,8 @@ class Verify extends Base
     {
         $oUri       = Factory::service('Uri');
         $oInput     = Factory::service('Input');
-        $oSession   = Factory::service('Session', 'nailsapp/module-auth');
-        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+        $oSession   = Factory::service('Session', 'nails/module-auth');
+        $oUserModel = Factory::model('User', 'nails/module-auth');
 
         $iId      = $oUri->segment(3);
         $sCode    = $oUri->segment(4);

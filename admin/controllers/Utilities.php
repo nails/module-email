@@ -24,7 +24,7 @@ class Utilities extends BaseAdmin
      */
     public static function announce()
     {
-        $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $oNavGroup = Factory::factory('Nav', 'nails/module-admin');
         $oNavGroup->setLabel('Utilities');
         $oNavGroup->setIcon('fa-sliders');
 
@@ -96,7 +96,7 @@ class Utilities extends BaseAdmin
                 ];
 
                 //  Send the email
-                $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+                $oEmailer = Factory::service('Emailer', 'nails/module-email');
                 if ($oEmailer->send($oEmail)) {
 
                     $this->data['success'] = '<strong>Done!</strong> Test email successfully sent to <strong>';

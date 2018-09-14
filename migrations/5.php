@@ -12,7 +12,7 @@
  * @link
  */
 
-namespace Nails\Database\Migration\Nailsapp\ModuleEmail;
+namespace Nails\Database\Migration\Nails\ModuleEmail;
 
 use Nails\Common\Console\Migrate\Base;
 
@@ -24,6 +24,6 @@ class Migration5 extends Base
      */
     public function execute()
     {
-        $this->query("UPDATE `{{NAILS_DB_PREFIX}}app_setting` SET `grouping` = 'nailsapp/module-email' WHERE `grouping` = 'email';");
+        $this->query("UPDATE `{{NAILS_DB_PREFIX}}app_setting` SET `grouping` = 'nails/module-email' WHERE `grouping` = 'email';");
     }
 }

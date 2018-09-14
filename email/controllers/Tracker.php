@@ -21,7 +21,7 @@ class Tracker extends Base
     public function track_open()
     {
         $oUri     = Factory::service('Uri');
-        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         $sRef  = $oUri->segment(3);
         $sGuid = $oUri->segment(4);
@@ -72,7 +72,7 @@ class Tracker extends Base
     public function track_link()
     {
         $oUri     = Factory::service('Uri');
-        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         $sRef    = $oUri->segment(4);
         $sGuid   = $oUri->segment(5);

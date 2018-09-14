@@ -251,7 +251,7 @@ class Email
             $aData['data']->bcc = $aEmail['aBcc'];
         }
 
-        $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         foreach ($aEmail['aTo'] as $mUserIdOrEmail) {
 

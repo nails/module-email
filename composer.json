@@ -1,5 +1,5 @@
 {
-    "name": "nailsapp/module-email",
+    "name": "nails/module-email",
     "keywords": ["Nails", "Shed Collective", "CodeIgniter", "Email Module"],
     "homepage": "http://nailsapp.co.uk/modules/email",
     "description": "This is the \"Email\" module for Nails.",
@@ -27,7 +27,7 @@
     "prefer-stable": true,
     "require":
     {
-        "nailsapp/common": "dev-develop"
+        "nails/common": "dev-develop"
     },
     "require-dev":
     {

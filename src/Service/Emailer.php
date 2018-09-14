@@ -262,7 +262,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  If we're sending to an email address, try and associate it to a registered user
-        $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+        $oUserModel = Factory::model('User', 'nails/module-auth');
         if ($input->to_email) {
             $_user = $oUserModel->getByEmail($input->to_email);
             if ($_user) {
@@ -1580,7 +1580,7 @@ EOT;
      */
     public function getFromName()
     {
-        return appSetting('from_name', 'nailsapp/module-email') ?: APP_NAME;
+        return appSetting('from_name', 'nails/module-email') ?: APP_NAME;
     }
 
     // --------------------------------------------------------------------------
@@ -1591,6 +1591,6 @@ EOT;
      */
     public function getFromEmail()
     {
-        return appSetting('from_email', 'nailsapp/module-email') ?: 'nobody@' . gethostname();
+        return appSetting('from_email', 'nails/module-email') ?: 'nobody@' . gethostname();
     }
 }

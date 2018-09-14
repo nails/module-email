@@ -24,7 +24,7 @@ class Settings extends BaseAdmin
      */
     public static function announce()
     {
-        $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+        $oNavGroup = Factory::factory('Nav', 'nails/module-admin');
         $oNavGroup->setLabel('Settings');
         $oNavGroup->setIcon('fa-wrench');
 
@@ -76,7 +76,7 @@ class Settings extends BaseAdmin
 
             if (!empty($aSettings)) {
                 $oAppSettingModel = Factory::model('AppSetting');
-                if ($oAppSettingModel->set($aSettings, 'nailsapp/module-email')) {
+                if ($oAppSettingModel->set($aSettings, 'nails/module-email')) {
                     $this->data['success'] = 'Email settings have been saved.';
                 } else {
                     $this->data['error'] = 'There was a problem saving email settings.';
@@ -90,7 +90,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['aSettings'] = appSetting(null, 'nailsapp/module-email', true);
+        $this->data['aSettings'] = appSetting(null, 'nails/module-email', true);
 
         // --------------------------------------------------------------------------
 

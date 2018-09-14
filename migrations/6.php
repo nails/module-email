@@ -12,7 +12,7 @@
  * @link
  */
 
-namespace Nails\Database\Migration\Nailsapp\ModuleEmail;
+namespace Nails\Database\Migration\Nails\ModuleEmail;
 
 use Nails\Common\Console\Migrate\Base;
 
