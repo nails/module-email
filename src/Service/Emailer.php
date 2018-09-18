@@ -34,19 +34,19 @@ class Emailer
     protected $sTable;
     protected $sTableAlias;
     protected $bHasDeveloperMail;
-    protected $_generate_tracking_email_id;
-    protected $_generate_tracking_email_ref;
-    protected $_generate_tracking_needs_verified;
+    protected $iGenerateTrackingEmailId;
+    protected $sGenerateTrackingEmailRef;
+    protected $mGenerateTrackingNeedsVerified;
     protected $sDomain;
 
     // --------------------------------------------------------------------------
 
     /**
-     * Construct the library
+     * Emailer constructor.
      *
-     * @param array $config An optional config array
+     * @throws \Nails\Common\Exception\FactoryException
      */
-    public function __construct($config = [])
+    public function __construct()
     {
         $this->oCi =& get_instance();
 
@@ -101,23 +101,6 @@ class Emailer
         // --------------------------------------------------------------------------
 
         $this->bHasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
-
-        // --------------------------------------------------------------------------
-
-        if (site_url() === '/') {
-            $oInput    = Factory::service('Input');
-            $sHost     = $oInput->server('SERVER_NAME');
-            $sProtocol = $oInput->server('REQUEST_SCHEME') ?: 'http';
-            if (empty($sHost)) {
-                throw new HostNotKnownException('Failed to resolve host; email links will be incomplete.');
-            } else {
-                $this->sDomain = $sProtocol . '://' . $sHost . '/';
-            }
-        } else {
-            $this->sDomain = site_url();
-        }
-
-        $this->sDomain = rtrim($this->sDomain, '/');
     }
 
     // --------------------------------------------------------------------------
@@ -191,8 +174,9 @@ class Emailer
      * @param  object  $input    The email object
      * @param  boolean $graceful Whether to gracefully fail or not
      *
-     * @throws EmailerException
      * @return boolean|\stdClass
+     * @throws EmailerException
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function send($input, $graceful = false)
     {
@@ -368,6 +352,7 @@ class Emailer
      * @param  mixed $mEmailIdRef The email's ID or ref
      *
      * @return boolean
+     * @throws EmailerException
      */
     public function resend($mEmailIdRef)
     {
@@ -394,6 +379,7 @@ class Emailer
      * @param  string $type    The type of email to check against
      *
      * @return boolean
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function userHasUnsubscribed($user_id, $type)
     {
@@ -413,6 +399,7 @@ class Emailer
      * @param  string $type    The type of email to unsubscribe from
      *
      * @return boolean
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function unsubscribeUser($user_id, $type)
     {
@@ -440,6 +427,7 @@ class Emailer
      * @param  string $type    The type of email to subscribe to
      *
      * @return boolean
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function subscribeUser($user_id, $type)
     {
@@ -465,8 +453,9 @@ class Emailer
      * @param  int|bool $emailId  The ID of the email to send, or the email object itself
      * @param  boolean  $graceful Whether or not to fail gracefully
      *
-     * @throws EmailerException
      * @return boolean
+     * @throws EmailerException
+     * @throws \Nails\Common\Exception\FactoryException
      */
     protected function doSend($emailId = false, $graceful = false)
     {
@@ -475,6 +464,7 @@ class Emailer
 
             $oEmail = $this->getById($emailId);
             if (!$oEmail) {
+
                 $this->setError('EMAILER: Invalid email ID');
                 return false;
             }
@@ -496,14 +486,12 @@ class Emailer
         $this->aTrackLinkCache = [];
 
         if ($oEmail->to->id && !$oEmail->to->email_verified) {
-
-            $bNeedsVerified = [
+            $mNeedsVerified = [
                 'id'   => $oEmail->to->id,
                 'code' => $oEmail->to->email_verified_code,
             ];
-
         } else {
-            $bNeedsVerified = false;
+            $mNeedsVerified = false;
         }
 
         $oEmail->body->html = $this->parseLinks(
@@ -511,14 +499,15 @@ class Emailer
             $oEmail->id,
             $oEmail->ref,
             true,
-            $bNeedsVerified
+            $mNeedsVerified
         );
+
         $oEmail->body->text = $this->parseLinks(
             $oEmail->body->text,
             $oEmail->id,
             $oEmail->ref,
             false,
-            $bNeedsVerified
+            $mNeedsVerified
         );
 
         // --------------------------------------------------------------------------
@@ -673,6 +662,7 @@ class Emailer
      * @param  array   $data    Data to pass to getCountCommonEmail()
      *
      * @return object
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function getAllRawQuery($page = null, $perPage = null, $data = [])
     {
@@ -718,6 +708,7 @@ class Emailer
      * @param mixed $aData    Any data to pass to getCountCommon()
      *
      * @return array
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function getAll($iPage = null, $iPerPage = null, $aData = [])
     {
@@ -741,6 +732,7 @@ class Emailer
      * @param array $data Data passed from the calling method
      *
      * @return void
+     * @throws \Nails\Common\Exception\FactoryException
      **/
     protected function getCountCommonEmail($data = [])
     {
@@ -806,6 +798,7 @@ class Emailer
      * @param array $data Data passed from the calling method
      *
      * @return mixed
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function countAll($data)
     {
@@ -823,6 +816,7 @@ class Emailer
      * @param array $aData The data array
      *
      * @return mixed   stdClass on success, false on failure
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function getById($iId, $aData = [])
     {
@@ -846,6 +840,7 @@ class Emailer
      * @param array  $aData The data array
      *
      * @return mixed        stdClass on success, false on failure
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function getByRef($sRef, $aData = [])
     {
@@ -918,6 +913,7 @@ class Emailer
      * @param  array $exclude Strings to exclude from the reference
      *
      * @return string
+     * @throws \Nails\Common\Exception\FactoryException
      */
     protected function generateReference($exclude = [])
     {
@@ -1089,6 +1085,7 @@ EOT;
      * @param  integer $iLinkId The link's ID
      *
      * @return string
+     * @throws \Nails\Common\Exception\FactoryException
      */
     public function trackLink($sRef, $iLinkId)
     {
@@ -1149,9 +1146,9 @@ EOT;
     protected function parseLinks($body, $emailId, $emailRef, $isHtml = true, $needsVerified = false)
     {
         //    Set the class variables for the ID and ref (need those in the callbacks)
-        $this->_generate_tracking_email_id       = $emailId;
-        $this->_generate_tracking_email_ref      = $emailRef;
-        $this->_generate_tracking_needs_verified = $needsVerified;
+        $this->iGenerateTrackingEmailId       = $emailId;
+        $this->sGenerateTrackingEmailRef      = $emailRef;
+        $this->mGenerateTrackingNeedsVerified = $needsVerified;
 
         // --------------------------------------------------------------------------
 
@@ -1166,9 +1163,9 @@ EOT;
         // --------------------------------------------------------------------------
 
         //    And null these again, so nothing gets confused
-        $this->_generate_tracking_email_id       = null;
-        $this->_generate_tracking_email_ref      = null;
-        $this->_generate_tracking_needs_verified = null;
+        $this->iGenerateTrackingEmailId       = null;
+        $this->sGenerateTrackingEmailRef      = null;
+        $this->mGenerateTrackingNeedsVerified = null;
 
         // --------------------------------------------------------------------------
 
@@ -1213,6 +1210,7 @@ EOT;
      * @param  array $url The URL elements
      *
      * @return string
+     * @throws \Nails\Common\Exception\FactoryException
      */
     protected function processLinkUrl($url)
     {
@@ -1241,12 +1239,14 @@ EOT;
      * @param  boolean $is_html Whether this is HTML or not
      *
      * @return string
+     * @throws HostNotKnownException
+     * @throws \Nails\Common\Exception\FactoryException
      */
     protected function processLinkGenerate($html, $url, $title, $is_html)
     {
         //  Ensure URLs have a domain
         if (preg_match('/^\//', $url)) {
-            $url = $this->sDomain . $url;
+            $url = $this->getDomain() . $url;
         }
 
         /**
@@ -1274,13 +1274,13 @@ EOT;
              * do this for the actual email verifier...
              */
 
-            if ($this->_generate_tracking_needs_verified) {
+            if ($this->mGenerateTrackingNeedsVerified) {
 
                 //  Make sure we're not applying this to an activation URL
                 if (!preg_match('#email/verify/[0-9]*?/(.*?)#', $url)) {
 
-                    $_user_id = $this->_generate_tracking_needs_verified['id'];
-                    $_code    = $this->_generate_tracking_needs_verified['code'];
+                    $_user_id = $this->mGenerateTrackingNeedsVerified['id'];
+                    $_code    = $this->mGenerateTrackingNeedsVerified['code'];
                     $_return  = urlencode($url);
 
                     $_url = site_url('email/verify/' . $_user_id . '/' . $_code . '?return_to=' . $_return);
@@ -1294,7 +1294,7 @@ EOT;
             }
 
             $oDb = Factory::service('Database');
-            $oDb->set('email_id', $this->_generate_tracking_email_id);
+            $oDb->set('email_id', $this->iGenerateTrackingEmailId);
             $oDb->set('url', $_url);
             $oDb->set('title', $title);
             $oDb->set('created', 'NOW()', false);
@@ -1306,8 +1306,8 @@ EOT;
             if ($_id) {
 
                 $_time       = time();
-                $trackingUrl = 'email/tracker/link/' . $this->_generate_tracking_email_ref . '/' . $_time . '/';
-                $trackingUrl .= $this->generateHash($this->_generate_tracking_email_ref, $_time) . '/' . $_id;
+                $trackingUrl = 'email/tracker/link/' . $this->sGenerateTrackingEmailRef . '/' . $_time . '/';
+                $trackingUrl .= $this->generateHash($this->sGenerateTrackingEmailRef, $_time) . '/' . $_id;
                 $trackingUrl = site_url($trackingUrl);
 
                 $this->aTrackLinkCache[md5($url)] = $trackingUrl;
@@ -1329,11 +1329,43 @@ EOT;
     // --------------------------------------------------------------------------
 
     /**
+     * Returns the domain to use for the email
+     *
+     * @return string
+     * @throws HostNotKnownException
+     * @throws \Nails\Common\Exception\FactoryException
+     */
+    protected function getDomain()
+    {
+        dd('cats');
+        if (!empty($this->sDomain)) {
+            return $this->sDomain;
+        } elseif (site_url() === '/') {
+            $oInput    = Factory::service('Input');
+            $sHost     = $oInput->server('SERVER_NAME');
+            $sProtocol = $oInput->server('REQUEST_SCHEME') ?: 'http';
+            if (empty($sHost)) {
+                throw new HostNotKnownException('Failed to resolve host; email links will be incomplete.');
+            } else {
+                $this->sDomain = $sProtocol . '://' . $sHost . '/';
+            }
+        } else {
+            $this->sDomain = site_url();
+        }
+
+        $this->sDomain = rtrim($this->sDomain, '/');
+        return $this->sDomain;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Format an email object
      *
      * @param  object $oEmail The raw email object
      *
      * @return void
+     * @throws \Nails\Common\Exception\FactoryException
      */
     protected function formatObject(&$oEmail)
     {
