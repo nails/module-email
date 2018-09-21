@@ -163,7 +163,8 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $iEmailId = $this->uri->segment(5);
+        $oUri     = Factory::service('Uri');
+        $iEmailId = $oUri->segment(5);
         $sReturn  = $this->input->get('return') ? $this->input->get('return') : 'admin/email/index';
 
         if ($oEmailer->resend($iEmailId)) {
