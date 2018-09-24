@@ -128,6 +128,7 @@ class Emailer
 
     /**
      * Returns the available email types in the system, sorted alphabetically by name
+     *
      * @return array
      */
     public function getTypes()
@@ -262,10 +263,14 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //  Check to see if the user has opted out of receiving these emails
+        //  Check to see if the user has opted out of receiving these emails or is suspended
         if ($input->to_id) {
             if ($this->userHasUnsubscribed($input->to_id, $input->type)) {
                 //  User doesn't want to receive these notifications; abort.
+                return true;
+            }
+            if ($this->userIsSuspended($input->to_id)) {
+                //  User is suspended and should not receive emails
                 return true;
             }
         }
@@ -347,6 +352,7 @@ class Emailer
 
     /**
      * Sends an email again
+     *
      * @todo This should probably create a new row
      *
      * @param  mixed $mEmailIdRef The email's ID or ref
@@ -375,19 +381,36 @@ class Emailer
     /**
      * Determines whether the user has unsubscribed from this email type
      *
-     * @param  int    $user_id The user ID to check for
-     * @param  string $type    The type of email to check against
+     * @param  int    $iUSerId The user ID to check for
+     * @param  string $sType   The type of email to check against
      *
      * @return boolean
      * @throws \Nails\Common\Exception\FactoryException
      */
-    public function userHasUnsubscribed($user_id, $type)
+    public function userHasUnsubscribed($iUSerId, $sType)
     {
         $oDb = Factory::service('Database');
-        $oDb->where('user_id', $user_id);
-        $oDb->where('type', $type);
-
+        $oDb->where('user_id', $iUSerId);
+        $oDb->where('type', $sType);
         return (bool) $oDb->count_all_results(NAILS_DB_PREFIX . 'user_email_blocker');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Determiens whether a suer is suspended
+     *
+     * @param integer $iUserId The user ID to check
+     *
+     * @return bool
+     * @throws \Nails\Common\Exception\FactoryException
+     */
+    public function userIsSuspended($iUserId)
+    {
+        $oDb = Factory::service('Database');
+        $oDb->where('id', $iUSerId);
+        $oDb->where('is_suspended', true);
+        return (bool) $oDb->count_all_results(NAILS_DB_PREFIX . 'user');
     }
 
     // --------------------------------------------------------------------------
@@ -1586,6 +1609,7 @@ EOT;
 
     /**
      * Returns protected property $table
+     *
      * @return string
      */
     public function getTableName()
@@ -1597,6 +1621,7 @@ EOT;
 
     /**
      * Returns protected property $tableAlias
+     *
      * @return string
      */
     public function getTableAlias()
@@ -1608,6 +1633,7 @@ EOT;
 
     /**
      * Returns the defined sending from name, or falls back to APP_NAME
+     *
      * @return string
      */
     public function getFromName()
@@ -1619,6 +1645,7 @@ EOT;
 
     /**
      * Returns the defined sending from email, or falls back to nobody@host
+     *
      * @return string
      */
     public function getFromEmail()
