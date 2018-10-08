@@ -408,7 +408,7 @@ class Emailer
     public function userIsSuspended($iUserId)
     {
         $oDb = Factory::service('Database');
-        $oDb->where('id', $iUSerId);
+        $oDb->where('id', $iUserId);
         $oDb->where('is_suspended', true);
         return (bool) $oDb->count_all_results(NAILS_DB_PREFIX . 'user');
     }
