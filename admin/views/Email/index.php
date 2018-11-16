@@ -112,7 +112,7 @@
                                 <?php
 
                                 echo anchor(
-                                    site_url($oEmail->data->url->viewOnline, isPageSecure()),
+                                    site_url($oEmail->data->url->viewOnline, \Nails\Functions::isPageSecure()),
                                     lang('action_preview'),
                                     'class="btn btn-xs btn-primary fancybox" data-fancybox-type="iframe"'
                                 );
