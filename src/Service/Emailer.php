@@ -536,7 +536,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  If we're not on a production server, never send out to any live addresses
-        if (Environment::not('PRODUCTION') || EMAIL_OVERRIDE) {
+        if (Environment::not(Environment::ENV_PROD) || EMAIL_OVERRIDE) {
             if (EMAIL_OVERRIDE) {
                 $oEmail->to->email = EMAIL_OVERRIDE;
             } elseif (APP_DEVELOPER_EMAIL) {
@@ -652,7 +652,7 @@ class Emailer
             $sMessage .= '' . "\n";
             $sMessage .= print_r($oEmail, true) . "\n";
 
-            if (Environment::is('PRODUCTION')) {
+            if (Environment::is(Environment::ENV_PROD)) {
 
                 $this->setError('Email failed to send at SMTP time, developers informed');
                 sendDeveloperMail($sSubject, $sMessage);

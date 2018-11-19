@@ -41,7 +41,7 @@ class View extends Base
 
 //        throw new \Exception();
 
-        if (\Nails\Environment::is('DEVELOPMENT')) {
+        if (\Nails\Environment::is(Environment::ENV_DEV)) {
 
             $oAsset = Factory::service('Asset');
             $oAsset->load('debugger.css', 'nails/module-email');
