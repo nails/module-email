@@ -34,24 +34,24 @@ class Unsubscribe extends Base
         $aToken = $oEncrypt->decode($sToken, APP_PRIVATE_KEY);
 
         if (!$aToken) {
-            show_404();
+            show404();
         }
 
         $aToken = explode('|', $aToken);
 
         if (count($aToken) != 3) {
-            show_404();
+            show404();
         }
 
         $oUser = $oUserModel->getById($aToken[2]);
         if (!$oUser || $oUser->id != activeUser('id ')) {
-            show_404();
+            show404();
         }
 
         $oEmail = $oEmailer->getByRef($aToken[1]);
 
         if (!$oEmail || empty($oEmail->type->isUnsubscribable)) {
-            show_404();
+            show404();
         }
 
         // --------------------------------------------------------------------------

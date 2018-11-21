@@ -36,7 +36,7 @@ class View extends Base
         }
 
         if (!$oEmail || !$oEmailer->validateHash($oEmail->ref, $sGuid, $sHash)) {
-            show_404();
+            show404();
         }
 
 //        throw new \Exception();

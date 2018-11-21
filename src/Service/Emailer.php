@@ -14,6 +14,7 @@ namespace Nails\Email\Service;
 
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
+use Nails\Components;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Exception\HostNotKnownException;
 use Nails\Environment;
@@ -80,7 +81,7 @@ class Emailer
         $emailTypeLocations   = [];
         $emailTypeLocations[] = NAILS_COMMON_PATH . 'config/email_types.php';
 
-        $modules = _NAILS_GET_MODULES();
+        $modules = Components::modules();
 
         foreach ($modules as $module) {
             $emailTypeLocations[] = $module->path . $module->moduleName . '/config/email_types.php';

@@ -30,7 +30,7 @@ class Tracker extends Base
         // --------------------------------------------------------------------------
 
         if (!$sRef || !$oEmailer->validateHash($sRef, $sGuid, $sHash)) {
-            show_404();
+            show404();
         }
 
         // --------------------------------------------------------------------------
@@ -82,14 +82,14 @@ class Tracker extends Base
         // --------------------------------------------------------------------------
 
         if (!$sRef || !$oEmailer->validateHash($sRef, $sGuid, $sHash)) {
-            show_404();
+            show404();
         }
 
         // --------------------------------------------------------------------------
 
         $sUrl = $oEmailer->trackLink($sRef, $iLinkId);
         if ($sUrl === false) {
-            show_404();
+            show404();
         }
 
         redirect($sUrl);
