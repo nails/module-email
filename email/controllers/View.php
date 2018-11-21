@@ -11,6 +11,7 @@
  */
 
 use Nails\Email\Controller\Base;
+use Nails\Environment;
 use Nails\Factory;
 
 class View extends Base
@@ -39,22 +40,20 @@ class View extends Base
             show404();
         }
 
-//        throw new \Exception();
-
-        if (\Nails\Environment::is(Environment::ENV_DEV)) {
+        if (Environment::is(Environment::ENV_DEV)) {
 
             $oAsset = Factory::service('Asset');
             $oAsset->load('debugger.css', 'nails/module-email');
 
             Factory::service('View')
-                   ->setData([
-                       'oEmail' => $oEmail,
-                   ])
-                   ->load([
-                       'structure/header/blank',
-                       'email/view',
-                       'structure/footer/blank',
-                   ]);
+                ->setData([
+                    'oEmail' => $oEmail,
+                ])
+                ->load([
+                    'structure/header/blank',
+                    'email/view',
+                    'structure/footer/blank',
+                ]);
 
         } else {
             $oOutput = Factory::service('Output');
