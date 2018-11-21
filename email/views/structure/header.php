@@ -251,7 +251,7 @@
         <?php
 
 
-        if (\Nails\Environment::not(Environment::ENV_PROD)) {
+        if (\Nails\Environment::not(\Nails\Environment::ENV_PROD)) {
 
             ?>
             <div id="non-production-environment">
