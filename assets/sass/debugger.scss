@@ -1,8 +1,18 @@
+/* --------------------------------------------------------------
+   Nails Email Module Debugger Styles
+-------------------------------------------------------------- */
+
+$color-white: #fff;
+$color-orange: #d55600;
+$color-grey: #d5d5d5;
+$color-light-grey: #efefef;
+
+
 html,
 body {
     margin: 0;
     padding: 0;
-    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
     font-weight: 300;
     font-size: 13px;
     line-height: 1.5em;
@@ -10,11 +20,11 @@ body {
 
 .email-debugger {
     min-height: 100vh;
-    background: #fff;
+    background: $color-white;
 
     .header {
-        background: #d55600;
-        color: #fff;
+        background: $color-orange;
+        color: $color-white;
         height: 60px;
         line-height: 30px;
         padding: 1em;
@@ -29,32 +39,36 @@ body {
     .sub-header,
     .body {
         display: flex;
+
         .column {
-            width: calc(~"100%/3");
-            border-right: 1px solid darken(#d5d5d5, 7%);
+            width: calc(100% / 3);
+            border-right: 1px solid darken($color-grey, 7%);
             display: inline-block;
             box-sizing: border-box;
-            min-height: cal(~"100vh - 100px");
+            min-height: calc(100vh - 100px);
             overflow: auto;
         }
     }
 
     .sub-header {
-        background: #d5d5d5;
+        background: $color-grey;
         font-weight: bold;
         height: 35px;
+
         .column {
             padding: 0.5rem;
         }
     }
 
     .body {
-        min-height: calc(~"100vh - 100px");
+        min-height: calc(100vh - 100px);
+
         .variables {
             font-family: monospace;
-            background: #efefef;
+            background: $color-light-grey;
             padding: 0.5rem;
         }
+
         .html {
             iframe {
                 width: 100%;
@@ -62,6 +76,7 @@ body {
                 border: 0;
             }
         }
+
         .text {
             padding: 1rem;
         }

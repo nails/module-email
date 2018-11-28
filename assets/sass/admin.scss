@@ -1,0 +1,45 @@
+/* --------------------------------------------------------------
+   Nails Email Module Admin Styles
+-------------------------------------------------------------- */
+
+$color-grey: #ccc;
+
+.group-email {
+    table {
+        margin-bottom: 2em;
+
+        th,
+        td {
+            &.id
+            &.ref
+            &.status
+            &.reads
+            &.clicks {
+                text-align: center;
+            }
+        }
+
+        th {
+            &.actions {
+                min-width: 135px;
+            }
+        }
+
+        td {
+            &.to {
+                img {
+                    float: left;
+                    margin-right: 10px;
+                    border-radius: 3px;
+                    border: 1px solid $color-grey;
+                }
+            }
+
+            &.status {
+                b {
+                    margin-right: 0.3em;
+                }
+            }
+        }
+    }
+}
