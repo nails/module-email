@@ -43,7 +43,7 @@ class View extends Base
         if (Environment::is(Environment::ENV_DEV)) {
 
             $oAsset = Factory::service('Asset');
-            $oAsset->load('debugger.css', 'nails/module-email');
+            $oAsset->load('debugger.min.css', 'nails/module-email');
 
             Factory::service('View')
                 ->setData([

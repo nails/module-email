@@ -21,6 +21,6 @@ class BaseAdmin extends Base
     {
         parent::__construct();
         $oAsset = Factory::service('Asset');
-        $oAsset->load('admin.css', 'nails/module-email');
+        $oAsset->load('admin.min.css', 'nails/module-email');
     }
 }
