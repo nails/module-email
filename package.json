@@ -6,14 +6,14 @@
   "license": "MIT",
   "repository": "https://github.com/nails/module-email",
   "devDependencies": {
-    "autoprefixer": "^9.1.1",
-    "css-loader": "^1.0.0",
-    "mini-css-extract-plugin": "^0.4.1",
-    "node-sass": "^4.9.3",
-    "postcss-loader": "^3.0.0",
-    "sass-loader": "^7.1.0",
-    "webpack": "^4.14.0",
-    "webpack-command": "^0.4.2"
+    "autoprefixer": "^9.1",
+    "css-loader": "^1.0.",
+    "mini-css-extract-plugin": "^0.4",
+    "node-sass": "^4.11",
+    "postcss-loader": "^3.0",
+    "sass-loader": "^7.1",
+    "webpack": "^4.14",
+    "webpack-command": "^0.4"
   },
   "scripts": {
     "build": "webpack -p",
