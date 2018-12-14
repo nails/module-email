@@ -1,22 +1,23 @@
 {
-  "name": "nails-module-email",
-  "description": "This is the \"Email\" module for Nails.",
-  "author": "hello@nailsapp.co.uk",
-  "analyze": true,
-  "license": "MIT",
-  "repository": "https://github.com/nails/module-email",
-  "devDependencies": {
-    "autoprefixer": "^9.4",
-    "css-loader": "^1.0",
-    "mini-css-extract-plugin": "^0.5",
-    "node-sass": "^4.11",
-    "postcss-loader": "^3.0",
-    "sass-loader": "^7.1",
-    "webpack": "^4.27",
-    "webpack-command": "^0.4"
-  },
-  "scripts": {
-    "build": "webpack -p",
-    "watch": "webpack --watch"
-  }
+    "name": "nails-module-email",
+    "description": "This is the \"Email\" module for Nails.",
+    "author": "hello@nailsapp.co.uk",
+    "analyze": true,
+    "license": "MIT",
+    "repository": "https://github.com/nails/module-email",
+    "devDependencies": {
+        "autoprefixer": "^9.4",
+        "css-loader": "^2.0",
+        "mini-css-extract-plugin": "^0.5",
+        "node-sass": "^4.11",
+        "postcss-loader": "^3.0",
+        "sass-loader": "^7.1",
+        "webpack": "^4.27",
+        "webpack-command": "^0.4"
+    },
+    "scripts": {
+        "build": "webpack -p",
+        "build-dev": "webpack",
+        "watch": "webpack --watch"
+    }
 }
