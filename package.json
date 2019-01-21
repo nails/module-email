@@ -7,12 +7,12 @@
     "repository": "https://github.com/nails/module-email",
     "devDependencies": {
         "autoprefixer": "^9.4",
-        "css-loader": "^2.0",
+        "css-loader": "^2.1",
         "mini-css-extract-plugin": "^0.5",
         "node-sass": "^4.11",
         "postcss-loader": "^3.0",
         "sass-loader": "^7.1",
-        "webpack": "^4.27",
+        "webpack": "^4.29",
         "webpack-command": "^0.4"
     },
     "scripts": {
