@@ -1361,7 +1361,6 @@ EOT;
      */
     protected function getDomain()
     {
-        dd('cats');
         if (!empty($this->sDomain)) {
             return $this->sDomain;
         } elseif (site_url() === '/') {
