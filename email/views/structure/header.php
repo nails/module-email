@@ -1,272 +1,130 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{{email_subject}}</title>
-        <meta charset="utf-8">
-        <style type="text/css">
-
-            body,
-            #body-imposter {
-                margin: 0;
-                padding: 0;
-                font-size: 13px;
-                font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-                line-height: 1.75em;
-                max-width: 600px;
-                margin: auto;
-                color: #333;
-            }
-            #non-production-environment {
-                border: 1px solid #FD9005;
-                background: #FFCD9F;
-                color: #A75D00;
-                padding: 1em;
-                border-radius: 2px;
-            }
-            .padder {
-                padding: 20px;
-            }
-            h1 {
-                line-height: 1.5em;
-                font-style: italic;
-                font-weight: bold;
-            }
-            h2 {
-                font-size: 1.2em;
-                font-weight: bold;
-                margin-top: 3em;
-                border-bottom: 1px solid #ECECEC;
-                padding-bottom: 0.5em;
-            }
-            h3,
-            h4,
-            h5,
-            h6 {
-                font-size: 1em;
-                font-weight: bold;
-                margin-bottom: 1em;
-            }
-            p {
-                margin-bottom: 1em;
-            }
-            .text-center {
-                text-align: center;
-            }
-            .text-left {
-                text-align: left;
-            }
-            .text-right {
-                text-align: right;
-            }
-            small {
-                font-size:0.8em;
-            }
-            blockquote {
-                border-left: 4px solid #EFEFEF;
-                padding-left: 10px;
-                margin-left: 0px;
-                font-style: italic;
-                font-size: 1.3em;
-                font-weight: lighter;
-                color: #777777;
-            }
-            ul {
-                margin: 0;
-                margin-bottom: 1em;
-                padding: 0;
-            }
-            ul li {
-                margin: 0;
-                padding: 0;
-                list-style-type: none;
-            }
-            hr {
-                border: 0;
-                margin: 20px 0;
-                border-bottom: 1px solid #F1F1F1
-            }
-            .footer {
-                border-top: 1px solid #ECECEC;
-                margin-top: 2em;
-                padding-top: 1em;
-                font-size: 0.8em;
-            }
-            .footer ul li {
-                display: inline-block;
-                padding-right: 0.5em;
-            }
-            table.default-style {
-                border: 1px solid #CCCCCC;
-                width: 100%;
-                border-collapse: collapse;
-            }
-            table.default-style th {
-                background: #EFEFEF;
-                border-bottom: 1px dotted #CCCCCC;
-                padding: 5px 10px;
-            }
-            table.default-style td {
-                padding: 10px;
-                vertical-align: top;
-            }
-            table.default-style td.left-header-cell {
-                width: 125px;
-                font-weight: bold;
-                background: #ECECEC;
-                border-right: 1px solid #CCCCCC;
-            }
-            table.default-style th.center,
-            table.default-style td.center {
-                text-align: center;
-            }
-            table.default-style th.right,
-            table.default-style td.right {
-                text-align: right;
-            }
-            table.default-style tr.line-bottom td {
-                border-bottom: 1px dotted #CCCCCC;
-            }
-            table.default-style td small {
-                display: block;
-            }
-            img.thumbnail {
-                padding: 6px;
-                border: 1px solid #CCCCCC;
-                background: #F9F9F9;
-                -webkit-border-radius: 2px;
-                -moz-border-radius: 2px;
-                -o-border-radius: 2px;
-                border-radius: 2px;
-                -moz-box-shadow: 0px 1px 1px #888888;
-                -webkit-box-shadow: 0px 1px 1px #888888;
-                box-shadow: 0px 1px 1px #888888;
-            }
-            .heads-up,
-            .alert {
-                padding: 10px;
-                border: 1px solid #CCCCCC;
-                background: #EFEFEF;
-                -webkit-border-radius: 3px;
-                -moz-border-radius: 3px;
-                -o-border-radius: 3px;
-                border-radius: 3px;
-                -moz-box-shadow: 0px 1px 1px #CCCCCC;
-                -webkit-box-shadow: 0px 1px 1px #CCCCCC;
-                box-shadow: 0px 1px 1px #CCCCCC;
-            }
-            .heads-up.warning,
-            .heads-up.warning hr,
-            .alert.alert-danger,
-            .alert.alert-danger hr {
-                background-color: #FCF8E3;
-                border-color: #FAEBCC;
-                color: #8A6D3B;
-                margin: 1em 0;
-            }
-            a.button,
-            a.btn {
-                background: #EEEEEE; /* Old browsers */
-                background: #EEEEEE -moz-linear-gradient(top, rgba(255,255,255,.2) 0%, rgba(0,0,0,.2) 100%); /* FF3.6+ */
-                background: #EEEEEE -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.2)), color-stop(100%,rgba(0,0,0,.2))); /* Chrome,Safari4+ */
-                background: #EEEEEE -webkit-linear-gradient(top, rgba(255,255,255,.2) 0%,rgba(0,0,0,.2) 100%); /* Chrome10+,Safari5.1+ */
-                background: #EEEEEE -o-linear-gradient(top, rgba(255,255,255,.2) 0%,rgba(0,0,0,.2) 100%); /* Opera11.10+ */
-                background: #EEEEEE -ms-linear-gradient(top, rgba(255,255,255,.2) 0%,rgba(0,0,0,.2) 100%); /* IE10+ */
-                background: #EEEEEE linear-gradient(top, rgba(255,255,255,.2) 0%,rgba(0,0,0,.2) 100%); /* W3C */
-                border: 1px solid #AAAAAA;
-                border-top: 1px solid #CCCCCC;
-                border-left: 1px solid #CCCCCC;
-                -webkit-border-radius: 3px;
-                -moz-border-radius: 3px;
-                -o-border-radius: 3px;
-                border-radius: 3px;
-                color: #444444;
-                display: inline-block;
-                font-weight: bold;
-                text-decoration: none;
-                text-shadow: 0 1px rgba(255, 255, 255, .75);
-                cursor: pointer;
-                padding: 8px 10px;
-                font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            }
-            a.button.large,
-            a.btn.large {
-                font-size: 1em;
-                padding: 10px 15px;
-            }
-            a.button.small,
-            a.btn.small {
-                font-size: 0.8em;
-                padding: 2px 7px;
-            }
-            .button:hover,
-            .btn:hover,
-            button:hover,
-            input[type="submit"]:hover,
-            input[type="reset"]:hover,
-            input[type="button"]:hover {
-                color: #222222;
-                background: #DDDDDD; /* Old browsers */
-                background: #DDDDDD -moz-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(0,0,0,.3) 100%); /* FF3.6+ */
-                background: #DDDDDD -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.3)), color-stop(100%,rgba(0,0,0,.3))); /* Chrome,Safari4+ */
-                background: #DDDDDD -webkit-linear-gradient(top, rgba(255,255,255,.3) 0%,rgba(0,0,0,.3) 100%); /* Chrome10+,Safari5.1+ */
-                background: #DDDDDD -o-linear-gradient(top, rgba(255,255,255,.3) 0%,rgba(0,0,0,.3) 100%); /* Opera11.10+ */
-                background: #DDDDDD -ms-linear-gradient(top, rgba(255,255,255,.3) 0%,rgba(0,0,0,.3) 100%); /* IE10+ */
-                background: #DDDDDD linear-gradient(top, rgba(255,255,255,.3) 0%,rgba(0,0,0,.3) 100%); /* W3C */
-                border: 1px solid #888888;
-                border-top: 1px solid #AAAAAA;
-                border-left: 1px solid #AAAAAA;
-            }
-            .button:active,
-            .btn:active,
-            button:active,
-            input[type="submit"]:active,
-            input[type="reset"]:active,
-            input[type="button"]:active {
-                border: 1px solid #666666;
-                background: #CCCCCC; /* Old browsers */
-                background: #CCCCCC -moz-linear-gradient(top, rgba(255,255,255,.35) 0%, rgba(10,10,10,.4) 100%); /* FF3.6+ */
-                background: #CCCCCC -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.35)), color-stop(100%,rgba(10,10,10,.4))); /* Chrome,Safari4+ */
-                background: #CCCCCC -webkit-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* Chrome10+,Safari5.1+ */
-                background: #CCCCCC -o-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* Opera11.10+ */
-                background: #CCCCCC -ms-linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* IE10+ */
-                background: #CCCCCC linear-gradient(top, rgba(255,255,255,.35) 0%,rgba(10,10,10,.4) 100%); /* W3C */
-            }
-            .button.full-width,
-            .btn.btn-block,
-            button.full-width,
-            input[type="submit"].full-width,
-            input[type="reset"].full-width,
-            input[type="button"].full-width {
-                width: 100%;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                text-align: center;
-            }
-
-        </style>
-    </head>
-    <body>
-    <div id="body-imposter">
-    <div class="padder">
-        <?php
-
-
-        if (\Nails\Environment::not(\Nails\Environment::ENV_PROD)) {
-
-            ?>
-            <div id="non-production-environment">
-                This email was sent from a testing environment.
-            </div>
-            <?php
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>{{email_subject}}</title>
+    <style type="text/css">
+        img {
+            max-width: 100%;
         }
 
-        ?>
-        <h1>
-            {{email_subject}}
-            <hr />
-        </h1>
-        {{#sentTo.first_name}}
-            <p>
-            Hi {{sentTo.first_name}},
-            </p>
-        {{/sentTo.first_name}}
+        body {
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none;
+            width: 100% !important;
+            height: 100%;
+            line-height: 1.6em;
+            background-color: #f6f6f6;
+        }
+
+        .btn,
+        .button {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            font-size: 14px;
+            color: #FFF;
+            text-decoration: none;
+            line-height: 2em;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+            border-radius: 5px;
+            text-transform: capitalize;
+            background-color: #348eda;
+            margin: 0;
+            border-color: #348eda;
+            border-style: solid;
+            border-width: 10px 20px;
+        }
+
+        .btn-block
+        .button-block {
+            width: 100%;
+        }
+
+        @media only screen and (max-width: 640px) {
+            body {
+                padding: 0 !important;
+            }
+
+            h1 {
+                font-weight: 800 !important;
+                margin: 20px 0 5px !important;
+            }
+
+            h2 {
+                font-weight: 800 !important;
+                margin: 20px 0 5px !important;
+            }
+
+            h3 {
+                font-weight: 800 !important;
+                margin: 20px 0 5px !important;
+            }
+
+            h4 {
+                font-weight: 800 !important;
+                margin: 20px 0 5px !important;
+            }
+
+            h1 {
+                font-size: 22px !important;
+            }
+
+            h2 {
+                font-size: 18px !important;
+            }
+
+            h3 {
+                font-size: 16px !important;
+            }
+
+            .container {
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            .content {
+                padding: 0 !important;
+            }
+
+            .content-wrap {
+                padding: 10px !important;
+            }
+        }
+    </style>
+</head>
+
+<body itemscope itemtype="http://schema.org/EmailMessage" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6em; background-color: #f6f6f6; margin: 0;" bgcolor="#f6f6f6">
+<table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background-color: #f6f6f6; margin: 0;" bgcolor="#f6f6f6">
+    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+        <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
+        <td class="container" width="600" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto;" valign="top">
+            <div class="content" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
+                <table class="main" width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;" bgcolor="#fff">
+                    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                        <td class="alert alert-header" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; color: #fff; font-weight: 500; text-align: center; border-radius: 3px 3px 0 0; background-color: #4a4a4a; margin: 0; padding: 20px;" align="center" bgcolor="#FF9F00" valign="top">
+                            {{email_subject}}
+                        </td>
+                    </tr>
+                    <?php
+                    if (\Nails\Environment::not(\Nails\Environment::ENV_PROD)) {
+                        ?>
+                        <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                            <td class="alert alert-warning" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; color: #fff; font-weight: 500; text-align: center; background-color: #FF9F00; margin: 0; padding: 20px;" align="center" bgcolor="#FF9F00" valign="top">
+                                This email was sent from a testing environment.
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                        <td class="content-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 20px;" valign="top">
+                            {{#sentTo.first_name}}
+                            <p>Hi {{sentTo.first_name}},</p>
+                            {{/sentTo.first_name}}
+                            {{^sentTo.first_name}}
+                            <p>Hi,</p>
+                            {{/sentTo.first_name}}
