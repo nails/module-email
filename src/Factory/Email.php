@@ -19,54 +19,63 @@ class Email
 {
     /**
      * The email's type
+     *
      * @var string
      */
     protected $sType = '';
 
     /**
      * The email's recipients
+     *
      * @var array
      */
     protected $aTo = [];
 
     /**
      * The email's CC recipients
+     *
      * @var array
      */
     protected $aCc = [];
 
     /**
      * The email's BCC recipients
+     *
      * @var array
      */
     protected $aBcc = [];
 
     /**
      * The name of the sender
+     *
      * @var string
      */
     protected $sFromName = '';
 
     /**
      * The email address of the sender (the reply-to value)
+     *
      * @var string
      */
     protected $sFromEmail = '';
 
     /**
      * The email's subject
+     *
      * @var string
      */
     protected $sSubject = '';
 
     /**
      * The email's data payload
+     *
      * @var array
      */
     protected $aData = [];
 
     /**
      * Whether the last email was sent successfully or not
+     *
      * @var null
      */
     protected $bLastEmailDidSend = null;
@@ -173,6 +182,24 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * @param string $sEmail The email address to send from
+     * @param string $sName  The name to send from
+     *
+     * @return $this
+     * @throws ValidationException
+     */
+    public function from($sEmail, $sName = '')
+    {
+        $this->validateEmail($sEmail);
+        $this->sFromEmail = $sEmail;
+        $this->sFromName  = $sName;
+
+        return $this;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Validates an email address
      *
      * @param integer|string $sEmail The email address to validate
@@ -271,6 +298,7 @@ class Email
 
     /**
      * Whether the last email was sent successfully
+     *
      * @return bool
      */
     public function didSend()
@@ -282,6 +310,7 @@ class Email
 
     /**
      * Returns the item as an array
+     *
      * @return array
      */
     public function toArray()
