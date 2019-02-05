@@ -93,6 +93,35 @@
             .content-wrap {
                 padding: 10px !important;
             }
+
+            .content-wrap .table {
+                border: 1px solid #bbb;
+                width: 100%;
+                padding: 0;
+                border-spacing: 0;
+                border-collapse: collapse;
+            }
+
+            .content-wrap .table tbody tr td {
+                padding: 0.5rem;
+            }
+
+            .content-wrap .table.table--list tbody tr td {
+                border-bottom: 1px solid #eee;
+            }
+
+            .content-wrap .table.table--list tbody tr td:first-child {
+                background: #ccc;
+                border-right: 3px solid #bbb;
+                border-bottom: 1px solid #bbb;
+                padding-right: 1rem;
+                vertical-align: top;
+                font-weight: bold;
+            }
+
+            .content-wrap .table.table--list tbody tr:last-child td {
+                border-bottom: 1px solid #bbb;
+            }
         }
     </style>
 </head>
