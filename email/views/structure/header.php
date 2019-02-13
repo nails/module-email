@@ -44,83 +44,83 @@
             width: 100%;
         }
 
+        h1 {
+            font-weight: 800 !important;
+            margin: 20px 0 5px !important;
+        }
+
+        h2 {
+            font-weight: 800 !important;
+            margin: 20px 0 5px !important;
+        }
+
+        h3 {
+            font-weight: 800 !important;
+            margin: 20px 0 5px !important;
+        }
+
+        h4 {
+            font-weight: 800 !important;
+            margin: 20px 0 5px !important;
+        }
+
+        h1 {
+            font-size: 22px !important;
+        }
+
+        h2 {
+            font-size: 18px !important;
+        }
+
+        h3 {
+            font-size: 16px !important;
+        }
+
+        .container {
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .content {
+            padding: 0 !important;
+        }
+
+        .content-wrap {
+            padding: 10px !important;
+        }
+
+        .content-wrap .table {
+            border: 1px solid #bbb;
+            width: 100%;
+            padding: 0;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+
+        .content-wrap .table tbody tr td {
+            padding: 0.5rem;
+        }
+
+        .content-wrap .table.table--list tbody tr td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .content-wrap .table.table--list tbody tr td:first-child {
+            background: #ccc;
+            border-right: 3px solid #bbb;
+            border-bottom: 1px solid #bbb;
+            padding-right: 1rem;
+            vertical-align: top;
+            font-weight: bold;
+        }
+
+        .content-wrap .table.table--list tbody tr:last-child td {
+            border-bottom: 1px solid #bbb;
+        }
+
         @media only screen and (max-width: 640px) {
             body {
                 padding: 0 !important;
-            }
-
-            h1 {
-                font-weight: 800 !important;
-                margin: 20px 0 5px !important;
-            }
-
-            h2 {
-                font-weight: 800 !important;
-                margin: 20px 0 5px !important;
-            }
-
-            h3 {
-                font-weight: 800 !important;
-                margin: 20px 0 5px !important;
-            }
-
-            h4 {
-                font-weight: 800 !important;
-                margin: 20px 0 5px !important;
-            }
-
-            h1 {
-                font-size: 22px !important;
-            }
-
-            h2 {
-                font-size: 18px !important;
-            }
-
-            h3 {
-                font-size: 16px !important;
-            }
-
-            .container {
-                padding: 0 !important;
-                width: 100% !important;
-            }
-
-            .content {
-                padding: 0 !important;
-            }
-
-            .content-wrap {
-                padding: 10px !important;
-            }
-
-            .content-wrap .table {
-                border: 1px solid #bbb;
-                width: 100%;
-                padding: 0;
-                border-spacing: 0;
-                border-collapse: collapse;
-            }
-
-            .content-wrap .table tbody tr td {
-                padding: 0.5rem;
-            }
-
-            .content-wrap .table.table--list tbody tr td {
-                border-bottom: 1px solid #eee;
-            }
-
-            .content-wrap .table.table--list tbody tr td:first-child {
-                background: #ccc;
-                border-right: 3px solid #bbb;
-                border-bottom: 1px solid #bbb;
-                padding-right: 1rem;
-                vertical-align: top;
-                font-weight: bold;
-            }
-
-            .content-wrap .table.table--list tbody tr:last-child td {
-                border-bottom: 1px solid #bbb;
             }
         }
     </style>
