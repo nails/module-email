@@ -87,7 +87,7 @@ class Emailer
             $emailTypeLocations[] = $module->path . $module->moduleName . '/config/email_types.php';
         }
 
-        $emailTypeLocations[] = APPPATH . 'config/email_types.php';
+        $emailTypeLocations[] = NAILS_APP_PATH . 'application/config/email_types.php';
 
         //  Find definitions
         foreach ($emailTypeLocations as $path) {
