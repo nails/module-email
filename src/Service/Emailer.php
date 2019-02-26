@@ -656,7 +656,6 @@ class Emailer
             if (Environment::is(Environment::ENV_PROD)) {
 
                 $this->setError('Email failed to send at SMTP time, developers informed');
-                sendDeveloperMail($sSubject, $sMessage);
 
             } else {
 
