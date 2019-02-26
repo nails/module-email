@@ -34,7 +34,6 @@ class Emailer
     protected $aTrackLinkCache;
     protected $sTable;
     protected $sTableAlias;
-    protected $bHasDeveloperMail;
     protected $iGenerateTrackingEmailId;
     protected $sGenerateTrackingEmailRef;
     protected $mGenerateTrackingNeedsVerified;
@@ -98,10 +97,6 @@ class Emailer
 
         $this->sTable      = NAILS_DB_PREFIX . 'email_archive';
         $this->sTableAlias = 'ea';
-
-        // --------------------------------------------------------------------------
-
-        $this->bHasDeveloperMail = defined('APP_DEVELOPER_EMAIL') && !empty(APP_DEVELOPER_EMAIL);
     }
 
     // --------------------------------------------------------------------------
@@ -536,16 +531,34 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //  If we're not on a production server, never send out to any live addresses
-        if (Environment::not(Environment::ENV_PROD) || EMAIL_OVERRIDE) {
+        //  Handle routing of email on non-production environments
+        if (Environment::not(Environment::ENV_PROD)) {
             if (EMAIL_OVERRIDE) {
                 $oEmail->to->email = EMAIL_OVERRIDE;
+            } elseif (EMAIL_WHITELIST) {
+
+                $aWhitelist = array_values(array_filter((array) json_decode(EMAIL_WHITELIST)));
+                if (!in_array($oEmail->to->email, $aWhitelist)) {
+
+                    $bMatch = false;
+                    foreach ($aWhitelist as $sRule) {
+                        if (preg_match('/' . $sRule . '/', $oEmail->to->email)) {
+                            $bMatch = true;
+                            break;
+                        }
+                    }
+
+                    if (!$bMatch) {
+                        //  No matches so silently fail
+                        return true;
+                    }
+                }
+
             } elseif (APP_DEVELOPER_EMAIL) {
                 $oEmail->to->email = APP_DEVELOPER_EMAIL;
             } else {
-                //  Not sure where this is going; fall over *waaaa*
                 throw new EmailerException(
-                    'EMAILER: Non production environment and neither EMAIL_OVERRIDE nor APP_DEVELOPER_EMAIL is set'
+                    'EMAILER: Non-production environment detected and neither EMAIL_OVERRIDE, EMAIL_WHITELIST nor APP_DEVELOPER_EMAIL is set'
                 );
             }
         }
