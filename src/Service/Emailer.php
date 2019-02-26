@@ -12,6 +12,7 @@
 
 namespace Nails\Email\Service;
 
+use Nails\Common\Exception\NailsException;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
@@ -1407,7 +1408,9 @@ EOT;
         $oEmail->type = !empty($this->aEmailType[$oEmail->type]) ? $this->aEmailType[$oEmail->type] : null;
 
         if (empty($oEmail->type)) {
-            showFatalError('Invalid Email Type', 'Email with ID #' . $oEmail->id . ' has an invalid email type.');
+            throw new NailsException(
+                'Invalid Email Type: email with ID #' . $oEmail->id . ' has an invalid email type.'
+            );
         }
 
         // --------------------------------------------------------------------------
