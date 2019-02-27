@@ -49,19 +49,10 @@ class Emailer
      */
     public function __construct()
     {
-        $this->oCi =& get_instance();
-
-        // --------------------------------------------------------------------------
-
         //  Set email related settings
         $this->from        = new \stdClass();
         $this->from->name  = $this->getFromName();
         $this->from->email = $this->getFromEmail();
-
-        // --------------------------------------------------------------------------
-
-        //  Load Email library
-        $this->oCi->load->library('email');
 
         // --------------------------------------------------------------------------
 
@@ -77,45 +68,65 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //  Define where we should look for email types
-        $emailTypeLocations   = [];
-        $emailTypeLocations[] = NAILS_COMMON_PATH . 'config/email_types.php';
-
-        $modules = Components::modules();
-
-        foreach ($modules as $module) {
-            $emailTypeLocations[] = $module->path . $module->moduleName . '/config/email_types.php';
-        }
-
-        $emailTypeLocations[] = NAILS_APP_PATH . 'application/config/email_types.php';
-
-        //  Find definitions
-        foreach ($emailTypeLocations as $path) {
-            $this->loadTypes($path);
-        }
+        // Auto-discover email types
+        static::discoverTypes($this->aEmailType);
 
         // --------------------------------------------------------------------------
 
         $this->sTable      = NAILS_DB_PREFIX . 'email_archive';
         $this->sTableAlias = 'ea';
+
+        // --------------------------------------------------------------------------
+
+        //  Load Email library
+        //  @todo (Pablo - 2019-02-27) - Do not rely on CodeIgniter for sending emails
+        if (function_exists('get_instance')) {
+            $this->oCi =& get_instance();
+            $this->oCi->load->library('email');
+        }
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Loads email types located in a config file at $path
+     * Auto-discover all emails supplied by modules and the app
      *
-     * @param  string $path The path to load
+     * @param array $aArray The array to populate with discoveries
+     */
+    public static function discoverTypes(array &$aArray): void
+    {
+        $aLocations = [
+            NAILS_COMMON_PATH . 'config/email_types.php',
+        ];
+
+        foreach (Components::modules() as $oModule) {
+            $aLocations[] = $oModule->path . $oModule->moduleName . '/config/email_types.php';
+        }
+
+        $aLocations[] = NAILS_APP_PATH . 'application/config/email_types.php';
+
+        foreach ($aLocations as $sPath) {
+            static::loadTypes($sPath, $aArray);
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Loads email types located in a config file at $sPath
+     *
+     * @param string $sPath  The path to load
+     * @param array  $aArray The array to populate
      *
      * @return void
      */
-    protected function loadTypes($path)
+    public static function loadTypes($sPath, array &$aArray): void
     {
-        if (file_exists($path)) {
-            include $path;
+        if (file_exists($sPath)) {
+            include $sPath;
             if (!empty($config['email_types'])) {
-                foreach ($config['email_types'] as $type) {
-                    $this->addType($type);
+                foreach ($config['email_types'] as $oType) {
+                    static::addType($oType, $aArray);
                 }
             }
         }
@@ -139,29 +150,30 @@ class Emailer
     /**
      * Adds a new email type to the stack
      *
-     * @param  \stdClass $data An object representing the email type
+     * @param  \stdClass $oData  An object representing the email type
+     * @param array      $aArray The array to populate
      *
      * @return boolean
      */
-    protected function addType($data)
+    protected static function addType(\stdClass $oData, array &$aArray): bool
     {
-        if (empty($data->slug) || empty($data->template_body)) {
-            return false;
+        if (!empty($oData->slug) && !empty($oData->template_body)) {
+
+            $aArray[$oData->slug] = (object) [
+                'slug'             => $oData->slug,
+                'name'             => $oData->name,
+                'description'      => $oData->description,
+                'isUnsubscribable' => property_exists($oData, 'isUnsubscribable') ? (bool) $oData->isUnsubscribable : true,
+                'template_header'  => empty($oData->template_header) ? 'email/structure/header' : $oData->template_header,
+                'template_body'    => $oData->template_body,
+                'template_footer'  => empty($oData->template_footer) ? 'email/structure/footer' : $oData->template_footer,
+                'default_subject'  => $oData->default_subject,
+            ];
+
+            return true;
         }
 
-        $temp                   = new \stdClass();
-        $temp->slug             = $data->slug;
-        $temp->name             = $data->name;
-        $temp->description      = $data->description;
-        $temp->isUnsubscribable = property_exists($data, 'isUnsubscribable') ? (bool) $data->isUnsubscribable : true;
-        $temp->template_header  = empty($data->template_header) ? 'email/structure/header' : $data->template_header;
-        $temp->template_body    = $data->template_body;
-        $temp->template_footer  = empty($data->template_footer) ? 'email/structure/footer' : $data->template_footer;
-        $temp->default_subject  = $data->default_subject;
-
-        $this->aEmailType[$data->slug] = $temp;
-
-        return true;
+        return false;
     }
 
     // --------------------------------------------------------------------------
@@ -479,6 +491,10 @@ class Emailer
      */
     protected function doSend($emailId = false, $graceful = false)
     {
+        if (empty($this->oCi)) {
+            throw new EmailerException('Cannot send email; CodeIgniter not available in this environment');
+        }
+
         //  Get the email if $emailId is not an object
         if (is_numeric($emailId)) {
 
