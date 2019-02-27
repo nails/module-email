@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Email extends BaseMaker
 {
     const SERVICE_TOKEN     = 'FACTORIES';
-    const RESOURCE_PATH     = NAILS_COMMON_PATH . 'resources/console/';
+    const RESOURCE_PATH     = __DIR__ . '/../../../../resources/console/';
     const APP_PATH          = NAILS_APP_PATH . 'src/Factory/Email/';
     const TEMPLATE_PATH     = NAILS_APP_PATH . 'modules/email/views/';
     const EMAIL_CONFIG_PATH = NAILS_APP_PATH . 'application/config/email_types.php';
