@@ -177,7 +177,8 @@ class Email extends BaseMaker
                     //  Generate templates
                     $this
                         ->createPath($aConfig['TEMPLATE_DIR'])
-                        ->createFile($aConfig['TEMPLATE_HTML']);
+                        ->createFile($aConfig['TEMPLATE_HTML'])
+                        ->createFile($aConfig['TEMPLATE_TEXT']);
 
                     //  Generate the service definition
                     $aDefinition           = [
