@@ -10,6 +10,7 @@
  * @link
  */
 
+use Nails\Common\Exception\NailsException;
 use Nails\Email\Controller\Base;
 use Nails\Factory;
 
@@ -36,7 +37,7 @@ class Verify extends Base
             try {
 
                 if (!$oUserModel->emailVerify($oUser->id, $sCode)) {
-                    throw new \Exception($oUserModel->lastError());
+                    throw new NailsException($oUserModel->lastError());
                 }
 
                 //  Reward referrer (if any)
