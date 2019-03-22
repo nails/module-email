@@ -167,6 +167,10 @@ class Email
             $aArray = [];
         }
 
+        if (strpos($mUserIdOrEmail, ',') !== false) {
+            $mUserIdOrEmail = array_map('trim', explode(',', $mUserIdOrEmail));
+        }
+
         if (is_array($mUserIdOrEmail)) {
             foreach ($mUserIdOrEmail as $sUserIdOrEmail) {
                 $this->addRecipient($sUserIdOrEmail, true, $aArray);
