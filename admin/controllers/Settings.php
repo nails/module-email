@@ -20,6 +20,7 @@ class Settings extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups
+     *
      * @return \stdClass
      */
     public static function announce()
@@ -39,6 +40,7 @@ class Settings extends BaseAdmin
 
     /**
      * Returns an array of permissions which can be configured for the user
+     *
      * @return array
      */
     public static function permissions(): array
@@ -54,6 +56,7 @@ class Settings extends BaseAdmin
 
     /**
      * Manage Email settings
+     *
      * @return void
      */
     public function index()
@@ -75,8 +78,8 @@ class Settings extends BaseAdmin
             }
 
             if (!empty($aSettings)) {
-                $oAppSettingModel = Factory::model('AppSetting');
-                if ($oAppSettingModel->set($aSettings, 'nails/module-email')) {
+                $oAppSettingService = Factory::service('AppSetting');
+                if ($oAppSettingService->set($aSettings, 'nails/module-email')) {
                     $this->data['success'] = 'Email settings have been saved.';
                 } else {
                     $this->data['error'] = 'There was a problem saving email settings.';
