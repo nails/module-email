@@ -74,6 +74,13 @@ class Email
     protected $aData = [];
 
     /**
+     * The email's attachments
+     *
+     * @var array
+     */
+    protected $aAttachments = [];
+
+    /**
      * Whether the last email was sent successfully or not
      *
      * @var null
@@ -245,12 +252,35 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Add an attachment to an email
+     *
+     * @param string|array $sPath     The path to the attachment
+     * @param string       $sFileName The name to give the filename
+     *
+     * @return $this
+     */
+    public function attach($sPath, string $sFileName = null): Email
+    {
+        if (is_array($sPath)) {
+            foreach ($sPath as $datum) {
+                $this->attach($datum);
+            }
+        } else {
+            $this->aAttachments[] = [$sPath, $sFileName ?? basename($sPath)];
+        }
+
+        return $this;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Send the email
      *
      * @param bool $bGraceful Whether to fail gracefully or not
      *
-     * @throws EmailerException
      * @return $this
+     * @throws EmailerException
      */
     public function send($bGraceful = false)
     {
@@ -261,6 +291,10 @@ class Email
             'to_email' => null,
             'data'     => (object) $aEmail['aData'],
         ];
+
+        if (!empty($aEmail['aAttachments'])) {
+            $aData['data']->attachments = $aEmail['aAttachments'];
+        }
 
         if (!empty($aEmail['sSubject']) & empty($aData['data']->email_subject)) {
             $aData['data']->email_subject = $aEmail['sSubject'];
@@ -320,14 +354,15 @@ class Email
     public function toArray()
     {
         return [
-            'sType'      => $this->sType,
-            'aTo'        => array_filter(array_unique($this->aTo)),
-            'aCc'        => array_filter(array_unique($this->aCc)),
-            'aBcc'       => array_filter(array_unique($this->aBcc)),
-            'sFromName'  => $this->sFromName,
-            'sFromEmail' => $this->sFromEmail,
-            'sSubject'   => $this->sSubject,
-            'aData'      => $this->aData,
+            'sType'        => $this->sType,
+            'aTo'          => array_filter(array_unique($this->aTo)),
+            'aCc'          => array_filter(array_unique($this->aCc)),
+            'aBcc'         => array_filter(array_unique($this->aBcc)),
+            'sFromName'    => $this->sFromName,
+            'sFromEmail'   => $this->sFromEmail,
+            'sSubject'     => $this->sSubject,
+            'aData'        => $this->aData,
+            'aAttachments' => $this->aAttachments,
         ];
     }
 }

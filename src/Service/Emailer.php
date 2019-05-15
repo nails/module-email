@@ -150,8 +150,8 @@ class Emailer
     /**
      * Adds a new email type to the stack
      *
-     * @param  \stdClass $oData  An object representing the email type
-     * @param array      $aArray The array to populate
+     * @param \stdClass $oData  An object representing the email type
+     * @param array     $aArray The array to populate
      *
      * @return boolean
      */
@@ -181,8 +181,8 @@ class Emailer
     /**
      * Send an email
      *
-     * @param  object  $input    The email object
-     * @param  boolean $graceful Whether to gracefully fail or not
+     * @param object  $input    The email object
+     * @param boolean $graceful Whether to gracefully fail or not
      *
      * @return boolean|\stdClass
      * @throws EmailerException
@@ -362,12 +362,12 @@ class Emailer
     /**
      * Sends an email again
      *
-     * @todo This should probably create a new row
-     *
-     * @param  mixed $mEmailIdRef The email's ID or ref
+     * @param mixed $mEmailIdRef The email's ID or ref
      *
      * @return boolean
      * @throws EmailerException
+     * @todo This should probably create a new row
+     *
      */
     public function resend($mEmailIdRef)
     {
@@ -390,8 +390,8 @@ class Emailer
     /**
      * Determines whether the user has unsubscribed from this email type
      *
-     * @param  int    $iUSerId The user ID to check for
-     * @param  string $sType   The type of email to check against
+     * @param int    $iUSerId The user ID to check for
+     * @param string $sType   The type of email to check against
      *
      * @return boolean
      * @throws \Nails\Common\Exception\FactoryException
@@ -427,8 +427,8 @@ class Emailer
     /**
      * Unsubscribes a user from a particular email type
      *
-     * @param  int    $user_id The user ID to unsubscribe
-     * @param  string $type    The type of email to unsubscribe from
+     * @param int    $user_id The user ID to unsubscribe
+     * @param string $type    The type of email to unsubscribe from
      *
      * @return boolean
      * @throws \Nails\Common\Exception\FactoryException
@@ -455,8 +455,8 @@ class Emailer
     /**
      * Subscribe a user to a particular email type
      *
-     * @param  int    $user_id The user ID to subscribe
-     * @param  string $type    The type of email to subscribe to
+     * @param int    $user_id The user ID to subscribe
+     * @param string $type    The type of email to subscribe to
      *
      * @return boolean
      * @throws \Nails\Common\Exception\FactoryException
@@ -482,8 +482,8 @@ class Emailer
     /**
      * Sends a templated email immediately
      *
-     * @param  int|bool $emailId  The ID of the email to send, or the email object itself
-     * @param  boolean  $graceful Whether or not to fail gracefully
+     * @param int|bool $emailId  The ID of the email to send, or the email object itself
+     * @param boolean  $graceful Whether or not to fail gracefully
      *
      * @return boolean
      * @throws EmailerException
@@ -595,14 +595,7 @@ class Emailer
 
         //  Add any attachments
         if (!empty($oEmail->data->attachments)) {
-
             foreach ($oEmail->data->attachments as $file) {
-
-                /**
-                 * @todo: Support for when custom names can be set.
-                 * It's in the CI 3.0 dev branch, wonder if it'll ever be
-                 * released.
-                 */
 
                 if (is_array($file)) {
                     $_file     = isset($file[0]) ? $file[0] : null;
@@ -710,9 +703,9 @@ class Emailer
     /**
      * Returns emails from the archive
      *
-     * @param  integer $page    The page of results to retrieve
-     * @param  integer $perPage The number of results per page
-     * @param  array   $data    Data to pass to getCountCommonEmail()
+     * @param integer $page    The page of results to retrieve
+     * @param integer $perPage The number of results per page
+     * @param array   $data    Data to pass to getCountCommonEmail()
      *
      * @return object
      * @throws \Nails\Common\Exception\FactoryException
@@ -865,7 +858,7 @@ class Emailer
     /**
      * Get en email from the archive by its ID
      *
-     * @param  int  $iId   The email's ID
+     * @param int   $iId   The email's ID
      * @param array $aData The data array
      *
      * @return mixed   stdClass on success, false on failure
@@ -963,7 +956,7 @@ class Emailer
     /**
      * Generates a unique reference for an email, optionally exclude strings
      *
-     * @param  array $exclude Strings to exclude from the reference
+     * @param array $exclude Strings to exclude from the reference
      *
      * @return string
      * @throws \Nails\Common\Exception\FactoryException
@@ -998,10 +991,10 @@ class Emailer
     /**
      * Renders the debugger
      *
-     * @param  \stdClass $input         The email input object
-     * @param  string    $body          The email's body
-     * @param  string    $plaintext     The email's plaintext body
-     * @param  array     $recent_errors An array of any recent errors
+     * @param \stdClass $input         The email input object
+     * @param string    $body          The email's body
+     * @param string    $plaintext     The email's plaintext body
+     * @param array     $recent_errors An array of any recent errors
      *
      * @return void
      */
@@ -1103,7 +1096,7 @@ EOT;
     /**
      * Increments an email's open count and adds a tracking note
      *
-     * @param  string $ref The email's reference
+     * @param string $ref The email's reference
      *
      * @return void
      */
@@ -1134,8 +1127,8 @@ EOT;
     /**
      * Increments a link's open count and adds a tracking note
      *
-     * @param  string  $sRef    The email's reference
-     * @param  integer $iLinkId The link's ID
+     * @param string  $sRef    The email's reference
+     * @param integer $iLinkId The link's ID
      *
      * @return string
      * @throws \Nails\Common\Exception\FactoryException
@@ -1187,11 +1180,11 @@ EOT;
     /**
      * Parses a string for <a> links and replaces them with a trackable URL
      *
-     * @param  string  $body          The string to parse
-     * @param  int     $emailId       The email's ID
-     * @param  string  $emailRef      The email's reference
-     * @param  boolean $isHtml        Whether or not this is the HTML version of the email
-     * @param  boolean $needsVerified Whether or not this user needs verified (i.e route tracking links through the
+     * @param string  $body           The string to parse
+     * @param int     $emailId        The email's ID
+     * @param string  $emailRef       The email's reference
+     * @param boolean $isHtml         Whether or not this is the HTML version of the email
+     * @param boolean $needsVerified  Whether or not this user needs verified (i.e route tracking links through the
      *                                verifier)
      *
      * @return string
@@ -1230,7 +1223,7 @@ EOT;
     /**
      * Processes a link found by _parse_links()
      *
-     * @param  array $link The link elements
+     * @param array $link The link elements
      *
      * @return string
      */
@@ -1260,7 +1253,7 @@ EOT;
     /**
      * Process the URL of a link found by processLinkHtml()
      *
-     * @param  array $url The URL elements
+     * @param array $url The URL elements
      *
      * @return string
      * @throws \Nails\Common\Exception\FactoryException
@@ -1286,10 +1279,10 @@ EOT;
     /**
      * Generate a tracking URL
      *
-     * @param  string  $html    The Link HTML
-     * @param  string  $url     The Link's URL
-     * @param  string  $title   The Link's Title
-     * @param  boolean $is_html Whether this is HTML or not
+     * @param string  $html    The Link HTML
+     * @param string  $url     The Link's URL
+     * @param string  $title   The Link's Title
+     * @param boolean $is_html Whether this is HTML or not
      *
      * @return string
      * @throws HostNotKnownException
@@ -1414,7 +1407,7 @@ EOT;
     /**
      * Format an email object
      *
-     * @param  object $oEmail The raw email object
+     * @param object $oEmail The raw email object
      *
      * @return void
      * @throws \Nails\Common\Exception\FactoryException
