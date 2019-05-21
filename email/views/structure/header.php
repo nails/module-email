@@ -39,7 +39,7 @@
             border-width: 10px 20px;
         }
 
-        .btn-block
+        .btn-block,
         .button-block {
             width: 100%;
         }
