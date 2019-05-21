@@ -12,7 +12,11 @@
 
 namespace Nails\Email\Service;
 
+use Mustache_Engine;
+use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\NailsException;
+use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
@@ -20,7 +24,14 @@ use Nails\Email\Exception\EmailerException;
 use Nails\Email\Exception\HostNotKnownException;
 use Nails\Environment;
 use Nails\Factory;
+use PHPMailer\PHPMailer;
+use stdClass;
 
+/**
+ * Class Emailer
+ *
+ * @package Nails\Email\Service
+ */
 class Emailer
 {
     use ErrorHandling;
@@ -30,7 +41,11 @@ class Emailer
 
     public $from;
 
-    protected $oCi;
+    /**
+     * @var PHPMailer\PHPMailer
+     */
+    protected $oPhpMailer;
+
     protected $aEmailType;
     protected $aTrackLinkCache;
     protected $sTable;
@@ -45,14 +60,15 @@ class Emailer
     /**
      * Emailer constructor.
      *
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function __construct()
     {
         //  Set email related settings
-        $this->from        = new \stdClass();
-        $this->from->name  = $this->getFromName();
-        $this->from->email = $this->getFromEmail();
+        $this->from = (object) [
+            'name'  => $this->getFromName(),
+            'email' => $this->getFromEmail(),
+        ];
 
         // --------------------------------------------------------------------------
 
@@ -78,12 +94,14 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //  Load Email library
-        //  @todo (Pablo - 2019-02-27) - Do not rely on CodeIgniter for sending emails
-        if (function_exists('get_instance')) {
-            $this->oCi =& get_instance();
-            $this->oCi->load->library('email');
-        }
+        $this->oPhpMailer = new PHPMailer\PHPMailer();
+
+        $this->oPhpMailer->isSMTP();
+        $this->oPhpMailer->Host     = DEPLOY_EMAIL_HOST;
+        $this->oPhpMailer->SMTPAuth = true;
+        $this->oPhpMailer->Username = DEPLOY_DB_USERNAME;
+        $this->oPhpMailer->Password = DEPLOY_DB_PASSWORD;
+        $this->oPhpMailer->Port     = DEPLOY_EMAIL_PORT;
     }
 
     // --------------------------------------------------------------------------
@@ -150,12 +168,12 @@ class Emailer
     /**
      * Adds a new email type to the stack
      *
-     * @param \stdClass $oData  An object representing the email type
-     * @param array     $aArray The array to populate
+     * @param stdClass $oData  An object representing the email type
+     * @param array    $aArray The array to populate
      *
      * @return boolean
      */
-    protected static function addType(\stdClass $oData, array &$aArray): bool
+    protected static function addType(stdClass $oData, array &$aArray): bool
     {
         if (!empty($oData->slug) && !empty($oData->template_body)) {
 
@@ -184,9 +202,11 @@ class Emailer
      * @param object  $input    The email object
      * @param boolean $graceful Whether to gracefully fail or not
      *
-     * @return boolean|\stdClass
+     * @return boolean|stdClass
      * @throws EmailerException
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
+     * @throws ModelException
+     * @throws PHPMailer\Exception
      */
     public function send($input, $graceful = false)
     {
@@ -236,7 +256,7 @@ class Emailer
 
         //  Make sure that at least empty data is available
         if (empty($input->data)) {
-            $input->data = new \stdClass();
+            $input->data = new stdClass();
         }
 
         // --------------------------------------------------------------------------
@@ -256,18 +276,22 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  If we're sending to an email address, try and associate it to a registered user
-        $oUserModel = Factory::model('User', 'nails/module-auth');
-        if ($input->to_email) {
-            $_user = $oUserModel->getByEmail($input->to_email);
-            if ($_user) {
-                $input->to_id = $_user->id;
+        try {
+            $oUserModel = Factory::model('User', 'nails/module-auth');
+            if ($input->to_email) {
+                $_user = $oUserModel->getByEmail($input->to_email);
+                if ($_user) {
+                    $input->to_id = $_user->id;
+                }
+            } else {
+                //  Sending to an ID, fetch the user's email
+                $_user = $oUserModel->getById($input->to_id);
+                if (!empty($_user->email)) {
+                    $input->to_email = $_user->email;
+                }
             }
-        } else {
-            //  Sending to an ID, fetch the user's email
-            $_user = $oUserModel->getById($input->to_id);
-            if (!empty($_user->email)) {
-                $input->to_email = $_user->email;
-            }
+        } catch (FactoryException $e) {
+            //  If this goes wrong, don't worry about it
         }
 
         // --------------------------------------------------------------------------
@@ -340,7 +364,7 @@ class Emailer
             $oDb->where('id', $input->id);
             $oDb->update($this->sTable);
 
-            $oOut      = new \stdClass();
+            $oOut      = new stdClass();
             $oOut->id  = $input->id;
             $oOut->ref = $input->ref;
 
@@ -366,8 +390,9 @@ class Emailer
      *
      * @return boolean
      * @throws EmailerException
+     * @throws FactoryException
+     * @throws PHPMailer\Exception
      * @todo This should probably create a new row
-     *
      */
     public function resend($mEmailIdRef)
     {
@@ -394,7 +419,7 @@ class Emailer
      * @param string $sType   The type of email to check against
      *
      * @return boolean
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function userHasUnsubscribed($iUSerId, $sType)
     {
@@ -412,7 +437,7 @@ class Emailer
      * @param integer $iUserId The user ID to check
      *
      * @return bool
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function userIsSuspended($iUserId)
     {
@@ -425,13 +450,13 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
-     * Unsubscribes a user from a particular email type
+     * Unsubscribe a user from a particular email type
      *
      * @param int    $user_id The user ID to unsubscribe
      * @param string $type    The type of email to unsubscribe from
      *
      * @return boolean
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function unsubscribeUser($user_id, $type)
     {
@@ -459,7 +484,7 @@ class Emailer
      * @param string $type    The type of email to subscribe to
      *
      * @return boolean
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function subscribeUser($user_id, $type)
     {
@@ -480,21 +505,18 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
-     * Sends a templated email immediately
+     * Sends a template email immediately
      *
      * @param int|bool $emailId  The ID of the email to send, or the email object itself
      * @param boolean  $graceful Whether or not to fail gracefully
      *
      * @return boolean
      * @throws EmailerException
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
+     * @throws PHPMailer\Exception
      */
     protected function doSend($emailId = false, $graceful = false)
     {
-        if (empty($this->oCi)) {
-            throw new EmailerException('Cannot send email; CodeIgniter not available in this environment');
-        }
-
         //  Get the email if $emailId is not an object
         if (is_numeric($emailId)) {
 
@@ -583,13 +605,18 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Start prepping the email
-        $this->oCi->email->clear(true);
-        $this->oCi->email->from($this->from->email, $oEmail->from->name);
-        $this->oCi->email->reply_to($oEmail->from->email, $oEmail->from->name);
-        $this->oCi->email->to($oEmail->to->email);
-        $this->oCi->email->subject($oEmail->subject);
-        $this->oCi->email->message($oEmail->body->html);
-        $this->oCi->email->set_alt_message($oEmail->body->text);
+        $this->oPhpMailer->setFrom($this->from->email, $oEmail->from->name);
+
+        $this->oPhpMailer->clearReplyTos();
+        $this->oPhpMailer->addReplyTo($oEmail->from->email, $oEmail->from->name);
+
+        $this->oPhpMailer->clearAddresses();
+        $this->oPhpMailer->addAddress($oEmail->to->email);
+
+        $this->oPhpMailer->isHTML(true);
+        $this->oPhpMailer->Subject = $oEmail->subject;
+        $this->oPhpMailer->Body    = $oEmail->body->html;
+        $this->oPhpMailer->AltBody = $oEmail->body->text;
 
         // --------------------------------------------------------------------------
 
@@ -621,11 +648,11 @@ class Emailer
 
         //  Add any CC/BCC's
         if (!empty($oEmail->data->cc)) {
-            $this->oCi->email->cc($oEmail->data->cc);
+            $this->oPhpMailer->addCC($oEmail->data->cc);
         }
 
         if (!empty($oEmail->data->bcc)) {
-            $this->oCi->email->bcc($oEmail->data->bcc);
+            $this->oPhpMailer->addBCC($oEmail->data->bcc);
         }
 
         // --------------------------------------------------------------------------
@@ -634,7 +661,7 @@ class Emailer
         $_previous_error_reporting = error_reporting();
         error_reporting(0);
 
-        if ($this->oCi->email->send()) {
+        if ($this->oPhpMailer->send()) {
 
             //  Put error reporting back as it was
             error_reporting($_previous_error_reporting);
@@ -652,33 +679,11 @@ class Emailer
             //  Put error reporting back as it was
             error_reporting($_previous_error_reporting);
 
-            // --------------------------------------------------------------------------
-
-            //  Failed to send, notify developers
-            $sSubject = 'Email #' . $oEmail->id . ' failed to send at SMTP time';
-            $sMessage = 'Hi,' . "\n";
-            $sMessage .= '' . "\n";
-            $sMessage .= 'Email #' . $oEmail->id . ' failed to send at SMTP time' . "\n";
-            $sMessage .= '' . "\n";
-            $sMessage .= 'Please take a look as a matter of urgency; debugging data is below:' . "\n";
-            $sMessage .= '' . "\n";
-            $sMessage .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $sMessage .= '' . "\n";
-
-            $sMessage .= $this->oCi->email->print_debugger();
-
-            $sMessage .= '' . "\n";
-            $sMessage .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $sMessage .= '' . "\n";
-            $sMessage .= 'Additional debugging information:' . "\n";
-            $sMessage .= '' . "\n";
-            $sMessage .= '- - - - - - - - - - - - - - - - - - - - - -' . "\n";
-            $sMessage .= '' . "\n";
-            $sMessage .= print_r($oEmail, true) . "\n";
+            $sError = 'Email failed to send at SMTP time; ' . $this->oPhpMailer->ErrorInfo;
 
             if (Environment::is(Environment::ENV_PROD)) {
 
-                $this->setError('Email failed to send at SMTP time, developers informed');
+                $this->setError($sError);
 
             } else {
 
@@ -688,9 +693,9 @@ class Emailer
                  */
 
                 if (!$graceful) {
-                    throw new EmailerException('Email failed to send at SMTP time.', 1);
+                    throw new EmailerException($sError);
                 } else {
-                    $this->setError('Email failed to send at SMTP time.');
+                    $this->setError($sError);
                 }
             }
 
@@ -708,7 +713,7 @@ class Emailer
      * @param array   $data    Data to pass to getCountCommonEmail()
      *
      * @return object
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function getAllRawQuery($page = null, $perPage = null, $data = [])
     {
@@ -754,7 +759,7 @@ class Emailer
      * @param mixed $aData    Any data to pass to getCountCommon()
      *
      * @return array
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function getAll($iPage = null, $iPerPage = null, $aData = [])
     {
@@ -778,7 +783,7 @@ class Emailer
      * @param array $data Data passed from the calling method
      *
      * @return void
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      **/
     protected function getCountCommonEmail($data = [])
     {
@@ -844,7 +849,7 @@ class Emailer
      * @param array $data Data passed from the calling method
      *
      * @return mixed
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function countAll($data)
     {
@@ -862,7 +867,7 @@ class Emailer
      * @param array $aData The data array
      *
      * @return mixed   stdClass on success, false on failure
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function getById($iId, $aData = [])
     {
@@ -886,7 +891,7 @@ class Emailer
      * @param array  $aData The data array
      *
      * @return mixed        stdClass on success, false on failure
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function getByRef($sRef, $aData = [])
     {
@@ -937,18 +942,19 @@ class Emailer
     /**
      * Adds an attachment to an email
      *
-     * @param string $file     The file's path
-     * @param string $filename The filename ot give the attachment
+     * @param string $sFilePath The file's path
+     * @param string $sFileName The filename to give the attachment
      *
      * @return boolean
+     * @throws PHPMailer\Exception
      */
-    protected function addAttachment($file, $filename = null)
+    protected function addAttachment($sFilePath, $sFileName = null)
     {
-        if (!file_exists($file)) {
+        if (!file_exists($sFilePath)) {
             return false;
         }
 
-        return $this->oCi->email->attach($file, 'attachment', $filename);
+        return $this->oPhpMailer->addAttachment($sFilePath, $sFileName);
     }
 
     // --------------------------------------------------------------------------
@@ -959,7 +965,7 @@ class Emailer
      * @param array $exclude Strings to exclude from the reference
      *
      * @return string
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     protected function generateReference($exclude = [])
     {
@@ -967,16 +973,16 @@ class Emailer
 
         do {
 
-            $refOk = false;
+            $bRefOk = false;
 
             do {
 
                 $ref = strtoupper(random_string('alnum', 10));
                 if (array_search($ref, $exclude) === false) {
-                    $refOk = true;
+                    $bRefOk = true;
                 }
 
-            } while (!$refOk);
+            } while (!$bRefOk);
 
             $oDb->where('ref', $ref);
             $result = $oDb->get($this->sTable);
@@ -985,112 +991,6 @@ class Emailer
 
         return $ref;
     }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Renders the debugger
-     *
-     * @param \stdClass $input         The email input object
-     * @param string    $body          The email's body
-     * @param string    $plaintext     The email's plaintext body
-     * @param array     $recent_errors An array of any recent errors
-     *
-     * @return void
-     */
-    protected function printDebugger($input, $body, $plaintext, $recent_errors)
-    {
-        /**
-         * Debug mode, output data and don't actually send
-         * Remove the reference to CI; takes up a ton'na space
-         */
-
-        if (isset($input->data['ci'])) {
-            $input->data['ci'] = '**REFERENCE TO CODEIGNITER INSTANCE**';
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Input variables
-        echo '<pre>';
-
-        //  Who's the email going to?
-        echo '<strong>Sending to:</strong>' . "\n";
-        echo '-----------------------------------------------------------------' . "\n";
-        echo 'email: ' . $input->to->email . "\n";
-        echo 'first: ' . $input->to->first . "\n";
-        echo 'last:  ' . $input->to->last . "\n";
-
-        //  Who's the email being sent from?
-        echo "\n\n" . '<strong>Sending from:</strong>' . "\n";
-        echo '-----------------------------------------------------------------' . "\n";
-        echo 'name: ' . $input->from->name . "\n";
-        echo 'email:    ' . $input->from->email . "\n";
-
-        //  Input data (system & supplied)
-        echo "\n\n" . '<strong>Input variables (supplied + system):</strong>' . "\n";
-        echo '-----------------------------------------------------------------' . "\n";
-        print_r($input->data);
-
-        //  Template
-        echo "\n\n" . '<strong>Email body:</strong>' . "\n";
-        echo '-----------------------------------------------------------------' . "\n";
-        echo 'Subject:         ' . $input->subject . "\n";
-        echo 'Template Header: ' . $input->template_header . "\n";
-        echo 'Template Body:   ' . $input->template_body . "\n";
-        echo 'Template Footer: ' . $input->template_footer . "\n";
-
-        if ($recent_errors) {
-
-            echo "\n\n" . '<strong>Template Errors (' . count($recent_errors) . '):</strong>' . "\n";
-            echo '-----------------------------------------------------------------' . "\n";
-
-            foreach ($recent_errors as $error) {
-
-                echo 'Severity: ' . $error->severity . "\n";
-                echo 'Mesage: ' . $error->message . "\n";
-                echo 'Filepath: ' . $error->filepath . "\n";
-                echo 'Line: ' . $error->line . "\n\n";
-            }
-        }
-
-        echo "\n\n" . '<strong>Rendered HTML:</strong>' . "\n";
-        echo '-----------------------------------------------------------------' . "\n";
-
-        $_rendered_body = str_replace('"', '\\"', $body);
-        $_rendered_body = str_replace(["\r\n", "\r"], "\n", $_rendered_body);
-        $_lines         = explode("\n", $_rendered_body);
-        $_new_lines     = [];
-
-        foreach ($_lines as $line) {
-
-            if (!empty($line)) {
-
-                $_new_lines[] = $line;
-            }
-        }
-
-        $renderedBody  = implode($_new_lines);
-        $entityBody    = htmlentities($body);
-        $plaintextBody = nl2br($plaintext);
-
-        $str = <<<EOT
-<iframe width="100%" height="900" src="" id="renderframe"></iframe>
-<script type="text/javascript">
-var emailBody = "$renderedBody";
-document.getElementById('renderframe').src = "data:text/html;charset=utf-8," + escape(emailBody);
-</script>
-
-<strong>HTML:</strong>
------------------------------------------------------------------
-$entityBody
-
-<strong>Plain Text:</strong>
------------------------------------------------------------------
-</pre>$plaintextBody</pre>
-EOT;
-    }
-
     // --------------------------------------------------------------------------
 
     /**
@@ -1099,6 +999,7 @@ EOT;
      * @param string $ref The email's reference
      *
      * @return void
+     * @throws FactoryException
      */
     public function trackOpen($ref)
     {
@@ -1131,7 +1032,7 @@ EOT;
      * @param integer $iLinkId The link's ID
      *
      * @return string
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     public function trackLink($sRef, $iLinkId)
     {
@@ -1225,12 +1126,13 @@ EOT;
      *
      * @param array $link The link elements
      *
-     * @return string
+     * @return mixed|string
+     * @throws FactoryException
+     * @throws HostNotKnownException
      */
     protected function processLinkHtml($link)
     {
         $_html  = !empty($link[0]) ? $link[0] : '';
-        $_href  = !empty($link[1]) ? $link[1] : '';
         $_url   = !empty($link[2]) ? $link[2] : '';
         $_title = isset($link[3]) && strip_tags($link[3]) ? strip_tags($link[3]) : $_url;
 
@@ -1256,7 +1158,9 @@ EOT;
      * @param array $url The URL elements
      *
      * @return string
-     * @throws \Nails\Common\Exception\FactoryException
+     * @return mixed|string
+     * @throws FactoryException
+     * @throws HostNotKnownException
      */
     protected function processLinkUrl($url)
     {
@@ -1286,7 +1190,7 @@ EOT;
      *
      * @return string
      * @throws HostNotKnownException
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     protected function processLinkGenerate($html, $url, $title, $is_html)
     {
@@ -1329,7 +1233,7 @@ EOT;
                     $_code    = $this->mGenerateTrackingNeedsVerified['code'];
                     $_return  = urlencode($url);
 
-                    $_url = site_url('email/verify/' . $_user_id . '/' . $_code . '?return_to=' . $_return);
+                    $_url = siteUrl('email/verify/' . $_user_id . '/' . $_code . '?return_to=' . $_return);
 
                 } else {
                     $_url = $url;
@@ -1354,7 +1258,7 @@ EOT;
                 $_time       = time();
                 $trackingUrl = 'email/tracker/link/' . $this->sGenerateTrackingEmailRef . '/' . $_time . '/';
                 $trackingUrl .= $this->generateHash($this->sGenerateTrackingEmailRef, $_time) . '/' . $_id;
-                $trackingUrl = site_url($trackingUrl);
+                $trackingUrl = siteUrl($trackingUrl);
 
                 $this->aTrackLinkCache[md5($url)] = $trackingUrl;
 
@@ -1379,13 +1283,13 @@ EOT;
      *
      * @return string
      * @throws HostNotKnownException
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
      */
     protected function getDomain()
     {
         if (!empty($this->sDomain)) {
             return $this->sDomain;
-        } elseif (site_url() === '/') {
+        } elseif (siteUrl() === '/') {
             $oInput    = Factory::service('Input');
             $sHost     = $oInput->server('SERVER_NAME');
             $sProtocol = $oInput->server('REQUEST_SCHEME') ?: 'http';
@@ -1395,7 +1299,7 @@ EOT;
                 $this->sDomain = $sProtocol . '://' . $sHost . '/';
             }
         } else {
-            $this->sDomain = site_url();
+            $this->sDomain = siteUrl();
         }
 
         $this->sDomain = rtrim($this->sDomain, '/');
@@ -1409,8 +1313,8 @@ EOT;
      *
      * @param object $oEmail The raw email object
      *
-     * @return void
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
+     * @throws NailsException
      */
     protected function formatObject(&$oEmail)
     {
@@ -1425,7 +1329,7 @@ EOT;
         // --------------------------------------------------------------------------
 
         //  Some fields can be manipulated by the contents of email_vars
-        $oEmail->data = json_decode($oEmail->email_vars) ?: new \stdClass();
+        $oEmail->data = json_decode($oEmail->email_vars) ?: new stdClass();
         unset($oEmail->email_vars);
 
         // --------------------------------------------------------------------------
@@ -1461,7 +1365,7 @@ EOT;
         // --------------------------------------------------------------------------
 
         //  Who the email is being sent to
-        $oEmail->to                      = new \stdClass();
+        $oEmail->to                      = new stdClass();
         $oEmail->to->id                  = $oEmail->user_id;
         $oEmail->to->group_id            = $oEmail->user_group;
         $oEmail->to->email               = $oEmail->sent_to;
@@ -1488,19 +1392,19 @@ EOT;
         unset($oEmail->email_verified_code);
 
         //  Who the email is being sent from
-        $oEmail->from        = new \stdClass();
+        $oEmail->from        = new stdClass();
         $oEmail->from->name  = !empty($oEmail->data->email_from_name) ? $oEmail->data->email_from_name : $this->from->name;
         $oEmail->from->email = !empty($oEmail->data->email_from_email) ? $oEmail->data->email_from_email : $this->from->email;
 
         //  Template details
-        $oEmail->template               = new \stdClass();
-        $oEmail->template->header       = new \stdClass();
+        $oEmail->template               = new stdClass();
+        $oEmail->template->header       = new stdClass();
         $oEmail->template->header->html = $oEmail->type->template_header;
         $oEmail->template->header->text = $oEmail->type->template_header . '_plaintext';
-        $oEmail->template->body         = new \stdClass();
+        $oEmail->template->body         = new stdClass();
         $oEmail->template->body->html   = $oEmail->type->template_body;
         $oEmail->template->body->text   = $oEmail->type->template_body . '_plaintext';
-        $oEmail->template->footer       = new \stdClass();
+        $oEmail->template->footer       = new stdClass();
         $oEmail->template->footer->html = $oEmail->type->template_footer;
         $oEmail->template->footer->text = $oEmail->type->template_footer . '_plaintext';
 
@@ -1511,27 +1415,15 @@ EOT;
         $oEmail->data->emailRef  = $oEmail->ref;
         $oEmail->data->sentFrom  = $oEmail->from;
         $oEmail->data->sentTo    = $oEmail->to;
-        $oEmail->data->siteUrl   = site_url();
+        $oEmail->data->siteUrl   = siteUrl();
 
         //  Common URLs
-        $oEmail->data->url = new \stdClass();
-
-        //  AutoLogin
-        $oEmail->data->url->autoLogin = '';
-
-        // //  Check login URLs are allowed
-        $this->oCi->config->load('auth/auth');
-
-        if (!empty($oEmail->to->id) && $this->oCi->config->item('authEnableHashedLogin')) {
-            $sIdHash                      = md5($oEmail->to->id);
-            $sPwHash                      = md5($oEmail->to->password);
-            $oEmail->data->url->autoLogin = site_url('auth/login/with_hashes/' . $sIdHash . '/' . $sPwHash);
-        }
+        $oEmail->data->url = new stdClass();
 
         //  View Online
         $iTime                         = time();
         $sHash                         = $this->generateHash($oEmail->data->emailRef, $iTime);
-        $oEmail->data->url->viewOnline = site_url(
+        $oEmail->data->url->viewOnline = siteUrl(
             'email/view/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash
         );
 
@@ -1539,7 +1431,7 @@ EOT;
         $oEmail->data->url->unsubscribe = '';
         if ($oEmail->type->isUnsubscribable && !empty($oEmail->to->id)) {
 
-            $sUrl = site_url('email/unsubscribe?token=');
+            $sUrl = siteUrl('email/unsubscribe?token=');
 
             /**
              * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
@@ -1560,25 +1452,24 @@ EOT;
 
             } while ($iCounter <= $iAttempts && strpos($sToken, '+') !== false);
 
-            //  Link, autologin if possible
-            if (!empty($oEmail->data->url->autoLogin)) {
-                $oEmail->data->url->unsubscribe = $oEmail->data->url->autoLogin . '?return_to=' . urlencode($sUrl . $sToken);
-            } else {
-                $oEmail->data->url->unsubscribe = $sUrl . $sToken;
-            }
+            $oEmail->data->url->unsubscribe = $sUrl . $sToken;
         }
+
+        /** @var Input $oInput */
+        $oInput = Factory::service('Input');
 
         //  Tracker Image (not on view online links though)
         $oEmail->data->url->trackerImg = '';
-        if (!preg_match('/^email\/view\/[a-zA-Z0-9]+\/[0-9]+\/[a-zA-Z0-9]+$/', uri_string())) {
+        if (!$oInput->isCli() && !preg_match('/^email\/view\/[a-zA-Z0-9]+\/[0-9]+\/[a-zA-Z0-9]+$/', uri_string())) {
             $iTime                         = time();
             $sHash                         = $this->generateHash($oEmail->data->emailRef, $iTime);
-            $sImgSrc                       = site_url('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
+            $sImgSrc                       = siteUrl('email/tracker/' . $oEmail->data->emailRef . '/' . $iTime . '/' . $sHash) . '/0.gif';
             $oEmail->data->url->trackerImg = $sImgSrc;
         }
 
         // --------------------------------------------------------------------------
 
+        /** @var Mustache_Engine $oMustache */
         $oMustache = Factory::service('Mustache');
 
         //  Subject
@@ -1588,7 +1479,7 @@ EOT;
         $oEmail->data->email_subject = $oEmail->subject;
 
         //  Body
-        $oEmail->body = new \stdClass();
+        $oEmail->body = new stdClass();
 
         //  HTML Version
         $oView              = Factory::service('View');

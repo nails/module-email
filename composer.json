@@ -27,8 +27,11 @@
     "prefer-stable": true,
     "require":
     {
+        "ext-json": "*",
         "nails/common": "dev-develop",
-        "nails/module-console": "dev-develop"
+        "nails/module-auth": "dev-develop",
+        "nails/module-console": "dev-develop",
+        "phpmailer/phpmailer": "^6.0"
     },
     "require-dev":
     {
