@@ -102,6 +102,7 @@ class Emailer
         $this->oPhpMailer->Username = DEPLOY_DB_USERNAME;
         $this->oPhpMailer->Password = DEPLOY_DB_PASSWORD;
         $this->oPhpMailer->Port     = DEPLOY_EMAIL_PORT;
+        $this->oPhpMailer->CharSet  = PHPMailer\PHPMailer::CHARSET_UTF8;
     }
 
     // --------------------------------------------------------------------------
