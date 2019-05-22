@@ -13,13 +13,17 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Common\Service\FormValidation;
 use Nails\Email\Controller\BaseAdmin;
+use Nails\Email\Exception\EmailerException;
+use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
 class Utilities extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups
+     *
      * @return stdClass
      */
     public static function announce()
@@ -39,6 +43,7 @@ class Utilities extends BaseAdmin
 
     /**
      * Returns an array of permissions which can be configured for the user
+     *
      * @return array
      */
     public static function permissions(): array
@@ -54,6 +59,7 @@ class Utilities extends BaseAdmin
 
     /**
      * Send a test email
+     *
      * @return void
      */
     public function index()
@@ -71,43 +77,37 @@ class Utilities extends BaseAdmin
 
         $oInput = Factory::service('Input');
         if ($oInput->post()) {
+            try {
 
-            //  Form validation and update
-            $oFormValidation = Factory::service('FormValidation');
+                /** @var FormValidation $oFormValidation */
+                $oFormValidation = Factory::service('FormValidation');
+                $oFormValidation
+                    ->buildValidator([
+                        'recipient' => ['required', 'valid_email'],
+                    ])
+                    ->run();
 
-            //  Define rules
-            $oFormValidation->set_rules('recipient', '', 'required|valid_email');
-
-            //  Set Messages
-            $oFormValidation->set_message('required', lang('fv_required'));
-            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
-
-            //  Execute
-            if ($oFormValidation->run()) {
-
-                //  Prepare data
-                $oNow   = Factory::factory('DateTime');
-                $oEmail = (object) [
-                    'type'     => 'test_email',
-                    'to_email' => $oInput->post('recipient', true),
-                    'data'     => [
-                        'sentAt' => $oNow->format('Y-m-d H:i:s'),
-                    ],
-                ];
-
-                //  Send the email
+                /** @var Emailer $oEmailer */
                 $oEmailer = Factory::service('Emailer', 'nails/module-email');
-                if ($oEmailer->send($oEmail)) {
+                $bResult  = $oEmailer->send((object) [
+                    'type'     => 'test_email',
+                    'to_email' => $oInput->post('recipient'),
+                    'data'     => [
+                        'sentAt' => Factory::factory('DateTime')->format('Y-m-d H:i:s'),
+                    ],
+                ]);
 
-                    $this->data['success'] = '<strong>Done!</strong> Test email successfully sent to <strong>';
-                    $this->data['success'] .= $oEmail->to_email . '</strong> at ' . toUserDatetime();
-
-                } else {
-
-                    echo '<h1>Sending Failed, debugging data below:</h1>';
-                    echo $oEmailer->print_debugger();
-                    return;
+                if (!$bResult) {
+                    throw new EmailerException(
+                        'Failed to send email: ' . $oEmailer->lastError()
+                    );
                 }
+
+                $this->data['success'] = '<strong>Done!</strong> Test email successfully sent to <strong>';
+                $this->data['success'] .= $oInput->post('recipient') . '</strong> at ' . toUserDatetime();
+
+            } catch (\Exception $e) {
+                $this->data['error'] = $e->getMessage();
             }
         }
 
