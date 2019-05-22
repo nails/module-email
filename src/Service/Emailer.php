@@ -97,11 +97,11 @@ class Emailer
         $this->oPhpMailer = new PHPMailer\PHPMailer();
 
         $this->oPhpMailer->isSMTP();
-        $this->oPhpMailer->Host     = DEPLOY_EMAIL_HOST;
+        $this->oPhpMailer->Host     = EMAIL_HOST;
         $this->oPhpMailer->SMTPAuth = true;
-        $this->oPhpMailer->Username = DEPLOY_DB_USERNAME;
-        $this->oPhpMailer->Password = DEPLOY_DB_PASSWORD;
-        $this->oPhpMailer->Port     = DEPLOY_EMAIL_PORT;
+        $this->oPhpMailer->Username = EMAIL_USERNAME;
+        $this->oPhpMailer->Password = EMAIL_PASSWORD;
+        $this->oPhpMailer->Port     = EMAIL_PORT;
         $this->oPhpMailer->CharSet  = PHPMailer\PHPMailer::CHARSET_UTF8;
     }
 
