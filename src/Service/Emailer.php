@@ -97,10 +97,8 @@ class Emailer
         $this->oPhpMailer = new PHPMailer\PHPMailer();
 
         $this->oPhpMailer->isSMTP();
+
         $this->oPhpMailer->Host     = EMAIL_HOST;
-        $this->oPhpMailer->SMTPAuth = true;
-        $this->oPhpMailer->Username = EMAIL_USERNAME;
-        $this->oPhpMailer->Password = EMAIL_PASSWORD;
         $this->oPhpMailer->Port     = EMAIL_PORT;
         $this->oPhpMailer->CharSet  = PHPMailer\PHPMailer::CHARSET_UTF8;
 
@@ -112,6 +110,12 @@ class Emailer
                     'allow_self_signed' => true,
                 ],
             ];
+        }
+
+        if (!is_null(EMAIL_USERNAME) && !is_null(EMAIL_PASSWORD)) {
+            $this->oPhpMailer->SMTPAuth = true;
+            $this->oPhpMailer->Username = EMAIL_USERNAME;
+            $this->oPhpMailer->Password = EMAIL_PASSWORD;
         }
     }
 
