@@ -103,6 +103,16 @@ class Emailer
         $this->oPhpMailer->Password = EMAIL_PASSWORD;
         $this->oPhpMailer->Port     = EMAIL_PORT;
         $this->oPhpMailer->CharSet  = PHPMailer\PHPMailer::CHARSET_UTF8;
+
+        if (EMAIL_HOST === 'localhost' || EMAIL_HOST === '127.0.0.1') {
+            $this->oPhpMailer->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer'       => false,
+                    'verify_peer_name'  => false,
+                    'allow_self_signed' => true,
+                ],
+            ];
+        }
     }
 
     // --------------------------------------------------------------------------
