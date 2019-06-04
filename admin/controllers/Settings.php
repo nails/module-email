@@ -13,6 +13,7 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Common\Service\Input;
 use Nails\Email\Controller\BaseAdmin;
 use Nails\Factory;
 
@@ -47,7 +48,8 @@ class Settings extends BaseAdmin
     {
         $aPermissions = parent::permissions();
 
-        $aPermissions['update:sender'] = 'Can update sender settings';
+        $aPermissions['update:sender']    = 'Can update sender settings';
+        $aPermissions['update:retention'] = 'Can update data retention settings';
 
         return $aPermissions;
     }
@@ -67,14 +69,19 @@ class Settings extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        /** @var Input $oInput */
         $oInput = Factory::service('Input');
         if ($oInput->post()) {
 
             $aSettings = [];
 
             if (userHasPermission('admin:email:settings:update:sender')) {
-                $aSettings['from_name']  = $oInput->post('from_name');
-                $aSettings['from_email'] = $oInput->post('from_email');
+                $aSettings['from_name']  = trim($oInput->post('from_name'));
+                $aSettings['from_email'] = trim($oInput->post('from_email'));
+            }
+
+            if (userHasPermission('admin:email:settings:update:retention')) {
+                $aSettings['retention_period'] = (int) $oInput->post('retention_period');
             }
 
             if (!empty($aSettings)) {
