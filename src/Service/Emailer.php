@@ -98,9 +98,9 @@ class Emailer
 
         $this->oPhpMailer->isSMTP();
 
-        $this->oPhpMailer->Host     = EMAIL_HOST;
-        $this->oPhpMailer->Port     = EMAIL_PORT;
-        $this->oPhpMailer->CharSet  = PHPMailer\PHPMailer::CHARSET_UTF8;
+        $this->oPhpMailer->Host    = EMAIL_HOST;
+        $this->oPhpMailer->Port    = EMAIL_PORT;
+        $this->oPhpMailer->CharSet = PHPMailer\PHPMailer::CHARSET_UTF8;
 
         if (EMAIL_HOST === 'localhost' || EMAIL_HOST === '127.0.0.1') {
             $this->oPhpMailer->SMTPOptions = [
@@ -620,15 +620,15 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Start prepping the email
-        $this->oPhpMailer->setFrom($this->from->email, $oEmail->from->name);
-
         $this->oPhpMailer->clearReplyTos();
+        $this->oPhpMailer->clearAllRecipients();
+        $this->oPhpMailer->clearAttachments();
+        $this->oPhpMailer->clearCustomHeaders();
+        $this->oPhpMailer->setFrom($this->from->email, $oEmail->from->name);
         $this->oPhpMailer->addReplyTo($oEmail->from->email, $oEmail->from->name);
-
-        $this->oPhpMailer->clearAddresses();
         $this->oPhpMailer->addAddress($oEmail->to->email);
-
         $this->oPhpMailer->isHTML(true);
+
         $this->oPhpMailer->Subject = $oEmail->subject;
         $this->oPhpMailer->Body    = $oEmail->body->html;
         $this->oPhpMailer->AltBody = $oEmail->body->text;
