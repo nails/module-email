@@ -1,3 +1,6 @@
+<?php
+$oInput = \Nails\Factory::service('Input');
+?>
 <div class="group-email archive">
     <p>
         This page shows you all the mail which has been sent by the system.
@@ -120,9 +123,8 @@
                                 if (userHasPermission('admin:email:email:resend')) {
 
                                     $sReturn = uri_string();
-                                    if ($this->input->server('QUERY_STRING')) {
-
-                                        $sReturn .= '?' . $this->input->server('QUERY_STRING');
+                                    if ($oInput->server('QUERY_STRING')) {
+                                        $sReturn .= '?' . $oInput->server('QUERY_STRING');
                                     }
                                     $sReturn = urlencode($sReturn);
                                     echo anchor('admin/email/email/resend/' . $oEmail->id . '?return=' . $sReturn, 'Resend', 'class="btn btn-xs btn-success"');

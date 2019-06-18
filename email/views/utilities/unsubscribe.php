@@ -1,3 +1,6 @@
+<?php
+$oInput = \Nails\Factory::service('Input');
+?>
 <!DOCTYPE html>
 <!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
 <!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
@@ -196,7 +199,7 @@
         }
 
 
-        if ($this->input->get('undo')) {
+        if ($oInput->get('undo')) {
 
             ?>
             <h2>That's OK, we all make mistakes</h2>
@@ -204,7 +207,7 @@
                 We'll continue to send you this type of email.
             </p>
             <p>
-                <?=anchor('email/unsubscribe?token=' . $this->input->get('token'), 'Unsubscribe?', 'class="btn"') ?>
+                <?=anchor('email/unsubscribe?token=' . $oInput->get('token'), 'Unsubscribe?', 'class="btn"') ?>
             </p>
             <?php
 
@@ -216,7 +219,7 @@
                 OK! We won't send you this type of email again.
             </p>
             <p>
-                <?=anchor('email/unsubscribe?token=' . $this->input->get('token') . '&undo=1', 'Undo?', 'class="btn"') ?>
+                <?=anchor('email/unsubscribe?token=' . $oInput->get('token') . '&undo=1', 'Undo?', 'class="btn"') ?>
             </p>
             <?php
 

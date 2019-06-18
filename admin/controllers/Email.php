@@ -69,6 +69,7 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $oInput   = Factory::service('Input');
         $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         // --------------------------------------------------------------------------
@@ -80,11 +81,11 @@ class Email extends BaseAdmin
 
         //  Get pagination and search/sort variables
         $sPrefix    = $oEmailer->getTableAlias();
-        $iPage      = $this->input->get('page') ? $this->input->get('page') : 0;
-        $iPerPage   = $this->input->get('perPage') ? $this->input->get('perPage') : 50;
-        $sSortOn    = $this->input->get('sortOn') ? $this->input->get('sortOn') : $sPrefix . '.sent';
-        $sSortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
-        $sKeywords  = $this->input->get('keywords') ? $this->input->get('keywords') : '';
+        $iPage      = $oInput->get('page') ? $oInput->get('page') : 0;
+        $iPerPage   = $oInput->get('perPage') ? $oInput->get('perPage') : 50;
+        $sSortOn    = $oInput->get('sortOn') ? $oInput->get('sortOn') : $sPrefix . '.sent';
+        $sSortOrder = $oInput->get('sortOrder') ? $oInput->get('sortOrder') : 'desc';
+        $sKeywords  = $oInput->get('keywords') ? $oInput->get('keywords') : '';
 
         // --------------------------------------------------------------------------
 
@@ -159,13 +160,14 @@ class Email extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $oInput   = Factory::service('Input');
         $oEmailer = Factory::service('Emailer', 'nails/module-email');
 
         // --------------------------------------------------------------------------
 
         $oUri     = Factory::service('Uri');
         $iEmailId = $oUri->segment(5);
-        $sReturn  = $this->input->get('return') ? $this->input->get('return') : 'admin/email/index';
+        $sReturn  = $oInput->get('return') ? $oInput->get('return') : 'admin/email/index';
 
         if ($oEmailer->resend($iEmailId)) {
             $sStatus  = 'success';
