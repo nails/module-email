@@ -1577,9 +1577,21 @@ class Emailer
      * Returns the defined sending from email, or falls back to nobody@host
      *
      * @return string
+     * @throws EmailerException
      */
     public function getFromEmail()
     {
-        return appSetting('from_email', 'nails/module-email') ?: 'nobody@' . gethostname();
+        $sFrom = appSetting('from_email', 'nails/module-email');
+        if ($sFrom) {
+            return $sFrom;
+        } else {
+            $sDomain = parse_url(BASE_URL, PHP_URL_HOST);
+            if ($sDomain === 'localhost' && Environment::is(Environment::ENV_DEV)) {
+                $sDomain = 'example.com';
+            } elseif (!PHPMailer\PHPMailer::validateAddress('nobody@' . $sDomain)) {
+                throw new EmailerException('nobody@' . $sDomain . ' is not a valid from email');
+            }
+            return 'nobody@' . $sDomain;
+        }
     }
 }
