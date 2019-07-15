@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Common\Service\HttpCodes;
+use Nails\Common\Service\Output;
 use Nails\Email\Controller\Base;
 use Nails\Environment;
 use Nails\Factory;
@@ -37,7 +39,24 @@ class View extends Base
         }
 
         if (!$oEmail || !$oEmailer->validateHash($oEmail->ref, $sGuid, $sHash)) {
-            show404();
+
+            /**
+             * Using this to generate a JSON 404 as the standard show404() will attempt to
+             * render the module's header/footer and it looks like a btoken email template.
+             */
+
+            /** @var HttpCodes $oHttpCodes */
+            $oHttpCodes = Factory::service('HttpCodes');
+            /** @var Output $oOutput */
+            $oOutput = Factory::service('Output');
+
+            $oOutput->set_status_header($oHttpCodes::STATUS_NOT_FOUND);
+            $oOutput->set_content_type('application/json');
+            $oOutput->set_output(json_encode([
+                'status' => $oHttpCodes::STATUS_NOT_FOUND,
+                'error'  => 'Failed to validate email URL',
+            ]));
+            return;
         }
 
         if (Environment::is(Environment::ENV_DEV)) {
