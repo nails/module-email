@@ -69,7 +69,7 @@ $oInput = \Nails\Factory::service('Input');
 
                     // --------------------------------------------------------------------------
 
-                    $aUrl     = parse_url(site_url());
+                    $aUrl     = parse_url(siteUrl());
                     $sDefault = 'nobody@' . getFromArray('host', $aUrl);
 
                     echo form_field([
