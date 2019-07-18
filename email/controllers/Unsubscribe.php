@@ -10,46 +10,47 @@
  * @link
  */
 
+use Nails\Auth\Model\User;
+use Nails\Common\Service\Encrypt;
+use Nails\Common\Service\Input;
 use Nails\Email\Controller\Base;
+use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
 class Unsubscribe extends Base
 {
     /**
      * Renders the subscribe/unsubscribe page
+     *
      * @return void
      */
     public function index()
     {
-        if (!isLoggedIn()) {
-            unauthorised();
-        }
-
-        $oInput     = Factory::service('Input');
-        $oEncrypt   = Factory::service('Encrypt');
-        $oEmailer   = Factory::service('Emailer', 'nails/module-email');
+        /** @var Input $oInput */
+        $oInput = Factory::service('Input');
+        /** @var Encrypt $oEncrypt */
+        $oEncrypt = Factory::service('Encrypt');
+        /** @var Emailer $oEmailer */
+        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        /** @var User $oUserModel */
         $oUserModel = Factory::model('User', 'nails/module-auth');
 
         $sToken = $oInput->get('token');
         $aToken = $oEncrypt->decode($sToken, APP_PRIVATE_KEY);
-
-        if (!$aToken) {
-            show404();
-        }
-
         $aToken = explode('|', $aToken);
 
         if (count($aToken) != 3) {
             show404();
         }
 
-        $oUser = $oUserModel->getById($aToken[2]);
-        if (!$oUser || $oUser->id != activeUser('id ')) {
+        list($sType, $sRef, $iUserId) = $aToken;
+
+        $oUser = $oUserModel->getById($iUserId);
+        if (empty($oUser)) {
             show404();
         }
 
-        $oEmail = $oEmailer->getByRef($aToken[1]);
-
+        $oEmail = $oEmailer->getByRef($sRef);
         if (!$oEmail || empty($oEmail->type->isUnsubscribable)) {
             show404();
         }
@@ -58,24 +59,32 @@ class Unsubscribe extends Base
 
         //  All seems above board, action the request
         if ($oInput->get('undo')) {
-            if ($oEmailer->userHasUnsubscribed(activeUser('id'), $aToken[0])) {
-                $oEmailer->subscribeUser(activeUser('id'), $aToken[0]);
+            if ($oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
+                $oEmailer->subscribeUser($oUser->id, $sType);
             }
         } else {
-            if (!$oEmailer->userHasUnsubscribed(activeUser('id'), $aToken[0])) {
-                $oEmailer->unsubscribeUser(activeUser('id'), $aToken[0]);
+            if (!$oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
+                $oEmailer->unsubscribeUser($oUser->id, $sType);
             }
         }
 
-        //  Load views
-        $oView = Factory::service('View');
-        $oView->load('email/utilities/unsubscribe', $this->data);
+        // --------------------------------------------------------------------------
+
+        $this->loadStyles(NAILS_APP_PATH . 'application/modules/email/views/utilities/unsubscribe.php');
+
+        Factory::service('View')
+            ->load([
+                'structure/header/blank',
+                'email/utilities/unsubscribe',
+                'structure/footer/blank',
+            ]);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Map all requests to index
+     *
      * @return  void
      **/
     public function _remap()
