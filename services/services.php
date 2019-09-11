@@ -10,6 +10,24 @@ return [
             }
         },
     ],
+    'models'    => [
+        'Email' => function () {
+            if (class_exists('\App\Email\Model\Email')) {
+                return new \App\Email\Model\Email();
+            } else {
+                return new \Nails\Email\Model\Email();
+            }
+        },
+    ],
+    'resources' => [
+        'Email' => function ($mObj) {
+            if (class_exists('\App\Email\Resource\Email')) {
+                return new \App\Email\Resource\Email($mObj);
+            } else {
+                return new \Nails\Email\Resource\Email($mObj);
+            }
+        },
+    ],
     'factories' => [
         'Email' => function () {
             if (class_exists('\App\Email\Factory\Email')) {
