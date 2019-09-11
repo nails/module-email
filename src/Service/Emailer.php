@@ -172,10 +172,24 @@ class Emailer
      *
      * @return array
      */
-    public function getTypes()
+    public function getTypes(): array
     {
         arraySortMulti($this->aEmailType, 'name');
         return $this->aEmailType;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns a specific type of email
+     *
+     * @param string $sType The type to look for
+     *
+     * @return stdClass|null
+     */
+    public function getType(string $sType): ?stdClass
+    {
+        return array_key_exists($sType, $this->aEmailType) ? $this->aEmailType[$sType] : null;
     }
 
     // --------------------------------------------------------------------------
