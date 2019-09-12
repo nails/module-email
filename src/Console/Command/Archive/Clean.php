@@ -6,6 +6,7 @@ use DateTime;
 use Nails\Common\Service\Database;
 use Nails\Console\Command\Base;
 use Nails\Console\Exception\ConsoleException;
+use Nails\Email\Constants;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
 use Symfony\Component\Console\Input\InputInterface;
@@ -46,7 +47,7 @@ class Clean extends Base
 
             $this->banner('Email Archive Clean');
 
-            $iRetention = (int) appSetting('retention_period', 'nails/module-email');
+            $iRetention = (int) appSetting('retention_period', Constants::MODULE_SLUG);
             if ($iRetention) {
 
                 $oOutput->writeln('Retention policy: <info>' . $iRetention . ' days</info>');
@@ -56,7 +57,7 @@ class Clean extends Base
                 /** @var DateTime $oNow */
                 $oNow = Factory::factory('DateTime');
                 /** @var Emailer $oEmailer */
-                $oEmailer = Factory::service('Emailer', 'nails/module-email');
+                $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
                 $oNow->sub(new \DateInterval('P' . $iRetention . 'D'));
 

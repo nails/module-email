@@ -4,6 +4,7 @@ namespace Nails\Email\Console\Command;
 
 use Nails\Console\Command\Base;
 use Nails\Console\Exception\ConsoleException;
+use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
@@ -48,7 +49,7 @@ class Test extends Base
             $this->banner('Send Test Email');
 
             /** @var Emailer $oEmailer */
-            $oEmailer = Factory::service('Emailer', 'nails/module-email');
+            $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
             $bResult  = $oEmailer->send((object) [
                 'type'     => 'test_email',
                 'to_email' => $oInput->getArgument('email'),

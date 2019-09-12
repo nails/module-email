@@ -4,6 +4,7 @@ namespace Nails\Email\Console\Command\Make;
 
 use Nails\Console\Command\BaseMaker;
 use Nails\Console\Exception\ConsoleException;
+use Nails\Email\Constants;
 use Nails\Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,8 +40,8 @@ class Email extends BaseMaker
     /**
      * Executes the app
      *
-     * @param  InputInterface  $oInput  The Input Interface provided by Symfony
-     * @param  OutputInterface $oOutput The Output Interface provided by Symfony
+     * @param InputInterface  $oInput  The Input Interface provided by Symfony
+     * @param OutputInterface $oOutput The Output Interface provided by Symfony
      *
      * @return int
      */
@@ -82,8 +83,8 @@ class Email extends BaseMaker
     /**
      * Create the Service
      *
-     * @throws ConsoleException
      * @return $this
+     * @throws ConsoleException
      */
     private function createEmail(): self
     {
@@ -230,7 +231,6 @@ class Email extends BaseMaker
 
     // --------------------------------------------------------------------------
 
-
     /**
      * Generate the class namespace
      *
@@ -356,7 +356,7 @@ class Email extends BaseMaker
             ],
         ];
 
-        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         $oNow     = Factory::factory('DateTime');
 
         $oEmailer::loadTypes(static::EMAIL_CONFIG_PATH, $aTypes);

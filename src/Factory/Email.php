@@ -12,6 +12,7 @@
 namespace Nails\Email\Factory;
 
 use Nails\Common\Exception\ValidationException;
+use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
 use Nails\Factory;
 
@@ -316,7 +317,7 @@ class Email
             $aData['data']->bcc = $aEmail['aBcc'];
         }
 
-        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         foreach ($aEmail['aTo'] as $mUserIdOrEmail) {
 

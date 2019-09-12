@@ -10,9 +10,11 @@
  * @link
  */
 
+use Nails\Auth;
 use Nails\Auth\Model\User;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Service\Input;
+use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
@@ -31,9 +33,9 @@ class Unsubscribe extends Base
         /** @var Encrypt $oEncrypt */
         $oEncrypt = Factory::service('Encrypt');
         /** @var Emailer $oEmailer */
-        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var User $oUserModel */
-        $oUserModel = Factory::model('User', 'nails/module-auth');
+        $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 
         $sToken = $oInput->get('token');
         $aToken = $oEncrypt->decode($sToken, APP_PRIVATE_KEY);

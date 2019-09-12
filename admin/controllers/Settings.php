@@ -14,6 +14,7 @@ namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
 use Nails\Common\Service\Input;
+use Nails\Email\Constants;
 use Nails\Email\Controller\BaseAdmin;
 use Nails\Factory;
 
@@ -86,7 +87,7 @@ class Settings extends BaseAdmin
 
             if (!empty($aSettings)) {
                 $oAppSettingService = Factory::service('AppSetting');
-                if ($oAppSettingService->set($aSettings, 'nails/module-email')) {
+                if ($oAppSettingService->set($aSettings, Constants::MODULE_SLUG)) {
                     $this->data['success'] = 'Email settings have been saved.';
                 } else {
                     $this->data['error'] = 'There was a problem saving email settings.';
@@ -100,7 +101,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['aSettings'] = appSetting(null, 'nails/module-email', true);
+        $this->data['aSettings'] = appSetting(null, Constants::MODULE_SLUG, true);
 
         // --------------------------------------------------------------------------
 

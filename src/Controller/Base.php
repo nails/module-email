@@ -12,7 +12,7 @@
 
 namespace Nails\Email\Controller;
 
-// --------------------------------------------------------------------------
+use Nails\Auth;
 use Nails\Factory;
 
 /**
@@ -46,7 +46,7 @@ abstract class Base extends BaseMiddle
             $oAsset = Factory::service('Asset');
             $oAsset->clear();
             $oAsset->load('nails.min.css', 'nails/common');
-            $oAsset->load('styles.min.css', 'nails/module-auth');
+            $oAsset->load('styles.min.css', Auth\Constants::MODULE_SLUG);
         }
     }
 }

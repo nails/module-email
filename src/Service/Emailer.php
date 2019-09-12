@@ -13,6 +13,7 @@
 namespace Nails\Email\Service;
 
 use Mustache_Engine;
+use Nails\Auth;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\NailsException;
@@ -20,6 +21,7 @@ use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
+use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Exception\HostNotKnownException;
 use Nails\Environment;
@@ -306,7 +308,7 @@ class Emailer
 
         //  If we're sending to an email address, try and associate it to a registered user
         try {
-            $oUserModel = Factory::model('User', 'nails/module-auth');
+            $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
             if ($input->to_email) {
                 $_user = $oUserModel->getByEmail($input->to_email);
                 if ($_user) {
@@ -1582,7 +1584,7 @@ class Emailer
      */
     public function getFromName()
     {
-        return appSetting('from_name', 'nails/module-email') ?: APP_NAME;
+        return appSetting('from_name', Constants::MODULE_SLUG) ?: APP_NAME;
     }
 
     // --------------------------------------------------------------------------
@@ -1595,7 +1597,7 @@ class Emailer
      */
     public function getFromEmail()
     {
-        $sFrom = appSetting('from_email', 'nails/module-email');
+        $sFrom = appSetting('from_email', Constants::MODULE_SLUG);
         if ($sFrom) {
             return $sFrom;
         } else {

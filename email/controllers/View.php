@@ -12,10 +12,14 @@
 
 use Nails\Common\Service\HttpCodes;
 use Nails\Common\Service\Output;
+use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
 use Nails\Environment;
 use Nails\Factory;
 
+/**
+ * Class View
+ */
 class View extends Base
 {
     /**
@@ -24,7 +28,7 @@ class View extends Base
     public function index()
     {
         $oUri     = Factory::service('Uri');
-        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         $sRef     = $oUri->segment(3);
         $sGuid    = $oUri->segment(4);
         $sHash    = $oUri->segment(5);
@@ -62,7 +66,7 @@ class View extends Base
         if (Environment::is(Environment::ENV_DEV)) {
 
             $oAsset = Factory::service('Asset');
-            $oAsset->load('debugger.min.css', 'nails/module-email');
+            $oAsset->load('debugger.min.css', Constants::MODULE_SLUG);
 
             Factory::service('View')
                 ->setData([

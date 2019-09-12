@@ -10,6 +10,7 @@
  * @link
  */
 
+use Nails\Auth;
 use Nails\Common\Exception\NailsException;
 use Nails\Email\Controller\Base;
 use Nails\Factory;
@@ -23,8 +24,8 @@ class Verify extends Base
     {
         $oUri       = Factory::service('Uri');
         $oInput     = Factory::service('Input');
-        $oSession   = Factory::service('Session', 'nails/module-auth');
-        $oUserModel = Factory::model('User', 'nails/module-auth');
+        $oSession   = Factory::service('Session', Auth\Constants::MODULE_SLUG);
+        $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 
         $iId      = $oUri->segment(3);
         $sCode    = $oUri->segment(4);

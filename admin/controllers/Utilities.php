@@ -14,6 +14,7 @@ namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
 use Nails\Common\Service\FormValidation;
+use Nails\Email\Constants;
 use Nails\Email\Controller\BaseAdmin;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Service\Emailer;
@@ -88,7 +89,7 @@ class Utilities extends BaseAdmin
                     ->run();
 
                 /** @var Emailer $oEmailer */
-                $oEmailer = Factory::service('Emailer', 'nails/module-email');
+                $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
                 $bResult  = $oEmailer->send((object) [
                     'type'     => 'test_email',
                     'to_email' => $oInput->post('recipient'),

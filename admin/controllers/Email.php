@@ -13,6 +13,8 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Auth;
+use Nails\Email\Constants;
 use Nails\Email\Controller\BaseAdmin;
 use Nails\Factory;
 
@@ -20,6 +22,7 @@ class Email extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups
+     *
      * @return stdClass
      */
     public static function announce()
@@ -39,6 +42,7 @@ class Email extends BaseAdmin
 
     /**
      * Returns an array of permissions which can be configured for the user
+     *
      * @return array
      */
     public static function permissions(): array
@@ -55,10 +59,12 @@ class Email extends BaseAdmin
 
     /**
      * Browse the email archive
+     *
      * @return void
      */
     /**
      * Browse posts
+     *
      * @return void
      */
     public function index()
@@ -70,7 +76,7 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         $oInput   = Factory::service('Input');
-        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         // --------------------------------------------------------------------------
 
@@ -125,7 +131,7 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $oEmailer->countAll($aData);
+        $totalRows             = $oEmailer->countAll($aData);
         $this->data['aEmails'] = $oEmailer->getAll($iPage, $iPerPage, $aData);
 
         //  Set Search and Pagination objects for the view
@@ -150,6 +156,7 @@ class Email extends BaseAdmin
 
     /**
      * Resent an email
+     *
      * @return void
      */
     public function resend()
@@ -161,7 +168,7 @@ class Email extends BaseAdmin
         // --------------------------------------------------------------------------
 
         $oInput   = Factory::service('Input');
-        $oEmailer = Factory::service('Emailer', 'nails/module-email');
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         // --------------------------------------------------------------------------
 
@@ -177,7 +184,7 @@ class Email extends BaseAdmin
             $sMessage = 'Message failed to resend. ' . $oEmailer->lastError();
         }
 
-        $oSession = Factory::service('Session', 'nails/module-auth');
+        $oSession = Factory::service('Session', Auth\Constants::MODULE_SLUG);
         $oSession->setFlashData($sStatus, $sMessage);
         redirect($sReturn);
     }
