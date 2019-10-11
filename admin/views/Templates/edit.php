@@ -12,7 +12,7 @@
         <strong>Variables and simple logic</strong>
     </p>
     <p>
-        Templates support the <a href="https://mustache.github.io/mustache.5.html" targe="_blank">Mustache</a>
+        Templates support the <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache</a>
         templating language.
     </p>
 </div>
