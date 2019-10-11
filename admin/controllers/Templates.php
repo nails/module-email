@@ -299,9 +299,17 @@ class Templates extends BaseAdmin
                     );
 
                     if (!empty($oOverride)) {
-                        $oOverrideModel->update($oOverride->id, $aData);
+                        if (!$oOverrideModel->update($oOverride->id, $aData)) {
+                            throw new ValidationException(
+                                'Failed to update override. ' . $oOverrideModel->lastError()
+                            );
+                        }
                     } elseif (!empty($aData)) {
-                        $oOverrideModel->create($aData);
+                        if (!$oOverrideModel->create($aData)) {
+                            throw new ValidationException(
+                                'Failed to create override. ' . $oOverrideModel->lastError()
+                            );
+                        }
                     }
                 }
 
