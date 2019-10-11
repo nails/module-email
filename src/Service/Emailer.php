@@ -48,8 +48,9 @@ class Emailer
      */
     protected $oPhpMailer;
 
-    protected $aEmailType;
-    protected $aTrackLinkCache;
+    protected $aEmailType      = [];
+    protected $aEmailOverrides = [];
+    protected $aTrackLinkCache = [];
     protected $sTable;
     protected $sTableAlias;
     protected $iGenerateTrackingEmailId;
@@ -80,14 +81,14 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //  Set defaults
-        $this->aEmailType      = [];
-        $this->aTrackLinkCache = [];
+        // Auto-discover email types
+        static::discoverTypes($this->aEmailType);
 
         // --------------------------------------------------------------------------
 
-        // Auto-discover email types
-        static::discoverTypes($this->aEmailType);
+        //  Get Overrides
+        $oOverrideModel        = Factory::model('TemplateOverride', Constants::MODULE_SLUG);
+        $this->aEmailOverrides = $oOverrideModel->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1370,7 +1371,22 @@ class Emailer
          * defined in the template; if not, fall back to a default subject
          */
 
-        if (!empty($oEmail->data->email_subject)) {
+        /**
+         * Subject calculation is defined in the following order
+         * 1. Admin override
+         * 2. Data override
+         * 3. Template Default
+         * 4. Framework Default
+         */
+
+        $oOverride = getFromArray(
+            (string) arraySearchMulti($oEmail->type->slug, 'slug', $this->aEmailOverrides),
+            $this->aEmailOverrides
+        );
+
+        if (!empty($oOverride->subject)) {
+            $oEmail->subject = $oOverride->subject;
+        } elseif (!empty($oEmail->data->email_subject)) {
             $oEmail->subject = $oEmail->data->email_subject;
         } elseif (!empty($oEmail->type->default_subject)) {
             $oEmail->subject = $oEmail->type->default_subject;
@@ -1513,17 +1529,24 @@ class Emailer
         $oEmail->body = new stdClass();
 
         //  HTML Version
-        $oView              = Factory::service('View');
+        $oView = Factory::service('View');
+
         $oEmail->body->html = $oView->load(
             $oEmail->template->header->html,
             ['emailObject' => $oEmail],
             true
         );
-        $oEmail->body->html .= $oView->load(
-            $oEmail->template->body->html,
-            ['emailObject' => $oEmail],
-            true
-        );
+        if (!empty($oOverride->body_html)) {
+
+            $oEmail->body->html .= $oOverride->body_html;
+
+        } else {
+            $oEmail->body->html .= $oView->load(
+                $oEmail->template->body->html,
+                ['emailObject' => $oEmail],
+                true
+            );
+        }
         $oEmail->body->html .= $oView->load(
             $oEmail->template->footer->html,
             ['emailObject' => $oEmail],
@@ -1536,11 +1559,17 @@ class Emailer
             ['emailObject' => $oEmail],
             true
         );
-        $oEmail->body->text .= $oView->load(
-            $oEmail->template->body->text,
-            ['emailObject' => $oEmail],
-            true
-        );
+        if (!empty($oOverride->body_text)) {
+
+            $oEmail->body->text .= $oOverride->body_text;
+
+        } else {
+            $oEmail->body->text .= $oView->load(
+                $oEmail->template->body->text,
+                ['emailObject' => $oEmail],
+                true
+            );
+        }
         $oEmail->body->text .= $oView->load(
             $oEmail->template->footer->text,
             ['emailObject' => $oEmail],
