@@ -113,11 +113,7 @@ class Templates extends BaseAdmin
         ];
         // --------------------------------------------------------------------------
 
-        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-        $aTypes   = $oEmailer->getTypes();
-
-        //  Data for pagination
-        $iTotal = count($aTypes);
+        $aTypes = $oEmailer->getTypes();
 
         //  Filter out keywords
         if (!empty($sKeywords)) {
