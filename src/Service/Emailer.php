@@ -842,13 +842,12 @@ class Emailer
                 'value'  => $data['keywords'],
             ];
 
-            $keywordAsId = (int) preg_replace('/[^0-9]/', '', $data['keywords']);
-
-            if ($keywordAsId) {
-
+            //  If the term looks like a formatted number, convert it to an int and search against the ID
+            if (preg_match('/^(\d{1,3},?)+$/', $data['keywords'], $aMatches)) {
+                $iKeywordAsId      = (int) preg_replace('/[^0-9]/', '', $aMatches[0]);
                 $data['or_like'][] = [
                     'column' => 'u.id',
-                    'value'  => $keywordAsId,
+                    'value'  => $iKeywordAsId,
                 ];
             }
         }
