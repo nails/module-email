@@ -65,7 +65,7 @@ class Templates extends BaseAdmin
     {
         $aPermissions = parent::permissions();
 
-        $aPermissions['templates:edit'] = 'Can edit templates';
+        $aPermissions['edit'] = 'Can edit templates';
 
         return $aPermissions;
     }
