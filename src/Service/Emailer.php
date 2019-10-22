@@ -841,6 +841,10 @@ class Emailer
                 'column' => 'ue.email',
                 'value'  => $data['keywords'],
             ];
+            $data['or_like'][] = [
+                'column' => 'CONCAT(u.first_name, \' \', u.last_name)',
+                'value'  => $data['keywords'],
+            ];
 
             //  If the term looks like a formatted number, convert it to an int and search against the ID
             if (preg_match('/^(\d{1,3},?)+$/', $data['keywords'], $aMatches)) {
