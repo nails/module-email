@@ -79,7 +79,7 @@ class Templates extends BaseAdmin
      */
     public function index(): void
     {
-        if (!userHasPermission('admin:email:templates:browse')) {
+        if (!userHasPermission('admin:email:templates:edit')) {
             unauthorised();
         }
 
@@ -214,6 +214,12 @@ class Templates extends BaseAdmin
      */
     public function edit(): void
     {
+        if (!userHasPermission('admin:email:templates:edit')) {
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var Uri $oUri */
@@ -388,6 +394,10 @@ class Templates extends BaseAdmin
      */
     public function reset(): void
     {
+        if (!userHasPermission('admin:email:templates:edit')) {
+            unauthorised();
+        }
+
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var Uri $oUri */
