@@ -378,7 +378,7 @@ class Templates extends BaseAdmin
         if (preg_match('/<\?|<\?php|<\?=/', $sValue)) {
             throw new ValidationException(
                 'PHP is not supported in template overrides. ' .
-                'Use <a href="https://mustache.github.io/mustache.5.html" targe="_blank">Mustache</a> for ' .
+                'Use <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache</a> for ' .
                 'variable substitution and simple logic.'
             );
         }
