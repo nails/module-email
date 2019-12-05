@@ -142,7 +142,7 @@ $oInput = \Nails\Factory::service('Input');
                     ?>
                     <tr>
                         <td class="no-data" colspan="9">
-                            'No Emails Found
+                            No Emails Found
                         </td>
                     </tr>
                     <?php
