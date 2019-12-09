@@ -31,7 +31,6 @@ class Utilities extends BaseAdmin
     {
         $oNavGroup = Factory::factory('Nav', 'nails/module-admin');
         $oNavGroup->setLabel('Utilities');
-        $oNavGroup->setIcon('fa-sliders');
 
         if (userHasPermission('admin:email:utilities:sendTest')) {
             $oNavGroup->addAction('Send Test Email');

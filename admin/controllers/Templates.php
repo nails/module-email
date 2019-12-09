@@ -45,7 +45,7 @@ class Templates extends BaseAdmin
     {
         $oNavGroup = Factory::factory('Nav', 'nails/module-admin');
         $oNavGroup->setLabel('Email');
-        $oNavGroup->setIcon('fa-paper-plane-o');
+        $oNavGroup->setIcon('fa-paper-plane');
 
         if (userHasPermission('admin:email:templates:edit')) {
             $oNavGroup->addAction('Manage Templates');
