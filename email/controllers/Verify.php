@@ -12,9 +12,14 @@
 
 use Nails\Auth;
 use Nails\Common\Exception\NailsException;
+use Nails\Common\Service\Input;
+use Nails\Common\Service\Uri;
 use Nails\Email\Controller\Base;
 use Nails\Factory;
 
+/**
+ * Class Verify
+ */
 class Verify extends Base
 {
     /**
@@ -22,9 +27,13 @@ class Verify extends Base
      */
     public function index()
     {
-        $oUri       = Factory::service('Uri');
-        $oInput     = Factory::service('Input');
-        $oSession   = Factory::service('Session', Auth\Constants::MODULE_SLUG);
+        /** @var Uri $oUri */
+        $oUri = Factory::service('Uri');
+        /** @var Input $oInput */
+        $oInput = Factory::service('Input');
+        /** @var Auth\Service\Session $oSession */
+        $oSession = Factory::service('Session', Auth\Constants::MODULE_SLUG);
+        /** @var Auth\Model\User $oUserModel */
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 
         $iId      = $oUri->segment(3);

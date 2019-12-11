@@ -19,6 +19,9 @@ use Nails\Email\Controller\Base;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
+/**
+ * Class Unsubscribe
+ */
 class Unsubscribe extends Base
 {
     /**
@@ -45,7 +48,7 @@ class Unsubscribe extends Base
             show404();
         }
 
-        list($sType, $sRef, $iUserId) = $aToken;
+        [$sType, $sRef, $iUserId] = $aToken;
 
         $oUser = $oUserModel->getById($iUserId);
         if (empty($oUser)) {

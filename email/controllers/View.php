@@ -10,10 +10,13 @@
  * @link
  */
 
+use Nails\Common\Service\Asset;
 use Nails\Common\Service\HttpCodes;
 use Nails\Common\Service\Output;
+use Nails\Common\Service\Uri;
 use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
+use Nails\Email\Service\Emailer;
 use Nails\Environment;
 use Nails\Factory;
 
@@ -27,7 +30,9 @@ class View extends Base
      */
     public function index()
     {
-        $oUri     = Factory::service('Uri');
+        /** @var Uri $oUri */
+        $oUri = Factory::service('Uri');
+        /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         $sRef     = $oUri->segment(3);
         $sGuid    = $oUri->segment(4);
@@ -65,6 +70,7 @@ class View extends Base
 
         if (Environment::is(Environment::ENV_DEV)) {
 
+            /** @var Asset $oAsset */
             $oAsset = Factory::service('Asset');
             $oAsset->load('debugger.min.css', Constants::MODULE_SLUG);
 
@@ -79,6 +85,7 @@ class View extends Base
                 ]);
 
         } else {
+            /** @var Output $oOutput */
             $oOutput = Factory::service('Output');
             $oOutput->set_output($oEmail->body->html);
         }

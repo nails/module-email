@@ -10,10 +10,15 @@
  * @link
  */
 
+use Nails\Common\Service\Uri;
 use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
+use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
+/**
+ * Class Tracker
+ */
 class Tracker extends Base
 {
     /**
@@ -21,7 +26,9 @@ class Tracker extends Base
      */
     public function track_open()
     {
-        $oUri     = Factory::service('Uri');
+        /** @var Uri $oUri */
+        $oUri = Factory::service('Uri');
+        /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         $sRef  = $oUri->segment(3);
@@ -72,7 +79,9 @@ class Tracker extends Base
      */
     public function track_link()
     {
-        $oUri     = Factory::service('Uri');
+        /** @var Uri $oUri */
+        $oUri = Factory::service('Uri');
+        /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         $sRef    = $oUri->segment(4);

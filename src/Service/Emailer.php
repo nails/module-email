@@ -17,6 +17,7 @@ use Nails\Auth;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\NailsException;
+use Nails\Common\Service\Database;
 use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
@@ -1076,6 +1077,7 @@ class Emailer
         if ($oEmail) {
 
             //  Get the link which was clicked
+            /** @var Database $oDb */
             $oDb = Factory::service('Database');
             $oDb->select('id, url');
             $oDb->where('email_id', $oEmail->id);
