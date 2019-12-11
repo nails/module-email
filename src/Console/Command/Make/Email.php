@@ -2,6 +2,7 @@
 
 namespace Nails\Email\Console\Command\Make;
 
+use Nails\Common\Exception\ValidationException;
 use Nails\Console\Command\BaseMaker;
 use Nails\Console\Exception\ConsoleException;
 use Nails\Email\Constants;
@@ -27,12 +28,21 @@ class Email extends BaseMaker
     {
         $this
             ->setName('make:email')
-            ->setDescription('Creates a new email')
-            ->addArgument(
-                'emailName',
-                InputArgument::OPTIONAL,
-                'Define the name of the email to create'
-            );
+            ->setDescription('Creates a new email');
+
+        $this->aArguments = [
+            [
+                'name'        => 'name',
+                'mode'        => InputArgument::OPTIONAL,
+                'description' => 'Define the name of the email to create',
+                'required'    => true,
+                'validation'  => function (string $sValue) {
+                    $this->validateClassName($sValue);
+                },
+            ],
+        ];
+
+        parent::configure();
     }
 
     // --------------------------------------------------------------------------
@@ -97,7 +107,7 @@ class Email extends BaseMaker
             $aEmails   = array_filter(
                 array_map(function ($sEmail) {
                     return implode('/', array_map('ucfirst', explode('/', ucfirst(trim($sEmail)))));
-                }, explode(',', $aFields['EMAIL_NAME']))
+                }, explode(',', $aFields['NAME']))
             );
 
             sort($aEmails);
