@@ -175,7 +175,7 @@ class Email
             $aArray = [];
         }
 
-        if (strpos($mUserIdOrEmail, ',') !== false) {
+        if (is_string($mUserIdOrEmail) && strpos($mUserIdOrEmail, ',') !== false) {
             $mUserIdOrEmail = array_map('trim', explode(',', $mUserIdOrEmail));
         }
 
