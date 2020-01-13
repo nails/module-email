@@ -105,7 +105,9 @@ class Email extends BaseAdmin
         $aTypeOptions = ['All email types'];
         $aEmailTypes  = $oEmailer->getTypes();
         foreach ($aEmailTypes as $oType) {
-            $aTypeOptions[$oType->slug] = $oType->name;
+            if (empty($oType->is_hidden)) {
+                $aTypeOptions[$oType->slug] = $oType->name;
+            }
         }
 
         $aCbFilters = [];

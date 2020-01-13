@@ -210,11 +210,13 @@ class Emailer
     {
         if (!empty($oData->slug) && !empty($oData->template_body)) {
 
+            //  @todo (Pablo - 2020-01-13) - Convert this to a defined object/class
             $aArray[$oData->slug] = (object) [
                 'slug'             => $oData->slug,
                 'name'             => $oData->name,
                 'description'      => $oData->description,
                 'isUnsubscribable' => property_exists($oData, 'isUnsubscribable') ? (bool) $oData->isUnsubscribable : true,
+                'is_hidden'        => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
                 'template_header'  => empty($oData->template_header) ? 'email/structure/header' : $oData->template_header,
                 'template_body'    => $oData->template_body,
                 'template_footer'  => empty($oData->template_footer) ? 'email/structure/footer' : $oData->template_footer,

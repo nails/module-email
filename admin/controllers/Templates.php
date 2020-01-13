@@ -113,7 +113,12 @@ class Templates extends BaseAdmin
         ];
         // --------------------------------------------------------------------------
 
-        $aTypes = $oEmailer->getTypes();
+        $aTypes = array_filter(
+            $oEmailer->getTypes(),
+            function($oEmail) {
+                return empty($oEmail->is_hidden);
+            }
+        );
 
         //  Filter out keywords
         if (!empty($sKeywords)) {
