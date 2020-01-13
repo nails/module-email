@@ -215,8 +215,8 @@ class Emailer
                 'slug'             => $oData->slug,
                 'name'             => $oData->name,
                 'description'      => $oData->description,
-                'isUnsubscribable' => property_exists($oData, 'isUnsubscribable') ? (bool) $oData->isUnsubscribable : true,
                 'is_hidden'        => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
+                'can_unsubscribe'  => property_exists($oData, 'can_unsubscribe') ? (bool) $oData->can_unsubscribe : true,
                 'template_header'  => empty($oData->template_header) ? 'email/structure/header' : $oData->template_header,
                 'template_body'    => $oData->template_body,
                 'template_footer'  => empty($oData->template_footer) ? 'email/structure/footer' : $oData->template_footer,
@@ -1483,7 +1483,7 @@ class Emailer
 
         //  1-Click Unsubscribe
         $oEmail->data->url->unsubscribe = '';
-        if ($oEmail->type->isUnsubscribable && !empty($oEmail->to->id)) {
+        if ($oEmail->type->can_unsubscribe && !empty($oEmail->to->id)) {
 
             $sUrl = siteUrl('email/unsubscribe?token=');
 

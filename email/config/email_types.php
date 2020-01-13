@@ -14,7 +14,7 @@ $config['email_types'] = [
     (object) [
         'slug'             => 'test_email',
         'name'             => 'Test Email',
-        'isUnsubscribable' => true,
+        'can_unsubscribe'  => true,
         'description'      => 'Test email template, normally used in admin to test if recipients can receive email sent by the system',
         'template_header'  => '',
         'template_body'    => 'email/email/test',

@@ -56,7 +56,7 @@ class Unsubscribe extends Base
         }
 
         $oEmail = $oEmailer->getByRef($sRef);
-        if (!$oEmail || empty($oEmail->type->isUnsubscribable)) {
+        if (!$oEmail || empty($oEmail->type->can_unsubscribe)) {
             show404();
         }
 
