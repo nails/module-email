@@ -13,6 +13,7 @@
 use Nails\Auth;
 use Nails\Common\Exception\NailsException;
 use Nails\Common\Service\Input;
+use Nails\Common\Service\Session;
 use Nails\Common\Service\Uri;
 use Nails\Email\Controller\Base;
 use Nails\Factory;
@@ -31,8 +32,8 @@ class Verify extends Base
         $oUri = Factory::service('Uri');
         /** @var Input $oInput */
         $oInput = Factory::service('Input');
-        /** @var Auth\Service\Session $oSession */
-        $oSession = Factory::service('Session', Auth\Constants::MODULE_SLUG);
+        /** @var Session $oSession */
+        $oSession = Factory::service('Session');
         /** @var Auth\Model\User $oUserModel */
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 

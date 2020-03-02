@@ -13,11 +13,16 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
-use Nails\Auth;
+use Nails\Common\Service\Session;
 use Nails\Email\Constants;
 use Nails\Email\Controller\BaseAdmin;
 use Nails\Factory;
 
+/**
+ * Class Email
+ *
+ * @package Nails\Admin\Email
+ */
 class Email extends BaseAdmin
 {
     /**
@@ -186,7 +191,8 @@ class Email extends BaseAdmin
             $sMessage = 'Message failed to resend. ' . $oEmailer->lastError();
         }
 
-        $oSession = Factory::service('Session', Auth\Constants::MODULE_SLUG);
+        /** @var Session $oSession */
+        $oSession = Factory::service('Session');
         $oSession->setFlashData($sStatus, $sMessage);
         redirect($sReturn);
     }

@@ -13,7 +13,6 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
-use Nails\Auth\Service\Session;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\ValidationException;
@@ -21,6 +20,7 @@ use Nails\Common\Exception\ViewNotFoundCaseException;
 use Nails\Common\Exception\ViewNotFoundException;
 use Nails\Common\Service\FormValidation;
 use Nails\Common\Service\Input;
+use Nails\Common\Service\Session;
 use Nails\Common\Service\Uri;
 use Nails\Common\Service\View;
 use Nails\Email\Constants;
@@ -115,7 +115,7 @@ class Templates extends BaseAdmin
 
         $aTypes = array_filter(
             $oEmailer->getTypes(),
-            function($oEmail) {
+            function ($oEmail) {
                 return empty($oEmail->is_hidden);
             }
         );
@@ -325,7 +325,7 @@ class Templates extends BaseAdmin
                 }
 
                 /** @var Session $oSession */
-                $oSession = Factory::service('Session', 'nails/module-auth');
+                $oSession = Factory::service('Session');
                 $oSession->setFlashData('success', 'Override updated successfully.');
                 redirect('admin/email/templates/edit/' . $oType->slug);
 
@@ -410,7 +410,7 @@ class Templates extends BaseAdmin
         /** @var Override $oOverrideModel */
         $oOverrideModel = Factory::model('TemplateOverride', Constants::MODULE_SLUG);
         /** @var Session $oSession */
-        $oSession = Factory::service('Session', 'nails/module-auth');
+        $oSession = Factory::service('Session');
 
         $oType = $oEmailer->getType($oUri->segment(5));
         if (empty($oType)) {
