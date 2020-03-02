@@ -5,6 +5,7 @@ namespace Nails\Email\Event\Listener;
 use Nails\Common\Events;
 use Nails\Common\Events\Subscription;
 use Nails\Common\Exception\NailsException;
+use Nails\Config;
 use Nails\Functions;
 use ReflectionException;
 
@@ -37,20 +38,20 @@ class Startup extends Subscription
     {
         //  @todo (Pablo - 2019-12-06) - Remove this once a unified settings system is in place
         //  Email constants
-        Functions::define('APP_DEVELOPER_EMAIL', '');
-        Functions::define('EMAIL_OVERRIDE', '');
-        Functions::define('EMAIL_WHITELIST', '');
+        Config::set('APP_DEVELOPER_EMAIL', '');
+        Config::set('EMAIL_OVERRIDE', '');
+        Config::set('EMAIL_WHITELIST', '');
 
         //  Specify these first for backwards compatability
         //  @todo (Pablo - 2019-12-06) - Remove these
-        Functions::define('DEPLOY_EMAIL_HOST', '127.0.0.1');
-        Functions::define('DEPLOY_EMAIL_USER', null);
-        Functions::define('DEPLOY_EMAIL_PASS', null);
-        Functions::define('DEPLOY_EMAIL_PORT', 25);
+        Config::set('DEPLOY_EMAIL_HOST', '127.0.0.1');
+        Config::set('DEPLOY_EMAIL_USER', null);
+        Config::set('DEPLOY_EMAIL_PASS', null);
+        Config::set('DEPLOY_EMAIL_PORT', 25);
 
-        Functions::define('EMAIL_HOST', DEPLOY_EMAIL_HOST);
-        Functions::define('EMAIL_USERNAME', DEPLOY_EMAIL_USER);
-        Functions::define('EMAIL_PASSWORD', DEPLOY_EMAIL_PASS);
-        Functions::define('EMAIL_PORT', DEPLOY_EMAIL_PORT);
+        Config::set('EMAIL_HOST', Config::get('EMAIL_HOST'));
+        Config::set('EMAIL_USERNAME', Config::get('EMAIL_USERNAME'));
+        Config::set('EMAIL_PASSWORD', Config::get('EMAIL_PASSWORD'));
+        Config::set('EMAIL_PORT', Config::get('EMAIL_PORT'));
     }
 }
