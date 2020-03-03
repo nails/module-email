@@ -38,20 +38,20 @@ class Startup extends Subscription
     {
         //  @todo (Pablo - 2019-12-06) - Remove this once a unified settings system is in place
         //  Email constants
-        Config::set('APP_DEVELOPER_EMAIL', '');
-        Config::set('EMAIL_OVERRIDE', '');
-        Config::set('EMAIL_WHITELIST', '');
+        Config::default('APP_DEVELOPER_EMAIL', '');
+        Config::default('EMAIL_OVERRIDE', '');
+        Config::default('EMAIL_WHITELIST', '');
 
         //  Specify these first for backwards compatability
         //  @todo (Pablo - 2019-12-06) - Remove these
-        Config::set('DEPLOY_EMAIL_HOST', '127.0.0.1');
-        Config::set('DEPLOY_EMAIL_USER', null);
-        Config::set('DEPLOY_EMAIL_PASS', null);
-        Config::set('DEPLOY_EMAIL_PORT', 25);
+        Config::default('DEPLOY_EMAIL_HOST', '127.0.0.1');
+        Config::default('DEPLOY_EMAIL_USER', null);
+        Config::default('DEPLOY_EMAIL_PASS', null);
+        Config::default('DEPLOY_EMAIL_PORT', 25);
 
-        Config::set('EMAIL_HOST', Config::get('EMAIL_HOST'));
-        Config::set('EMAIL_USERNAME', Config::get('EMAIL_USERNAME'));
-        Config::set('EMAIL_PASSWORD', Config::get('EMAIL_PASSWORD'));
-        Config::set('EMAIL_PORT', Config::get('EMAIL_PORT'));
+        Config::default('EMAIL_HOST', '127.0.0.1');
+        Config::default('EMAIL_USERNAME', null);
+        Config::default('EMAIL_PASSWORD', null);
+        Config::default('EMAIL_PORT', 25);
     }
 }
