@@ -22,6 +22,7 @@ use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
+use Nails\Config;
 use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Exception\HostNotKnownException;
@@ -93,7 +94,7 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        $this->sTable      = NAILS_DB_PREFIX . 'email_archive';
+        $this->sTable      = Config::get('NAILS_DB_PREFIX') . 'email_archive';
         $this->sTableAlias = 'ea';
 
         // --------------------------------------------------------------------------
@@ -102,11 +103,11 @@ class Emailer
 
         $this->oPhpMailer->isSMTP();
 
-        $this->oPhpMailer->Host    = EMAIL_HOST;
-        $this->oPhpMailer->Port    = EMAIL_PORT;
+        $this->oPhpMailer->Host    = Config::get('EMAIL_HOST');
+        $this->oPhpMailer->Port    = Config::get('EMAIL_PORT');
         $this->oPhpMailer->CharSet = PHPMailer\PHPMailer::CHARSET_UTF8;
 
-        if (EMAIL_HOST === 'localhost' || EMAIL_HOST === '127.0.0.1') {
+        if (Config::get('EMAIL_HOST') === 'localhost' || Config::get('EMAIL_HOST') === '127.0.0.1') {
             $this->oPhpMailer->SMTPOptions = [
                 'ssl' => [
                     'verify_peer'       => false,
@@ -116,10 +117,10 @@ class Emailer
             ];
         }
 
-        if (!is_null(EMAIL_USERNAME) && !is_null(EMAIL_PASSWORD)) {
+        if (!is_null(Config::get('EMAIL_USERNAME')) && !is_null(Config::get('EMAIL_PASSWORD'))) {
             $this->oPhpMailer->SMTPAuth = true;
-            $this->oPhpMailer->Username = EMAIL_USERNAME;
-            $this->oPhpMailer->Password = EMAIL_PASSWORD;
+            $this->oPhpMailer->Username = Config::get('EMAIL_USERNAME');
+            $this->oPhpMailer->Password = Config::get('EMAIL_PASSWORD');
         }
     }
 
@@ -133,14 +134,14 @@ class Emailer
     public static function discoverTypes(array &$aArray): void
     {
         $aLocations = [
-            NAILS_COMMON_PATH . 'config/email_types.php',
+            Config::get('NAILS_COMMON_PATH') . 'config/email_types.php',
         ];
 
         foreach (Components::modules() as $oModule) {
             $aLocations[] = $oModule->path . $oModule->moduleName . '/config/email_types.php';
         }
 
-        $aLocations[] = NAILS_APP_PATH . 'application/config/email_types.php';
+        $aLocations[] = Config::get('NAILS_APP_PATH') . 'application/config/email_types.php';
 
         foreach ($aLocations as $sPath) {
             static::loadTypes($sPath, $aArray);
@@ -461,7 +462,7 @@ class Emailer
         $oDb = Factory::service('Database');
         $oDb->where('user_id', $iUSerId);
         $oDb->where('type', $sType);
-        return (bool) $oDb->count_all_results(NAILS_DB_PREFIX . 'user_email_blocker');
+        return (bool) $oDb->count_all_results(Config::get('NAILS_DB_PREFIX') . 'user_email_blocker');
     }
 
     // --------------------------------------------------------------------------
@@ -479,7 +480,7 @@ class Emailer
         $oDb = Factory::service('Database');
         $oDb->where('id', $iUserId);
         $oDb->where('is_suspended', true);
-        return (bool) $oDb->count_all_results(NAILS_DB_PREFIX . 'user');
+        return (bool) $oDb->count_all_results(Config::get('NAILS_DB_PREFIX') . 'user');
     }
 
     // --------------------------------------------------------------------------
@@ -505,7 +506,7 @@ class Emailer
         $oDb->set('user_id', $user_id);
         $oDb->set('type', $type);
         $oDb->set('created', 'NOW()', false);
-        $oDb->insert(NAILS_DB_PREFIX . 'user_email_blocker');
+        $oDb->insert(Config::get('NAILS_DB_PREFIX') . 'user_email_blocker');
 
         return (bool) $oDb->affected_rows();
     }
@@ -532,7 +533,7 @@ class Emailer
         $oDb = Factory::service('Database');
         $oDb->where('user_id', $user_id);
         $oDb->where('type', $type);
-        $oDb->delete(NAILS_DB_PREFIX . 'user_email_blocker');
+        $oDb->delete(Config::get('NAILS_DB_PREFIX') . 'user_email_blocker');
 
         return (bool) $oDb->affected_rows();
     }
@@ -607,11 +608,11 @@ class Emailer
 
         //  Handle routing of email on non-production environments
         if (Environment::not(Environment::ENV_PROD)) {
-            if (EMAIL_OVERRIDE) {
-                $oEmail->to->email = EMAIL_OVERRIDE;
-            } elseif (EMAIL_WHITELIST) {
+            if (Config::get('EMAIL_OVERRIDE')) {
+                $oEmail->to->email = Config::get('EMAIL_OVERRIDE');
+            } elseif (Config::get('EMAIL_WHITELIST') {
 
-                $aWhitelist = array_values(array_filter((array) json_decode(EMAIL_WHITELIST)));
+                $aWhitelist = array_values(array_filter((array) json_decode(Config::get('EMAIL_WHITELIST')));
                 if (!in_array($oEmail->to->email, $aWhitelist)) {
 
                     $bMatch = false;
@@ -628,8 +629,8 @@ class Emailer
                     }
                 }
 
-            } elseif (APP_DEVELOPER_EMAIL) {
-                $oEmail->to->email = APP_DEVELOPER_EMAIL;
+            } elseif (Config::get('APP_DEVELOPER_EMAIL')) {
+                $oEmail->to->email = Config::get('APP_DEVELOPER_EMAIL');
             } else {
                 throw new EmailerException(
                     'EMAILER: Non-production environment detected and neither EMAIL_OVERRIDE, EMAIL_WHITELIST nor APP_DEVELOPER_EMAIL is set'
@@ -705,7 +706,7 @@ class Emailer
             $oDb = Factory::service('Database');
             $oDb->set('count_sends', 'count_sends+1', false);
             $oDb->where('email', $oEmail->to->email);
-            $oDb->update(NAILS_DB_PREFIX . 'user_email');
+            $oDb->update(Config::get('NAILS_DB_PREFIX') . 'user_email');
 
             return true;
 
@@ -873,8 +874,8 @@ class Emailer
 
         //  Common joins
         $oDb = Factory::service('Database');
-        $oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->sTableAlias . '.user_id', 'LEFT');
-        $oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->sTableAlias . '.user_email', 'LEFT');
+        $oDb->join(Config::get('NAILS_DB_PREFIX') . 'user u', 'u.id = ' . $this->sTableAlias . '.user_id', 'LEFT');
+        $oDb->join(Config::get('NAILS_DB_PREFIX') . 'user_email ue', 'ue.email = ' . $this->sTableAlias . '.user_email', 'LEFT');
 
         $this->getCountCommon($data);
     }
@@ -972,7 +973,7 @@ class Emailer
      */
     public function generateHash($sRef, $sGuid)
     {
-        return md5($sGuid . APP_PRIVATE_KEY . $sRef);
+        return md5($sGuid . Config::get('APP_PRIVATE_KEY') . $sRef);
     }
 
     // --------------------------------------------------------------------------
@@ -1057,7 +1058,7 @@ class Emailer
                 $oDb->set('user_id', activeUser('id'));
             }
 
-            $oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_open');
+            $oDb->insert(Config::get('NAILS_DB_PREFIX') . 'email_archive_track_open');
         }
     }
 
@@ -1084,7 +1085,7 @@ class Emailer
             $oDb->select('id, url');
             $oDb->where('email_id', $oEmail->id);
             $oDb->where('id', $iLinkId);
-            $oLink = $oDb->get(NAILS_DB_PREFIX . 'email_archive_link')->row();
+            $oLink = $oDb->get(Config::get('NAILS_DB_PREFIX') . 'email_archive_link')->row();
 
             if ($oLink) {
 
@@ -1102,7 +1103,7 @@ class Emailer
                     $oDb->set('user_id', activeUser('id'));
                 }
 
-                $oDb->insert(NAILS_DB_PREFIX . 'email_archive_track_link');
+                $oDb->insert(Config::get('NAILS_DB_PREFIX') . 'email_archive_track_link');
 
                 //  Return the URL to go to
                 return $oLink->url;
@@ -1288,7 +1289,7 @@ class Emailer
             $oDb->set('title', $title);
             $oDb->set('created', 'NOW()', false);
             $oDb->set('is_html', $is_html);
-            $oDb->insert(NAILS_DB_PREFIX . 'email_archive_link');
+            $oDb->insert(Config::get('NAILS_DB_PREFIX') . 'email_archive_link');
 
             $_id = $oDb->insert_id();
 
@@ -1398,7 +1399,7 @@ class Emailer
         } elseif (!empty($oEmail->type->default_subject)) {
             $oEmail->subject = $oEmail->type->default_subject;
         } else {
-            $oEmail->subject = 'An E-mail from ' . APP_NAME;
+            $oEmail->subject = 'An E-mail from ' . Config::get('APP_NAME');
         }
 
         // --------------------------------------------------------------------------
@@ -1500,7 +1501,7 @@ class Emailer
 
                 $sToken = $oEncrypt->encode(
                     $oEmail->type->slug . '|' . $oEmail->data->emailRef . '|' . $oEmail->to->id,
-                    APP_PRIVATE_KEY
+                    Config::get('APP_PRIVATE_KEY')
                 );
                 $iCounter++;
 
@@ -1614,13 +1615,13 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the defined sending from name, or falls back to APP_NAME
+     * Returns the defined sending from name, or falls back to Config::get('APP_NAME')
      *
      * @return string
      */
     public function getFromName()
     {
-        return appSetting('from_name', Constants::MODULE_SLUG) ?: APP_NAME;
+        return appSetting('from_name', Constants::MODULE_SLUG) ?: Config::get('APP_NAME');
     }
 
     // --------------------------------------------------------------------------
@@ -1637,7 +1638,7 @@ class Emailer
         if ($sFrom) {
             return $sFrom;
         } else {
-            $sDomain = parse_url(BASE_URL, PHP_URL_HOST);
+            $sDomain = parse_url(Config::get('BASE_URL'), PHP_URL_HOST);
             if ($sDomain === 'localhost' && Environment::is(Environment::ENV_DEV)) {
                 $sDomain = 'example.com';
             } elseif (!PHPMailer\PHPMailer::validateAddress('nobody@' . $sDomain)) {
