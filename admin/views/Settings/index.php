@@ -64,7 +64,7 @@ $oInput = \Nails\Factory::service('Input');
                     echo form_field([
                         'key'         => 'from_name',
                         'label'       => 'From Name',
-                        'default'     => getFromArray('from_name', $aSettings, Config::get('APP_NAME'),
+                        'default'     => getFromArray('from_name', $aSettings, Config::get('APP_NAME')),
                         'placeholder' => 'The name of the sender which recipients should see.',
                     ]);
 
