@@ -101,7 +101,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['aSettings'] = appSetting(null, Constants::MODULE_SLUG, true);
+        $this->data['aSettings'] = appSetting(null, Constants::MODULE_SLUG, null, true);
 
         // --------------------------------------------------------------------------
 
