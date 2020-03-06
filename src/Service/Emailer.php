@@ -610,13 +610,11 @@ class Emailer
         if (Environment::not(Environment::ENV_PROD)) {
             if (Config::get('EMAIL_OVERRIDE')) {
                 $oEmail->to->email = Config::get('EMAIL_OVERRIDE');
-            } elseif (Config::get('EMAIL_WHITELIST')) {
+            } elseif (!empty(Config::get('EMAIL_WHITELIST'))) {
 
                 $aWhitelist = array_values(
                     array_filter(
-                        (array) json_decode(
-                            Config::get('EMAIL_WHITELIST')
-                        )
+                        (array) Config::get('EMAIL_WHITELIST')
                     )
                 );
 
