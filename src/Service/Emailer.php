@@ -213,15 +213,15 @@ class Emailer
 
             //  @todo (Pablo - 2020-01-13) - Convert this to a defined object/class
             $aArray[$oData->slug] = (object) [
-                'slug'             => $oData->slug,
-                'name'             => $oData->name,
-                'description'      => $oData->description,
-                'is_hidden'        => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
-                'can_unsubscribe'  => property_exists($oData, 'can_unsubscribe') ? (bool) $oData->can_unsubscribe : true,
-                'template_header'  => empty($oData->template_header) ? 'email/structure/header' : $oData->template_header,
-                'template_body'    => $oData->template_body,
-                'template_footer'  => empty($oData->template_footer) ? 'email/structure/footer' : $oData->template_footer,
-                'default_subject'  => $oData->default_subject,
+                'slug'            => $oData->slug,
+                'name'            => $oData->name,
+                'description'     => $oData->description,
+                'is_hidden'       => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
+                'can_unsubscribe' => property_exists($oData, 'can_unsubscribe') ? (bool) $oData->can_unsubscribe : true,
+                'template_header' => empty($oData->template_header) ? 'email/structure/header' : $oData->template_header,
+                'template_body'   => $oData->template_body,
+                'template_footer' => empty($oData->template_footer) ? 'email/structure/footer' : $oData->template_footer,
+                'default_subject' => $oData->default_subject,
             ];
 
             return true;
