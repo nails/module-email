@@ -1606,11 +1606,9 @@ class Emailer
         /** @var Mustache_Engine $oMustache */
         $oMustache = Factory::service('Mustache');
 
-        //  These functions take a single argument
-        $aFuncs = ['siteUrl', 'asset'];
-
+        //  Any function which takes a single argument
         $sTemplate = preg_replace_callback(
-            '/{{\s*(' . implode('|', $aFuncs) . ')(\(([\'" ]*)?(.*?)([\'" ]*)?\))?\s*}}/',
+            '/{{\s*([a-zA-Z0-9_]+)(\(([\'" ]*)?(.*?)([\'" ]*)?\))\s*}}/',
             function ($aMatches) {
                 $sFunction = getFromArray(1, $aMatches);
                 $sArgument = getFromArray(4, $aMatches);
