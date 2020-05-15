@@ -1529,11 +1529,8 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        /** @var Mustache_Engine $oMustache */
-        $oMustache = Factory::service('Mustache');
-
         //  Subject
-        $oEmail->subject = $oMustache->render($oEmail->subject, $oEmail->data);
+        $oEmail->subject = $this->render($oEmail->subject, $oEmail->data);
 
         //  Add the rendered subject to the data array so the body can sue it
         $oEmail->data->email_subject = $oEmail->subject;
@@ -1589,8 +1586,40 @@ class Emailer
             true
         );
 
-        $oEmail->body->html = $oMustache->render($oEmail->body->html, $oEmail->data);
-        $oEmail->body->text = $oMustache->render($oEmail->body->text, $oEmail->data);
+        $oEmail->body->html = $this->render($oEmail->body->html, $oEmail->data);
+        $oEmail->body->text = $this->render($oEmail->body->text, $oEmail->data);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Compiles a template, replacing functions and variable placeholders
+     *
+     * @param string       $sTemplate The template to use
+     * @param object|Array $mData     The data to use
+     *
+     * @return string
+     * @throws FactoryException
+     */
+    protected function render(string $sTemplate, $mData): string
+    {
+        /** @var Mustache_Engine $oMustache */
+        $oMustache = Factory::service('Mustache');
+
+        //  These functions take a single argument
+        $aFuncs = ['siteUrl', 'asset'];
+
+        $sTemplate = preg_replace_callback(
+            '/{{\s*(' . implode('|', $aFuncs) . ')(\(([\'" ]*)?(.*?)([\'" ]*)?\))?\s*}}/',
+            function ($aMatches) {
+                $sFunction = getFromArray(1, $aMatches);
+                $sArgument = getFromArray(4, $aMatches);
+                return call_user_func($sFunction, $sArgument);
+            },
+            $sTemplate
+        );
+
+        return $oMustache->render($sTemplate, $mData);
     }
 
     // --------------------------------------------------------------------------
