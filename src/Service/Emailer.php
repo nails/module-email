@@ -1475,7 +1475,7 @@ class Emailer
         $oEmail->data->emailRef  = $oEmail->ref;
         $oEmail->data->sentFrom  = $oEmail->from;
         $oEmail->data->sentTo    = $oEmail->to;
-        $oEmail->data->siteUrl   = siteUrl();
+        $oEmail->data->appName   = Config::get('APP_NAME');
 
         //  Common URLs
         $oEmail->data->url = new stdClass();
