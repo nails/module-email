@@ -1612,7 +1612,9 @@ class Emailer
             function ($aMatches) {
                 $sFunction = getFromArray(1, $aMatches);
                 $sArgument = getFromArray(4, $aMatches);
-                return call_user_func($sFunction, $sArgument);
+                return function_exists($sFunction)
+                    ? call_user_func($sFunction, $sArgument)
+                    : $aMatches[0];
             },
             $sTemplate
         );
