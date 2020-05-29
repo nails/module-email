@@ -14,6 +14,7 @@ use Nails\Auth;
 use Nails\Auth\Model\User;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Service\Input;
+use Nails\Config;
 use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
 use Nails\Email\Service\Emailer;
@@ -41,7 +42,7 @@ class Unsubscribe extends Base
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 
         $sToken = $oInput->get('token');
-        $aToken = $oEncrypt->decode($sToken, APP_PRIVATE_KEY);
+        $aToken = $oEncrypt->decode($sToken, Config::get('APP_PRIVATE_KEY'));
         $aToken = explode('|', $aToken);
 
         if (count($aToken) != 3) {
