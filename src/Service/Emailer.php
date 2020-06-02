@@ -1672,8 +1672,9 @@ class Emailer
         if ($sFrom) {
             return $sFrom;
         } else {
-            $sDomain = parse_url(Config::get('BASE_URL'), PHP_URL_HOST);
-            if ($sDomain === 'localhost' && Environment::is(Environment::ENV_DEV)) {
+            $sDomain    = parse_url(Config::get('BASE_URL'), PHP_URL_HOST);
+            $aValidEnvs = [Environment::ENV_DEV, Environment::ENV_TEST, Environment::ENV_HTTP_TEST];
+            if ($sDomain === 'localhost' && Environment::is($aValidEnvs)) {
                 $sDomain = 'example.com';
             } elseif (!PHPMailer\PHPMailer::validateAddress('nobody@' . $sDomain)) {
                 throw new EmailerException('nobody@' . $sDomain . ' is not a valid from email');
