@@ -116,6 +116,18 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Return's the email's type
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->sType;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Add a recipient
      *
      * @param integer|string|array $mUserIdOrEmail The user ID to send to, or an email address
@@ -126,6 +138,18 @@ class Email
     public function to($mUserIdOrEmail, $bAppend = false)
     {
         return $this->addRecipient($mUserIdOrEmail, $bAppend, $this->aTo);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns who the email is being sent to
+     *
+     * @return array
+     */
+    public function getTo(): array
+    {
+        return $this->aTo;
     }
 
     // --------------------------------------------------------------------------
@@ -146,6 +170,18 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Returns who the email is being CC'd to
+     *
+     * @return array
+     */
+    public function getCc(): array
+    {
+        return $this->aCc;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Add a recipient (on BCC)
      *
      * @param integer|string $mUserIdOrEmail The user ID to send to, or an email address
@@ -156,6 +192,18 @@ class Email
     public function bcc($mUserIdOrEmail, $bAppend = false)
     {
         return $this->addRecipient($mUserIdOrEmail, $bAppend, $this->aBcc);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns who the email is being BCC'd to
+     *
+     * @return array
+     */
+    public function getBcc(): array
+    {
+        return $this->aBcc;
     }
 
     // --------------------------------------------------------------------------
@@ -212,6 +260,30 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Returns who the email is being sent from (email)
+     *
+     * @return string
+     */
+    public function getFromEmail(): string
+    {
+        return $this->sFromEmail;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns who the email is being sent from (name)
+     *
+     * @return string
+     */
+    public function getFromName(): string
+    {
+        return $this->sFromName;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Validates an email address
      *
      * @param integer|string $sEmail The email address to validate
@@ -253,6 +325,18 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Returns email data
+     *
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->aData;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Add an attachment to an email
      *
      * @param string|array $sPath     The path to the attachment
@@ -271,6 +355,18 @@ class Email
         }
 
         return $this;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns email attachments
+     *
+     * @return array
+     */
+    public function getAttachments(): array
+    {
+        return $this->aAttachments;
     }
 
     // --------------------------------------------------------------------------
