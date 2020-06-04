@@ -218,9 +218,9 @@ class Emailer
                 'description'     => $oData->description,
                 'is_hidden'       => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
                 'can_unsubscribe' => property_exists($oData, 'can_unsubscribe') ? (bool) $oData->can_unsubscribe : true,
-                'template_header' => empty($oData->template_header) ? 'email/structure/header' : $oData->template_header,
+                'template_header' => empty($oData->template_header) ? 'email/structure/email_header' : $oData->template_header,
                 'template_body'   => $oData->template_body,
-                'template_footer' => empty($oData->template_footer) ? 'email/structure/footer' : $oData->template_footer,
+                'template_footer' => empty($oData->template_footer) ? 'email/structure/email_footer' : $oData->template_footer,
                 'default_subject' => $oData->default_subject,
             ];
 
