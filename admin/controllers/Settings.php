@@ -13,12 +13,12 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Admin\Controller\Base;
 use Nails\Common\Service\Input;
 use Nails\Email\Constants;
-use Nails\Email\Controller\BaseAdmin;
 use Nails\Factory;
 
-class Settings extends BaseAdmin
+class Settings extends Base
 {
     /**
      * Announces this controller's navGroups

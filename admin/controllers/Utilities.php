@@ -13,14 +13,14 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Admin\Controller\Base;
 use Nails\Common\Service\FormValidation;
 use Nails\Email\Constants;
-use Nails\Email\Controller\BaseAdmin;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
-class Utilities extends BaseAdmin
+class Utilities extends Base
 {
     /**
      * Announces this controller's navGroups

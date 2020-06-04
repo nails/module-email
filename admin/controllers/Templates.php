@@ -13,6 +13,7 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Admin\Controller\Base;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\ValidationException;
@@ -24,7 +25,6 @@ use Nails\Common\Service\Session;
 use Nails\Common\Service\Uri;
 use Nails\Common\Service\View;
 use Nails\Email\Constants;
-use Nails\Email\Controller\BaseAdmin;
 use Nails\Email\Model\Template\Override;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
@@ -34,7 +34,7 @@ use Nails\Factory;
  *
  * @package Nails\Admin\Email
  */
-class Templates extends BaseAdmin
+class Templates extends Base
 {
     /**
      * Announces this controller's navGroups

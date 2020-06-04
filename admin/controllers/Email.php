@@ -13,9 +13,9 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Helper;
+use Nails\Admin\Controller\Base;
 use Nails\Common\Service\Session;
 use Nails\Email\Constants;
-use Nails\Email\Controller\BaseAdmin;
 use Nails\Factory;
 
 /**
@@ -23,7 +23,7 @@ use Nails\Factory;
  *
  * @package Nails\Admin\Email
  */
-class Email extends BaseAdmin
+class Email extends Base
 {
     /**
      * Announces this controller's navGroups
