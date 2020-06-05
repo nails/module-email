@@ -42,6 +42,10 @@ class Unsubscribe extends Base
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 
         $sToken = $oInput->get('token');
+        if (empty($sToken)) {
+            show404();
+        }
+
         $aToken = $oEncrypt->decode($sToken, Config::get('APP_PRIVATE_KEY'));
         $aToken = explode('|', $aToken);
 
