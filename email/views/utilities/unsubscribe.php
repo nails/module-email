@@ -2,6 +2,16 @@
 $oInput = \Nails\Factory::service('Input');
 ?>
 <div class="nails-auth login u-center-screen">
+    <?php
+    $sLogo = logoDiscover();
+    if ($sLogo) {
+        echo '<div class="logo">';
+        echo img([
+            'src' => $sLogo,
+        ]);
+        echo '</div>';
+    }
+    ?>
     <div class="panel">
         <h1 class="panel__header text-center">
             <?php
