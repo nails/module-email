@@ -24,7 +24,7 @@ class Migration9 extends Base
      */
     public function execute()
     {
-        $this->query('ALTER TABLE `{{NAILS_SB_PREFIX}}email_archive` CHANGE `type` `type` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT \'\';');
-        $this->query('ALTER TABLE `{{NAILS_SB_PREFIX}}email_template_override` CHANGE `slug` `slug` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
+        $this->query('ALTER TABLE `{{NAILS_DB_PREFIX}}email_archive` CHANGE `type` `type` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT \'\';');
+        $this->query('ALTER TABLE `{{NAILS_DB_PREFIX}}email_template_override` CHANGE `slug` `slug` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;');
     }
 }
