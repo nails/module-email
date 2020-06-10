@@ -11,6 +11,7 @@
 
 namespace Nails\Email\Factory;
 
+use Nails\Auth\Resource\User;
 use Nails\Common\Exception\ValidationException;
 use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
@@ -130,8 +131,8 @@ class Email
     /**
      * Add a recipient
      *
-     * @param integer|string|array $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool                 $bAppend        Whether to add to the list of recipients or not
+     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
+     * @param bool            $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -157,8 +158,8 @@ class Email
     /**
      * Add a recipient (on CC)
      *
-     * @param integer|string|array $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool                 $bAppend        Whether to add to the list of recipients or not
+     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
+     * @param bool            $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -184,8 +185,8 @@ class Email
     /**
      * Add a recipient (on BCC)
      *
-     * @param integer|string $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool           $bAppend        Whether to add to the list of recipients or not
+     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
+     * @param bool            $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -211,9 +212,9 @@ class Email
     /**
      * Adds a recipient
      *
-     * @param integer|string $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool           $bAppend        Whether to add to the list of recipients or not
-     * @param array          $aArray         The array to add the recipient to
+     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
+     * @param bool            $bAppend        Whether to add to the list of recipients or not
+     * @param array           $aArray         The array to add the recipient to
      *
      * @return $this
      */
@@ -231,6 +232,13 @@ class Email
             foreach ($mUserIdOrEmail as $sUserIdOrEmail) {
                 $this->addRecipient($sUserIdOrEmail, true, $aArray);
             }
+
+        } elseif ($mUserIdOrEmail instanceof User) {
+            $aArray[] = $mUserIdOrEmail;
+
+        } elseif (is_int($mUserIdOrEmail)) {
+            $aArray[] = $mUserIdOrEmail->id;
+
         } else {
             $this->validateEmail($mUserIdOrEmail);
             $aArray[] = $mUserIdOrEmail;
@@ -286,7 +294,7 @@ class Email
     /**
      * Validates an email address
      *
-     * @param integer|string $sEmail The email address to validate
+     * @param int|string $sEmail The email address to validate
      *
      * @throws ValidationException
      */
@@ -417,8 +425,12 @@ class Email
 
         foreach ($aEmail['aTo'] as $mUserIdOrEmail) {
 
-            if (is_numeric($mUserIdOrEmail)) {
+            if ($mUserIdOrEmail instanceof User) {
+                $aData['to_id'] = $mUserIdOrEmail->id;
+
+            } elseif (is_numeric($mUserIdOrEmail)) {
                 $aData['to_id'] = $mUserIdOrEmail;
+
             } elseif (valid_email($mUserIdOrEmail)) {
                 $aData['to_email'] = $mUserIdOrEmail;
             }
