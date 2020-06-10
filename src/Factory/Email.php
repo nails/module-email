@@ -237,7 +237,7 @@ class Email
             $aArray[] = $mUserIdOrEmail;
 
         } elseif (is_int($mUserIdOrEmail)) {
-            $aArray[] = $mUserIdOrEmail->id;
+            $aArray[] = $mUserIdOrEmail;
 
         } else {
             $this->validateEmail($mUserIdOrEmail);
