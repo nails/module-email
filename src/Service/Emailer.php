@@ -212,7 +212,7 @@ class Emailer
      * @param stdClass $oData  An object representing the email type
      * @param array    $aArray The array to populate
      *
-     * @return boolean
+     * @return bool
      */
     protected static function addType(stdClass $oData, array &$aArray): bool
     {
@@ -242,10 +242,10 @@ class Emailer
     /**
      * Send an email
      *
-     * @param object  $input    The email object
-     * @param boolean $graceful Whether to gracefully fail or not
+     * @param object $input    The email object
+     * @param bool   $graceful Whether to gracefully fail or not
      *
-     * @return boolean|stdClass
+     * @return bool|stdClass
      * @throws EmailerException
      * @throws FactoryException
      * @throws ModelException
@@ -431,7 +431,7 @@ class Emailer
      *
      * @param mixed $mEmailIdRef The email's ID or ref
      *
-     * @return boolean
+     * @return bool
      * @throws EmailerException
      * @throws FactoryException
      * @throws PHPMailer\Exception
@@ -461,7 +461,7 @@ class Emailer
      * @param int    $iUSerId The user ID to check for
      * @param string $sType   The type of email to check against
      *
-     * @return boolean
+     * @return bool
      * @throws FactoryException
      */
     public function userHasUnsubscribed($iUSerId, $sType)
@@ -498,7 +498,7 @@ class Emailer
      * @param int    $user_id The user ID to unsubscribe
      * @param string $type    The type of email to unsubscribe from
      *
-     * @return boolean
+     * @return bool
      * @throws FactoryException
      */
     public function unsubscribeUser($user_id, $type)
@@ -526,7 +526,7 @@ class Emailer
      * @param int    $user_id The user ID to subscribe
      * @param string $type    The type of email to subscribe to
      *
-     * @return boolean
+     * @return bool
      * @throws FactoryException
      */
     public function subscribeUser($user_id, $type)
@@ -551,9 +551,9 @@ class Emailer
      * Sends a template email immediately
      *
      * @param int|bool $emailId  The ID of the email to send, or the email object itself
-     * @param boolean  $graceful Whether or not to fail gracefully
+     * @param bool     $graceful Whether or not to fail gracefully
      *
-     * @return boolean
+     * @return bool
      * @throws EmailerException
      * @throws FactoryException
      * @throws PHPMailer\Exception
@@ -1011,7 +1011,7 @@ class Emailer
      * @param string $sFilePath The file's path
      * @param string $sFileName The filename to give the attachment
      *
-     * @return boolean
+     * @return bool
      * @throws PHPMailer\Exception
      */
     protected function addAttachment($sFilePath, $sFileName = null)
@@ -1148,11 +1148,11 @@ class Emailer
     /**
      * Parses a string for <a> links and replaces them with a trackable URL
      *
-     * @param string  $body           The string to parse
-     * @param int     $emailId        The email's ID
-     * @param string  $emailRef       The email's reference
-     * @param boolean $isHtml         Whether or not this is the HTML version of the email
-     * @param boolean $needsVerified  Whether or not this user needs verified (i.e route tracking links through the
+     * @param string $body            The string to parse
+     * @param int    $emailId         The email's ID
+     * @param string $emailRef        The email's reference
+     * @param bool   $isHtml          Whether or not this is the HTML version of the email
+     * @param bool   $needsVerified   Whether or not this user needs verified (i.e route tracking links through the
      *                                verifier)
      *
      * @return string
@@ -1250,10 +1250,10 @@ class Emailer
     /**
      * Generate a tracking URL
      *
-     * @param string  $html    The Link HTML
-     * @param string  $url     The Link's URL
-     * @param string  $title   The Link's Title
-     * @param boolean $is_html Whether this is HTML or not
+     * @param string $html    The Link HTML
+     * @param string $url     The Link's URL
+     * @param string $title   The Link's Title
+     * @param bool   $is_html Whether this is HTML or not
      *
      * @return string
      * @throws HostNotKnownException
