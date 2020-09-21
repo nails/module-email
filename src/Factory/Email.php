@@ -15,9 +15,10 @@ use Nails\Auth\Resource\User;
 use Nails\Common\Exception\ValidationException;
 use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
+use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
-class Email
+abstract class Email
 {
     /**
      * The email's type
@@ -85,9 +86,16 @@ class Email
     /**
      * Whether the last email was sent successfully or not
      *
-     * @var null
+     * @var bool|null
      */
-    protected $bLastEmailDidSend = null;
+    protected $bLastEmailDidSend;
+
+    /**
+     * The emails which were generated using this template (reset before each call to send())
+     *
+     * @var array
+     */
+    protected $aEmailsGenerated = [];
 
     // --------------------------------------------------------------------------
 
@@ -430,7 +438,10 @@ class Email
             $aData['data']->bcc = $aEmail['aBcc'];
         }
 
+        /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+
+        $this->aEmailsGenerated = [];
 
         foreach ($aEmail['aTo'] as $mUserIdOrEmail) {
 
@@ -444,7 +455,8 @@ class Email
                 $aData['to_email'] = $mUserIdOrEmail;
             }
 
-            $this->bLastEmailDidSend = $oEmailer->send($aData, $bGraceful);
+            $this->bLastEmailDidSend  = $oEmailer->send($aData, $bGraceful);
+            $this->aEmailsGenerated[] = clone $oEmailer->getLastEmail();
         }
 
         return $this;
@@ -460,6 +472,18 @@ class Email
     public function didSend()
     {
         return (bool) $this->bLastEmailDidSend;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the emails generated using the template (reset before each call to send())
+     *
+     * @return array
+     */
+    public function getGeneratedEmails(): array
+    {
+        return $this->aEmailsGenerated;
     }
 
     // --------------------------------------------------------------------------
