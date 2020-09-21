@@ -2,6 +2,7 @@
 
 namespace Nails\Email\Console\Command;
 
+use Nails\Common\Helper\Inflector;
 use Nails\Console\Command\Base;
 use Nails\Console\Exception\ConsoleException;
 use Nails\Email\Constants;
@@ -81,7 +82,19 @@ class Test extends Base
                 ->data($aData ?? $oEmail->getTestData())
                 ->send();
 
-            $oOutput->writeln('Test email sent successfully.');
+            $oOutput->writeln(sprintf(
+                'Test %s sent successfully.',
+                Inflector::pluralise(count($oEmail->getGeneratedEmails()), 'email')
+            ));
+            $oOutput->writeln('');
+
+            foreach ($oEmail->getGeneratedEmails() as $oEmail) {
+                $oOutput->writeln(sprintf(
+                    '<comment>%s</comment>',
+                    $oEmail->data->url->viewOnline
+                ));
+            }
+
             $oOutput->writeln('');
 
         } catch (ConsoleException $e) {
