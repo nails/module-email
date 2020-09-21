@@ -60,6 +60,13 @@ class Emailer
     protected $mGenerateTrackingNeedsVerified;
     protected $sDomain;
 
+    /**
+     * The last email which was sent
+     *
+     * @var \stdClass
+     */
+    protected $oLastEmail;
+
     // --------------------------------------------------------------------------
 
     /**
@@ -713,6 +720,9 @@ class Emailer
             $oDb->where('email', $oEmail->to->email);
             $oDb->update(Config::get('NAILS_DB_PREFIX') . 'user_email');
 
+            //  Note the last email
+            $this->oLastEmail = $oEmail;
+
             return true;
 
         } else {
@@ -742,6 +752,18 @@ class Emailer
 
             return false;
         }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the last email which was sent
+     *
+     * @return stdClass|null
+     */
+    public function getLastEmail(): ?\stdClass
+    {
+        return $this->oLastEmail;
     }
 
     // --------------------------------------------------------------------------
