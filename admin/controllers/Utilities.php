@@ -12,12 +12,10 @@
 
 namespace Nails\Admin\Email;
 
-use Nails\Admin\Helper;
 use Nails\Admin\Controller\Base;
+use Nails\Admin\Helper;
 use Nails\Common\Service\FormValidation;
 use Nails\Email\Constants;
-use Nails\Email\Exception\EmailerException;
-use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
 class Utilities extends Base
@@ -83,25 +81,19 @@ class Utilities extends Base
                 $oFormValidation = Factory::service('FormValidation');
                 $oFormValidation
                     ->buildValidator([
-                        'recipient' => ['required', 'valid_email'],
+                        'recipient' => [
+                            FormValidation::RULE_REQUIRED,
+                            FormValidation::RULE_VALID_EMAIL,
+                        ],
                     ])
                     ->run();
 
-                /** @var Emailer $oEmailer */
-                $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-                $bResult  = $oEmailer->send((object) [
-                    'type'     => 'test_email',
-                    'to_email' => $oInput->post('recipient'),
-                    'data'     => [
-                        'sentAt' => Factory::factory('DateTime')->format('Y-m-d H:i:s'),
-                    ],
-                ]);
-
-                if (!$bResult) {
-                    throw new EmailerException(
-                        'Failed to send email: ' . $oEmailer->lastError()
-                    );
-                }
+                /** @var \Nails\Email\Factory\Email\Test $oEmail */
+                $oEmail = Factory::factory('EmailTest', Constants::MODULE_SLUG);
+                $oEmail
+                    ->to($oInput->getArgument('recipient'))
+                    ->data($oEmail->getTestData())
+                    ->send();
 
                 $this->data['success'] = '<strong>Done!</strong> Test email successfully sent to <strong>';
                 $this->data['success'] .= $oInput->post('recipient') . '</strong> at ' . toUserDatetime();

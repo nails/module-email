@@ -345,6 +345,15 @@ class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Returns test data to use when sending test emails
+     *
+     * @return array
+     */
+    abstract public function getTestData(): array;
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Add an attachment to an email
      *
      * @param string|array $sPath     The path to the attachment

@@ -50,5 +50,12 @@ return [
                 return new \Nails\Email\Factory\Email();
             }
         },
+        'EmailTest' => function () {
+            if (class_exists('\App\Email\Factory\Email\Test')) {
+                return new \App\Email\Factory\Email\Test();
+            } else {
+                return new \Nails\Email\Factory\Email\Test();
+            }
+        },
     ],
 ];
