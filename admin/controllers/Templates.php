@@ -12,8 +12,8 @@
 
 namespace Nails\Admin\Email;
 
-use Nails\Admin\Helper;
 use Nails\Admin\Controller\Base;
+use Nails\Admin\Helper;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\ValidationException;
@@ -238,6 +238,7 @@ class Templates extends Base
         if (empty($oType)) {
             show404();
         }
+        $oTypeFactory = $oType->getFactory();
 
         $oOverride = $oOverrideModel->getBySlug($oType->slug);
 
@@ -334,6 +335,7 @@ class Templates extends Base
             }
         }
 
+        $this->data['mTestData']        = $oTypeFactory ? $oTypeFactory->getTestData() : null;
         $this->data['sDefaultSubject']  = $sSubject;
         $this->data['sDefaultBodyHtml'] = $sBodyHtml;
         $this->data['sDefaultBodyText'] = $sBodyText;

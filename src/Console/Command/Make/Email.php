@@ -2,7 +2,7 @@
 
 namespace Nails\Email\Console\Command\Make;
 
-use Nails\Common\Exception\ValidationException;
+use Nails\Components;
 use Nails\Console\Command\BaseMaker;
 use Nails\Console\Exception\ConsoleException;
 use Nails\Email\Constants;
@@ -354,6 +354,8 @@ class Email extends BaseMaker
 
     protected function addEmailConfig(array $aConfig)
     {
+        Components::getApp()->slug;
+
         $aTypes = [
             $aConfig['EMAIL_KEY'] => (object) [
                 'slug'            => $aConfig['EMAIL_KEY'],
@@ -363,6 +365,11 @@ class Email extends BaseMaker
                 'template_body'   => 'email/' . rtrim(str_replace(static::TEMPLATE_PATH, '', $aConfig['TEMPLATE_HTML']), '.php'),
                 'template_footer' => '',
                 'default_subject' => '@todo - write the subject for the ' . $aConfig['CLASS_NAME_NORMALISED'] . ' email',
+                'factory'         => sprintf(
+                    '%s::%s',
+                    Components::getApp()->slug,
+                    $aConfig['CLASS_NAME_NORMALISED']
+                ),
             ],
         ];
 
@@ -372,19 +379,6 @@ class Email extends BaseMaker
         $oEmailer::loadTypes(static::EMAIL_CONFIG_PATH, $aTypes);
 
         ksort($aTypes);
-
-        $aTypes = array_map(
-            function ($oType) {
-                if ($oType->template_header == 'email/structure/header') {
-                    $oType->template_header = '';
-                }
-                if ($oType->template_footer == 'email/structure/footer') {
-                    $oType->template_footer = '';
-                }
-                return $oType;
-            },
-            $aTypes
-        );
 
         $aFile = [
             '<?php',
@@ -407,6 +401,7 @@ class Email extends BaseMaker
             $aFile[] = "        'template_body'   => '" . str_replace("'", "\'", $oType->template_body) . "',";
             $aFile[] = "        'template_footer' => '" . str_replace("'", "\'", $oType->template_footer) . "',";
             $aFile[] = "        'default_subject' => '" . str_replace("'", "\'", $oType->default_subject) . "',";
+            $aFile[] = "        'factory'         => '" . str_replace("'", "\'", $oType->factory) . "',";
             $aFile[] = '    ],';
         }
 

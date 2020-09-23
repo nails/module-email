@@ -41,15 +41,15 @@ return [
                 return new \Nails\Email\Resource\Template\Override($mObj);
             }
         },
-    ],
-    'factories' => [
-        'Email' => function () {
-            if (class_exists('\App\Email\Factory\Email')) {
-                return new \App\Email\Factory\Email();
+        'Type'             => function ($mObj) {
+            if (class_exists('\App\Email\Resource\Type')) {
+                return new \App\Email\Resource\Type($mObj);
             } else {
-                return new \Nails\Email\Factory\Email();
+                return new \Nails\Email\Resource\Type($mObj);
             }
         },
+    ],
+    'factories' => [
         'EmailTest' => function () {
             if (class_exists('\App\Email\Factory\Email\Test')) {
                 return new \App\Email\Factory\Email\Test();

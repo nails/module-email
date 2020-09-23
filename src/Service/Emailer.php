@@ -26,6 +26,7 @@ use Nails\Config;
 use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Exception\HostNotKnownException;
+use Nails\Email\Resource\Type;
 use Nails\Environment;
 use Nails\Factory;
 use PHPMailer\PHPMailer;
@@ -50,6 +51,7 @@ class Emailer
      */
     protected $oPhpMailer;
 
+    /** @var array Type[] */
     protected $aEmailType      = [];
     protected $aEmailOverrides = [];
     protected $aTrackLinkCache = [];
@@ -182,7 +184,7 @@ class Emailer
     /**
      * Returns the available email types in the system, sorted alphabetically by name
      *
-     * @return array
+     * @return Type[]
      */
     public function getTypes(): array
     {
@@ -197,9 +199,9 @@ class Emailer
      *
      * @param string $sType The type to look for
      *
-     * @return stdClass|null
+     * @return Type|null
      */
-    public function getType(string $sType): ?stdClass
+    public function getType(string $sType): ?Type
     {
         return array_key_exists($sType, $this->aEmailType) ? $this->aEmailType[$sType] : null;
     }
@@ -218,18 +220,18 @@ class Emailer
     {
         if (!empty($oData->slug) && !empty($oData->template_body)) {
 
-            //  @todo (Pablo - 2020-01-13) - Convert this to a defined object/class
-            $aArray[$oData->slug] = (object) [
+            $aArray[$oData->slug] = Factory::resource('Type', Constants::MODULE_SLUG, [
                 'slug'            => $oData->slug,
                 'name'            => $oData->name,
                 'description'     => $oData->description,
                 'is_hidden'       => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
                 'can_unsubscribe' => property_exists($oData, 'can_unsubscribe') ? (bool) $oData->can_unsubscribe : true,
-                'template_header' => empty($oData->template_header) ? 'email/structure/email_header' : $oData->template_header,
+                'template_header' => $oData->template_header ?? null,
                 'template_body'   => $oData->template_body,
-                'template_footer' => empty($oData->template_footer) ? 'email/structure/email_footer' : $oData->template_footer,
+                'template_footer' => $oData->template_footer ?? null,
                 'default_subject' => $oData->default_subject,
-            ];
+                'factory'         => $oData->factory ?? null,
+            ]);
 
             return true;
         }
@@ -1434,6 +1436,8 @@ class Emailer
         //  Template overrides
         if (!empty($oEmail->data->template_header)) {
             $oEmail->type->template_header = $oEmail->data->template_header;
+        } elseif (empty($oEmail->data->template_header)) {
+            $oEmail->type->template_header = 'email/structure/email_header';
         }
 
         if (!empty($oEmail->data->template_body)) {
@@ -1442,6 +1446,8 @@ class Emailer
 
         if (!empty($oEmail->data->template_footer)) {
             $oEmail->type->template_footer = $oEmail->data->template_footer;
+        } elseif (empty($oEmail->data->template_footer)) {
+            $oEmail->type->template_footer = 'email/structure/email_footer';
         }
 
         // --------------------------------------------------------------------------
