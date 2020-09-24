@@ -300,6 +300,31 @@ abstract class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Sets the subject
+     *
+     * @return $this
+     */
+    public function subject(string $sSubject): self
+    {
+        $this->sSubject = $sSubject;
+        return $this;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the subject
+     *
+     * @return string
+     */
+    public function getSubject(): string
+    {
+        return $this->sSubject;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Validates an email address
      *
      * @param int|string $sEmail The email address to validate
