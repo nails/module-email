@@ -158,7 +158,7 @@ abstract class Email
      */
     public function getTo(): array
     {
-        return $this->aTo;
+        return $this->getRecipients($this->aTo);
     }
 
     // --------------------------------------------------------------------------
@@ -185,7 +185,7 @@ abstract class Email
      */
     public function getCc(): array
     {
-        return $this->aCc;
+        return $this->getRecipients($this->aCc);
     }
 
     // --------------------------------------------------------------------------
@@ -212,7 +212,7 @@ abstract class Email
      */
     public function getBcc(): array
     {
-        return $this->aBcc;
+        return $this->getRecipients($this->aBcc);
     }
 
     // --------------------------------------------------------------------------
@@ -258,6 +258,22 @@ abstract class Email
     // --------------------------------------------------------------------------
 
     /**
+     * Returns filtered recipients
+     *
+     * @param  array $aArray The array to return from
+     *
+     * @return array
+     */
+    protected function getRecipients($aArray): array
+    {
+        return array_values(array_filter(array_unique($aArray)));
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Sets who the email is from
+     *
      * @param string $sEmail The email address to send from
      * @param string $sName  The name to send from
      *
