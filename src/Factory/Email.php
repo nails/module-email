@@ -116,7 +116,7 @@ abstract class Email
      *
      * @return $this
      */
-    public function type($sType)
+    public function type($sType): self
     {
         $this->sType = $sType;
         return $this;
@@ -144,7 +144,7 @@ abstract class Email
      *
      * @return $this
      */
-    public function to($mUserIdOrEmail, $bAppend = false)
+    public function to($mUserIdOrEmail, $bAppend = false): self
     {
         return $this->addRecipient($mUserIdOrEmail, $bAppend, $this->aTo);
     }
@@ -171,7 +171,7 @@ abstract class Email
      *
      * @return $this
      */
-    public function cc($mUserIdOrEmail, $bAppend = false)
+    public function cc($mUserIdOrEmail, $bAppend = false): self
     {
         return $this->addRecipient($mUserIdOrEmail, $bAppend, $this->aCc);
     }
@@ -198,7 +198,7 @@ abstract class Email
      *
      * @return $this
      */
-    public function bcc($mUserIdOrEmail, $bAppend = false)
+    public function bcc($mUserIdOrEmail, $bAppend = false): self
     {
         return $this->addRecipient($mUserIdOrEmail, $bAppend, $this->aBcc);
     }
@@ -226,7 +226,7 @@ abstract class Email
      *
      * @return $this
      */
-    protected function addRecipient($mUserIdOrEmail, $bAppend, &$aArray)
+    protected function addRecipient($mUserIdOrEmail, $bAppend, &$aArray): self
     {
         if (!$bAppend) {
             $aArray = [];
@@ -264,7 +264,7 @@ abstract class Email
      * @return $this
      * @throws ValidationException
      */
-    public function from($sEmail, $sName = '')
+    public function from($sEmail, $sName = ''): self
     {
         $this->validateEmail($sEmail);
         $this->sFromEmail = $sEmail;
@@ -306,7 +306,7 @@ abstract class Email
      *
      * @throws ValidationException
      */
-    protected function validateEmail($sEmail)
+    protected function validateEmail($sEmail): void
     {
         if (empty($sEmail)) {
             throw new ValidationException('No email address supplied');
@@ -325,7 +325,7 @@ abstract class Email
      *
      * @return $this
      */
-    public function data($mKey, $mValue = null)
+    public function data($mKey, $mValue = null): self
     {
         if (is_array($mKey)) {
             foreach ($mKey as $sKey => $mValue) {
@@ -369,7 +369,7 @@ abstract class Email
      *
      * @return $this
      */
-    public function attach($sPath, string $sFileName = null): Email
+    public function attach($sPath, string $sFileName = null): self
     {
         if (is_array($sPath)) {
             foreach ($sPath as $datum) {
@@ -404,7 +404,7 @@ abstract class Email
      * @return $this
      * @throws EmailerException
      */
-    public function send($bGraceful = false)
+    public function send($bGraceful = false): self
     {
         $aEmail = $this->toArray();
         $aData  = [
@@ -469,7 +469,7 @@ abstract class Email
      *
      * @return bool
      */
-    public function didSend()
+    public function didSend(): bool
     {
         return (bool) $this->bLastEmailDidSend;
     }
@@ -493,7 +493,7 @@ abstract class Email
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'sType'        => $this->sType,
