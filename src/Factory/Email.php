@@ -537,15 +537,15 @@ abstract class Email
     public function toArray(): array
     {
         return [
-            'sType'        => $this->sType,
-            'aTo'          => array_filter(array_unique($this->aTo)),
-            'aCc'          => array_filter(array_unique($this->aCc)),
-            'aBcc'         => array_filter(array_unique($this->aBcc)),
-            'sFromName'    => $this->sFromName,
-            'sFromEmail'   => $this->sFromEmail,
-            'sSubject'     => $this->sSubject,
-            'aData'        => $this->aData,
-            'aAttachments' => $this->aAttachments,
+            'sType'        => $this->getType(),
+            'aTo'          => $this->getTo(),
+            'aCc'          => $this->getCc(),
+            'aBcc'         => $this->getBcc(),
+            'sFromName'    => $this->getFromName(),
+            'sFromEmail'   => $this->getFromEmail(),
+            'sSubject'     => $this->getSubject(),
+            'aData'        => $this->getData(),
+            'aAttachments' => $this->getAttachments(),
         ];
     }
 }
