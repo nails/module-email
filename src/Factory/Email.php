@@ -18,6 +18,11 @@ use Nails\Email\Exception\EmailerException;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
+/**
+ * Class Email
+ *
+ * @package Nails\Email\Factory
+ */
 abstract class Email
 {
     /**
@@ -139,8 +144,8 @@ abstract class Email
     /**
      * Add a recipient
      *
-     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool            $bAppend        Whether to add to the list of recipients or not
+     * @param array|int|string|User $mUserIdOrEmail The user ID to send to, a user object, an email, or an array
+     * @param bool                  $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -166,8 +171,8 @@ abstract class Email
     /**
      * Add a recipient (on CC)
      *
-     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool            $bAppend        Whether to add to the list of recipients or not
+     * @param array|int|string|User $mUserIdOrEmail The user ID to send to, a user object, an email, or an array
+     * @param bool                  $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -193,8 +198,8 @@ abstract class Email
     /**
      * Add a recipient (on BCC)
      *
-     * @param int|string|User $mUserIdOrEmail The user ID to send to, or an email address
-     * @param bool            $bAppend        Whether to add to the list of recipients or not
+     * @param array|int|string|User $mUserIdOrEmail The user ID to send to, a user object, an email, or an array
+     * @param bool                  $bAppend        Whether to add to the list of recipients or not
      *
      * @return $this
      */
@@ -260,7 +265,7 @@ abstract class Email
     /**
      * Returns filtered recipients
      *
-     * @param  array $aArray The array to return from
+     * @param array $aArray The array to return from
      *
      * @return array
      */
