@@ -68,4 +68,14 @@ class Type extends Resource
 
         return Factory::factory($sFactory, $sProvider);
     }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->slug;
+    }
 }
