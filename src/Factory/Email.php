@@ -445,12 +445,10 @@ abstract class Email
     /**
      * Send the email
      *
-     * @param bool $bGraceful Whether to fail gracefully or not
-     *
      * @return $this
      * @throws EmailerException
      */
-    public function send($bGraceful = false): self
+    public function send(): self
     {
         $aEmail = $this->toArray();
         $aData  = [
@@ -501,10 +499,8 @@ abstract class Email
                 $aData['to_email'] = $mUserIdOrEmail;
             }
 
-            $this->bLastEmailDidSend = $oEmailer->send($aData, $bGraceful);
-            if ($this->bLastEmailDidSend) {
-                $this->aEmailsGenerated[] = clone $oEmailer->getLastEmail();
-            }
+            $this->bLastEmailDidSend  = $oEmailer->send($aData);
+            $this->aEmailsGenerated[] = clone $oEmailer->getLastEmail();
         }
 
         return $this;
