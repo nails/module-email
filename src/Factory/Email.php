@@ -501,8 +501,10 @@ abstract class Email
                 $aData['to_email'] = $mUserIdOrEmail;
             }
 
-            $this->bLastEmailDidSend  = $oEmailer->send($aData, $bGraceful);
-            $this->aEmailsGenerated[] = clone $oEmailer->getLastEmail();
+            $this->bLastEmailDidSend = $oEmailer->send($aData, $bGraceful);
+            if ($this->bLastEmailDidSend) {
+                $this->aEmailsGenerated[] = clone $oEmailer->getLastEmail();
+            }
         }
 
         return $this;
