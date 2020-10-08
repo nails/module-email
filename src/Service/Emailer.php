@@ -381,6 +381,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         //  Add to the archive table
+        /** @var Database $oDb */
         $oDb = Factory::service('Database');
         $oDb->set('ref', $input->ref);
         $oDb->set('user_id', $input->to_id);

@@ -500,7 +500,16 @@ abstract class Email
             }
 
             $this->bLastEmailDidSend  = $oEmailer->send($aData);
-            $this->aEmailsGenerated[] = clone $oEmailer->getLastEmail();
+            $oLastEmail               = $oEmailer->getLastEmail();
+
+            /**
+             * There might not always be an email generated:
+             * - unsubscribed users will not received an email, and send() will not fail
+             * - suspended users will not receive an email, and send() will not fail
+             */
+            if (!empty($oLastEmail)) {
+                $this->aEmailsGenerated[] = clone $oLastEmail;;
+            }
         }
 
         return $this;
