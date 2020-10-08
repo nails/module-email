@@ -365,6 +365,7 @@ class Email extends BaseMaker
                 'template_body'   => 'email/' . rtrim(str_replace(static::TEMPLATE_PATH, '', $aConfig['TEMPLATE_HTML']), '.php'),
                 'template_footer' => '',
                 'default_subject' => '@todo - write the subject for the ' . $aConfig['CLASS_NAME_NORMALISED'] . ' email',
+                'can_unsubscribe' => true,
                 'factory'         => sprintf(
                     '%s::%s',
                     Components::getApp()->slug,
