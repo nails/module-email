@@ -91,7 +91,7 @@ class Utilities extends Base
                 /** @var \Nails\Email\Factory\Email\Test $oEmail */
                 $oEmail = Factory::factory('EmailTest', Constants::MODULE_SLUG);
                 $oEmail
-                    ->to($oInput->getArgument('recipient'))
+                    ->to($oInput->post('recipient'))
                     ->data($oEmail->getTestData())
                     ->send();
 
