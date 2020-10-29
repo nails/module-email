@@ -1,5 +1,11 @@
 <?php
+
+use Nails\Common\Service\Input;
+use Nails\Email\Service\Emailer;
+
+/** @var Input $oInput */
 $oInput = \Nails\Factory::service('Input');
+
 ?>
 <div class="group-email archive">
     <p>
@@ -42,75 +48,103 @@ $oInput = \Nails\Factory::service('Input');
                             <?php
 
                             switch ($oEmail->status) {
-                                case 'SENT':
-                                    $aRowStatus = 'success';
-                                    $sRowText   = 'Sent';
-                                    $sIcon      = 'fa-check-circle';
+                                case Emailer::STATUS_PENDING:
+                                    $sCellStatus  = 'info';
+                                    $sCellText    = 'Pending';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-clock';
                                     break;
 
-                                case 'BOUNCED':
-                                    $aRowStatus = 'error';
-                                    $sRowText   = 'Bounced';
-                                    $sIcon      = 'fa-times-circle';
+                                case Emailer::STATUS_SENT:
+                                    $sCellStatus  = 'success';
+                                    $sCellText    = 'Sent';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-check-circle';
                                     break;
 
-                                case 'OPENED':
-                                    $aRowStatus = 'success';
-                                    $sRowText   = 'Opened';
-                                    $sIcon      = 'fa-check-circle';
+                                case Emailer::STATUS_BOUNCED:
+                                    $sCellStatus  = 'warning';
+                                    $sCellText    = 'Bounced';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-table-tennis';
                                     break;
 
-                                case 'REJECTED':
-                                    $aRowStatus = 'error';
-                                    $sRowText   = 'Rejected';
-                                    $sIcon      = 'fa-times-circle';
+                                case Emailer::STATUS_OPENED:
+                                    $sCellStatus  = 'success';
+                                    $sCellText    = 'Opened';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-envelope-open-text';
                                     break;
 
-                                case 'DELAYED':
-                                    $aRowStatus = 'message';
-                                    $sRowText   = 'Delayed';
-                                    $sIcon      = 'fa-warning';
+                                case Emailer::STATUS_REJECTED:
+                                    $sCellStatus  = 'danger';
+                                    $sCellText    = 'Rejected';
+                                    $sCellSubText = $oEmail->fail_reason;
+                                    $sIcon        = 'fa-times-circle';
                                     break;
 
-                                case 'SOFT_BOUNCED':
-                                    $aRowStatus = 'message';
-                                    $sRowText   = 'Bounced (Soft)';
-                                    $sIcon      = 'fa-warning';
+                                case Emailer::STATUS_DELAYED:
+                                    $sCellStatus  = 'warning';
+                                    $sCellText    = 'Delayed';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-clock';
                                     break;
 
-                                case 'MARKED_AS_SPAM':
-                                    $aRowStatus = 'message';
-                                    $sRowText   = 'Marked as Spam';
-                                    $sIcon      = 'fa-warning';
+                                case Emailer::STATUS_SOFT_BOUNCED:
+                                    $sCellStatus  = 'warning';
+                                    $sCellText    = 'Bounced (Soft)';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-table-tennis';
                                     break;
 
-                                case 'CLICKED':
-                                    $aRowStatus = 'success';
-                                    $sRowText   = 'Clicked';
-                                    $sIcon      = 'fa-check-circle';
+                                case Emailer::STATUS_MARKED_AS_SPAM:
+                                    $sCellStatus  = 'warning';
+                                    $sCellText    = 'Marked as Spam';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-trash';
                                     break;
 
-                                case 'FAILED':
-                                    $aRowStatus = 'error';
-                                    $sRowText   = 'Failed';
-                                    $sIcon      = 'fa-times-circle';
+                                case Emailer::STATUS_CLICKED:
+                                    $sCellStatus  = 'success';
+                                    $sCellText    = 'Clicked';
+                                    $sCellSubText = '';
+                                    $sIcon        = 'fa-envelope-open-text';
+                                    break;
+
+                                case Emailer::STATUS_FAILED:
+                                    $sCellStatus  = 'danger';
+                                    $sCellText    = 'Failed';
+                                    $sCellSubText = $oEmail->fail_reason;
+                                    $sIcon        = 'fa-times-circle';
                                     break;
 
                                 default:
-                                    $aRowStatus = '';
-                                    $sRowText   = ucfirst(strtolower(str_replace('_', ' ', $oEmail->status)));
-                                    $sIcon      = '';
+                                    $sCellStatus  = '';
+                                    $sCellText    = ucfirst(strtolower(str_replace('_', ' ', $oEmail->status)));
+                                    $sCellSubText = '';
+                                    $sIcon        = '';
                                     break;
                             }
 
-                            echo '<td class="status ' . $aRowStatus . '">';
-                            echo !empty($sIcon) ? '<b class="fa fa-lg ' . $sIcon . '"></b>' : '';
-                            echo !empty($sRowText) ? $sRowText : '';
-                            echo '</td>';
+                            if (!empty($sIcon)) {
+                                ?>
+                                <td class="text-center <?=$sCellStatus?>" rel="tipsy" title="<?=$sCellText?>">
+                                    <b class="fa fa-lg <?=$sIcon?>"></b>
+                                    <?=!empty($sCellSubText) ? '<small>' . $sCellSubText . '</small>' : ''?>
+                                </td>
+                                <?php
+                            } else {
+                                ?>
+                                <td class="text-center <?=$sCellStatus?>">
+                                    <?=!empty($sCellText) ? $sCellText : ''?>
+                                    <?=!empty($sCellSubText) ? '<small>' . $sCellSubText . '</small>' : ''?>
+                                </td>
+                                <?php
+                            }
 
                             ?>
-                            <td class="reads"><?=$oEmail->read_count?></td>
-                            <td class="clicks"><?=$oEmail->link_click_count?></td>
+                            <td class="text-center reads"><?=$oEmail->read_count?></td>
+                            <td class="text-center clicks"><?=$oEmail->link_click_count?></td>
                             <td class="actions">
                                 <?php
 

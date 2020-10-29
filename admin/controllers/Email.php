@@ -12,8 +12,8 @@
 
 namespace Nails\Admin\Email;
 
-use Nails\Admin\Helper;
 use Nails\Admin\Controller\Base;
+use Nails\Admin\Helper;
 use Nails\Common\Service\Session;
 use Nails\Email\Constants;
 use Nails\Factory;
@@ -94,7 +94,7 @@ class Email extends Base
         $sPrefix    = $oEmailer->getTableAlias();
         $iPage      = $oInput->get('page') ? $oInput->get('page') : 0;
         $iPerPage   = $oInput->get('perPage') ? $oInput->get('perPage') : 50;
-        $sSortOn    = $oInput->get('sortOn') ? $oInput->get('sortOn') : $sPrefix . '.sent';
+        $sSortOn    = $oInput->get('sortOn') ? $oInput->get('sortOn') : $sPrefix . '.id';
         $sSortOrder = $oInput->get('sortOrder') ? $oInput->get('sortOrder') : 'desc';
         $sKeywords  = $oInput->get('keywords') ? $oInput->get('keywords') : '';
 
@@ -102,6 +102,7 @@ class Email extends Base
 
         //  Define the sortable columns
         $aSortColumns = [
+            $sPrefix . '.id'   => 'ID',
             $sPrefix . '.sent' => 'Sent Date',
         ];
 
