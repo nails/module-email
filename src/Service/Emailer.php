@@ -1612,8 +1612,6 @@ class Emailer
         $oEmail->data->url->unsubscribe = '';
         if ($oEmail->type->can_unsubscribe && !empty($oEmail->to->id)) {
 
-            $sUrl = siteUrl('email/unsubscribe?token=');
-
             /**
              * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
              * 20 times before giving up @TODO: make this less hacky
@@ -1633,7 +1631,11 @@ class Emailer
 
             } while ($iCounter <= $iAttempts && strpos($sToken, '+') !== false);
 
-            $oEmail->data->url->unsubscribe = $sUrl . $sToken;
+            $oEmail->data->url->unsubscribe = sprintf(
+                siteUrl('email/unsubscribe?ref=%s&token=%s'),
+                $oEmail->ref,
+                sToken
+            );
         }
 
         /** @var Input $oInput */
