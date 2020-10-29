@@ -1634,7 +1634,7 @@ class Emailer
             $oEmail->data->url->unsubscribe = sprintf(
                 siteUrl('email/unsubscribe?ref=%s&token=%s'),
                 $oEmail->ref,
-                sToken
+                $sToken
             );
         }
 
