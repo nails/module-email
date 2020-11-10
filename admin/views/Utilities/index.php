@@ -76,7 +76,7 @@
             echo form_field_textarea([
                 'key'      => '',
                 'label'    => 'Whitelist',
-                'default'  => json_encode(\Nails\Config::get('EMAIL_WHITELIST')),
+                'default'  => implode(PHP_EOL, (array) \Nails\Config::get('EMAIL_WHITELIST') ?: []),
                 'info'     => 'If defined, email is only released if the "to" address is whitelisted',
                 'readonly' => true,
             ]);
