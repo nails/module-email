@@ -366,14 +366,14 @@ abstract class Email
     /**
      * Set email payload data
      *
-     * @param array|string $mKey   An array of key value pairs, or the key if supplying the second parameter
-     * @param mixed        $mValue The value
+     * @param iterable|string $mKey   An iterable of key value pairs, or the key if supplying the second parameter
+     * @param mixed           $mValue The value
      *
      * @return $this
      */
     public function data($mKey, $mValue = null): self
     {
-        if (is_array($mKey)) {
+        if (is_array($mKey) || is_iterable($mKey) || $mKey instanceof \stdClass) {
             foreach ($mKey as $sKey => $mValue) {
                 $this->data($sKey, $mValue);
             }
@@ -499,8 +499,8 @@ abstract class Email
                 $aData['to_email'] = $mUserIdOrEmail;
             }
 
-            $this->bLastEmailDidSend  = $oEmailer->send($aData);
-            $oLastEmail               = $oEmailer->getLastEmail();
+            $this->bLastEmailDidSend = $oEmailer->send($aData);
+            $oLastEmail              = $oEmailer->getLastEmail();
 
             /**
              * There might not always be an email generated:
