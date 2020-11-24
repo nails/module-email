@@ -25,7 +25,9 @@ use Nails\Common\Service\Session;
 use Nails\Common\Service\Uri;
 use Nails\Common\Service\View;
 use Nails\Email\Constants;
+use Nails\Email\Exception\EmailerException;
 use Nails\Email\Model\Template\Override;
+use Nails\Email\Resource\Type;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
@@ -183,6 +185,12 @@ class Templates extends Base
             'INDEX_PAGE_ID'         => null,
             'INDEX_FIELDS'          => [
                 'Label'       => 'name',
+                'Provided By' => function (Type $oType) {
+                    return sprintf(
+                        '<code>%s</code>',
+                        $oType->component->name
+                    );
+                },
                 'Description' => 'description',
             ],
             'INDEX_BOOL_FIELDS'     => [],
@@ -199,6 +207,15 @@ class Templates extends Base
                     'url'   => 'reset/{{slug}}',
                     'label' => lang('action_reset'),
                     'class' => 'btn-warning confirm',
+                ],
+                [
+                    'url'     => 'preview/{{slug}}',
+                    'label'   => lang('action_preview'),
+                    'class'   => 'btn-default',
+                    'attr'    => 'rel="tipsy" title="Sends a test email to your email using this template."',
+                    'enabled' => function (Type $oType) {
+                        return !empty($oType->factory);
+                    },
                 ],
             ],
             'MODEL_INSTANCE'        => (object) [],
@@ -436,6 +453,87 @@ class Templates extends Base
             }
         } else {
             $oSession->setFlashData('success', 'Template reset successfully.');
+        }
+
+        redirect('admin/email/templates/index');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Generates a preview of the email using test data
+     *
+     * @throws FactoryException
+     */
+    public function preview(): void
+    {
+        if (!userHasPermission('admin:email:templates:edit')) {
+            unauthorised();
+        }
+
+        /** @var Emailer $oEmailer */
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var Uri $oUri */
+        $oUri = Factory::service('Uri');
+        /** @var Session $oSession */
+        $oSession = Factory::service('Session');
+
+        $oType = $oEmailer->getType($oUri->segment(5));
+        if (empty($oType)) {
+            show404();
+        }
+
+        $oEmail = $oType->getFactory();
+        if (empty($oEmail)) {
+            show404();
+        }
+
+        try {
+
+            $oEmail
+                ->to(activeUser())
+                ->data($oEmail->getTestData())
+                ->send();
+
+            $aGeneratedEmails = $oEmail->getGeneratedEmails();
+
+            if (empty($aGeneratedEmails)) {
+                throw new EmailerException(
+                    'No emails were generated when sending the test. Perhaps you have blocked this type of email?'
+                );
+            }
+
+            if (count($aGeneratedEmails) === 1) {
+                $oSession->setFlashData(
+                    'success',
+                    sprintf(
+                        'Preview email sent successfully. View it in your browser <a href="%s" style="text-decoration: underline" target="_blank:">here</a>.',
+                        reset($aGeneratedEmails)->data->url->viewOnline
+                    )
+                );
+            } else {
+                $oSession->setFlashData(
+                    'success',
+                    sprintf(
+                        'Multiple preview emails sent successfully. View them in your browser:',
+                        implode(
+                            '<br>',
+                            array_map(
+                                function ($oEmail) {
+                                    return $oEmail->data->url->viewOnline;
+                                },
+                                $aGeneratedEmails
+                            )
+                        )
+                    )
+                );
+            }
+
+        } catch (EmailerException $e) {
+            $oSession->setFlashData(
+                'error',
+                'An error occurred whislt sending the test email: ' . $e->getMessage()
+            );
         }
 
         redirect('admin/email/templates/index');

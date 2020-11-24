@@ -10,6 +10,7 @@
 namespace Nails\Email\Resource;
 
 use Nails\Common\Exception\FactoryException;
+use Nails\Common\Factory\Component;
 use Nails\Common\Resource;
 use Nails\Factory;
 
@@ -25,6 +26,9 @@ class Type extends Resource
 
     /** @var string */
     public $name;
+
+    /** @var Component */
+    public $component;
 
     /** @var string */
     public $description;
@@ -58,7 +62,7 @@ class Type extends Resource
      * @return Nails\Email\Factory\Email|null
      * @throws FactoryException
      */
-    public function getFactory(): ?Nails\Email\Factory\Email
+    public function getFactory(): ?\Nails\Email\Factory\Email
     {
         if (empty($this->factory)) {
             return null;

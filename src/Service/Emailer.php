@@ -17,6 +17,7 @@ use Nails\Auth;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\NailsException;
+use Nails\Common\Factory\Component;
 use Nails\Common\Service\Database;
 use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
@@ -162,19 +163,20 @@ class Emailer
      */
     public static function discoverTypes(array &$aArray): void
     {
-        $aLocations = [
-            Config::get('NAILS_COMMON_PATH') . 'config/email_types.php',
-        ];
-
         foreach (Components::modules() as $oModule) {
-            $aLocations[] = $oModule->path . $oModule->moduleName . '/config/email_types.php';
+            static::loadTypes(
+                $oModule->path . $oModule->moduleName . '/config/email_types.php',
+                $oModule,
+                $aArray
+            );
         }
 
-        $aLocations[] = Config::get('NAILS_APP_PATH') . 'application/config/email_types.php';
-
-        foreach ($aLocations as $sPath) {
-            static::loadTypes($sPath, $aArray);
-        }
+        $oApp = Components::getApp();
+        static::loadTypes(
+            $oApp->path . 'application/config/email_types.php',
+            $oApp,
+            $aArray
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -182,18 +184,19 @@ class Emailer
     /**
      * Loads email types located in a config file at $sPath
      *
-     * @param string $sPath  The path to load
-     * @param array  $aArray The array to populate
+     * @param string    $sPath      The path to load
+     * @param Component $oComponent The component which supplied the email type
+     * @param array     $aArray     The array to populate
      *
      * @return void
      */
-    public static function loadTypes($sPath, array &$aArray): void
+    public static function loadTypes($sPath, Component $oComponent, array &$aArray): void
     {
         if (file_exists($sPath)) {
             include $sPath;
             if (!empty($config['email_types'])) {
                 foreach ($config['email_types'] as $oType) {
-                    static::addType($oType, $aArray);
+                    static::addType($oType, $oComponent, $aArray);
                 }
             }
         }
@@ -231,18 +234,20 @@ class Emailer
     /**
      * Adds a new email type to the stack
      *
-     * @param stdClass $oData  An object representing the email type
-     * @param array    $aArray The array to populate
+     * @param stdClass  $oData      An object representing the email type
+     * @param Component $oComponent The component which supplied the email type
+     * @param array     $aArray     The array to populate
      *
      * @return bool
      */
-    protected static function addType(stdClass $oData, array &$aArray): bool
+    protected static function addType(stdClass $oData, Component $oComponent, array &$aArray): bool
     {
         if (!empty($oData->slug) && !empty($oData->template_body)) {
 
             $aArray[$oData->slug] = Factory::resource('Type', Constants::MODULE_SLUG, [
                 'slug'            => $oData->slug,
                 'name'            => $oData->name,
+                'component'       => $oComponent,
                 'description'     => $oData->description,
                 'is_hidden'       => property_exists($oData, 'is_hidden') ? (bool) $oData->is_hidden : false,
                 'can_unsubscribe' => property_exists($oData, 'can_unsubscribe') ? (bool) $oData->can_unsubscribe : true,
@@ -783,7 +788,7 @@ class Emailer
      * Sets an email as failed with optional reason for failure
      *
      * @param \Nails\Email\Resource\Email|\stdClass $oEmail
-     * @param string|null                 $sFailReason
+     * @param string|null                           $sFailReason
      *
      * @return $this
      * @throws FactoryException
