@@ -1100,7 +1100,7 @@ class Emailer
      */
     public function generateHash($sRef, $sGuid)
     {
-        return md5($sGuid . Config::get('APP_PRIVATE_KEY') . $sRef);
+        return md5($sGuid . Config::get('PRIVATE_KEY') . $sRef);
     }
 
     // --------------------------------------------------------------------------
@@ -1630,7 +1630,7 @@ class Emailer
 
                 $sToken = $oEncrypt->encode(
                     $oEmail->type->slug . '|' . $oEmail->data->emailRef . '|' . $oEmail->to->id,
-                    Config::get('APP_PRIVATE_KEY')
+                    Config::get('PRIVATE_KEY')
                 );
                 $iCounter++;
 
