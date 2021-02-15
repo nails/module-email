@@ -32,7 +32,7 @@ class Email extends Base
      */
     public static function announce()
     {
-        $oNavGroup = Factory::factory('Nav', 'nails/module-admin');
+        $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Email');
         $oNavGroup->setIcon('fa-paper-plane');
 
