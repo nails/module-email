@@ -59,12 +59,13 @@ class View extends Base
             /** @var Output $oOutput */
             $oOutput = Factory::service('Output');
 
-            $oOutput->set_status_header($oHttpCodes::STATUS_NOT_FOUND);
-            $oOutput->set_content_type('application/json');
-            $oOutput->set_output(json_encode([
-                'status' => $oHttpCodes::STATUS_NOT_FOUND,
-                'error'  => 'Failed to validate email URL',
-            ]));
+            $oOutput
+                ->setStatusHeader($oHttpCodes::STATUS_NOT_FOUND)
+                ->setContentType('application/json')
+                ->setOutput(json_encode([
+                    'status' => $oHttpCodes::STATUS_NOT_FOUND,
+                    'error'  => 'Failed to validate email URL',
+                ]));
             return;
         }
 
@@ -87,7 +88,7 @@ class View extends Base
         } else {
             /** @var Output $oOutput */
             $oOutput = Factory::service('Output');
-            $oOutput->set_output($oEmail->body->html);
+            $oOutput->setOutput($oEmail->body->html);
         }
     }
 
