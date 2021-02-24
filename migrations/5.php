@@ -15,6 +15,7 @@
 namespace Nails\Database\Migration\Nails\ModuleEmail;
 
 use Nails\Common\Console\Migrate\Base;
+use Nails\Email\Constants;
 
 class Migration5 extends Base
 {
@@ -24,6 +25,6 @@ class Migration5 extends Base
      */
     public function execute()
     {
-        $this->query("UPDATE `{{NAILS_DB_PREFIX}}app_setting` SET `grouping` = 'nails/module-email' WHERE `grouping` = 'email';");
+        $this->query("UPDATE `{{NAILS_DB_PREFIX}}app_setting` SET `grouping` = '" . Constants::MODULE_SLUG . "' WHERE `grouping` = 'email';");
     }
 }
