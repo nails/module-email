@@ -2,15 +2,22 @@
 
 namespace Nails\Email\Console\Command\Make;
 
+use Nails\Common\Exception\FactoryException;
 use Nails\Components;
 use Nails\Console\Command\BaseMaker;
 use Nails\Console\Exception\ConsoleException;
 use Nails\Email\Constants;
+use Nails\Email\Service\Emailer;
 use Nails\Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class Email
+ *
+ * @package Nails\Email\Console\Command\Make
+ */
 class Email extends BaseMaker
 {
     const SERVICE_TOKEN     = 'FACTORIES';
@@ -106,6 +113,7 @@ class Email extends BaseMaker
             $aToCreate = [];
             $aEmails   = array_filter(
                 array_map(function ($sEmail) {
+                    $sEmail = str_replace('/', '\\', $sEmail);
                     return implode('/', array_map('ucfirst', explode('/', ucfirst(trim($sEmail)))));
                 }, explode(',', $aFields['NAME']))
             );
@@ -197,14 +205,13 @@ class Email extends BaseMaker
                         str_repeat(' ', $this->iServicesIndent) . '    return new ' . $aConfig['CLASS_NAME_FULL'] . '();',
                         str_repeat(' ', $this->iServicesIndent) . '},',
                     ];
-                    $aServiceDefinitions[] = implode("\n", $aDefinition);
+                    $aServiceDefinitions[] = implode(PHP_EOL, $aDefinition);
 
                     //  Add to the email config
                     $this->addEmailConfig($aConfig);
                 }
 
                 //  Add services to the app's services array
-                $this->oOutput->writeln('');
                 $this->oOutput->write('Adding email(s) to app services... ');
                 $this->writeServiceFile($aServiceDefinitions);
                 $this->oOutput->writeln('<info>done!</info>');
@@ -343,41 +350,46 @@ class Email extends BaseMaker
     protected function generateTemplate(string $sType, array $aEmailBits): string
     {
         $sClassName = end($aEmailBits);
-        if ($sType === 'HTML') {
-            return $this->generateTemplateDir($aEmailBits) . strtolower($sClassName) . '.php';
-        } else {
-            return $this->generateTemplateDir($aEmailBits) . strtolower($sClassName) . '_plaintext.php';
-        }
+
+        return $sType === 'HTML'
+            ? $this->generateTemplateDir($aEmailBits) . strtolower($sClassName) . '.php'
+            : $this->generateTemplateDir($aEmailBits) . strtolower($sClassName) . '_plaintext.php';
     }
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Adds the email to the app's email config
+     *
+     * @param array $aConfig The email to add
+     *
+     * @throws FactoryException
+     */
     protected function addEmailConfig(array $aConfig)
     {
-        Components::getApp()->slug;
+        $oApp = Components::getApp();
+        /** @var Emailer $oEmailer */
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var \DateTime $oNow */
+        $oNow = Factory::factory('DateTime');
 
-        $aTypes = [
-            $aConfig['EMAIL_KEY'] => (object) [
-                'slug'            => $aConfig['EMAIL_KEY'],
-                'name'            => str_replace('\\', ' ', str_replace('App\\Factory\\Email\\', '', $aConfig['CLASS_NAME_FULL'])),
-                'description'     => '@todo - write the description for the ' . $aConfig['CLASS_NAME_NORMALISED'] . ' email',
-                'template_header' => '',
-                'template_body'   => 'email/' . rtrim(str_replace(static::TEMPLATE_PATH, '', $aConfig['TEMPLATE_HTML']), '.php'),
-                'template_footer' => '',
-                'default_subject' => '@todo - write the subject for the ' . $aConfig['CLASS_NAME_NORMALISED'] . ' email',
-                'can_unsubscribe' => true,
-                'factory'         => sprintf(
-                    '%s::%s',
-                    Components::getApp()->slug,
-                    $aConfig['CLASS_NAME_NORMALISED']
-                ),
-            ],
+        //  The required fields
+        $oType = (object) [
+            'slug'            => $aConfig['EMAIL_KEY'],
+            'name'            => str_replace('\\', ' ', str_replace('App\\Factory\\Email\\', '', $aConfig['CLASS_NAME_FULL'])),
+            'description'     => '@todo - write the description for the ' . $aConfig['CLASS_NAME_NORMALISED'] . ' email',
+            'template_body'   => 'email/' . rtrim(str_replace(static::TEMPLATE_PATH, '', $aConfig['TEMPLATE_HTML']), '.php'),
+            'default_subject' => '@todo - write the subject for the ' . $aConfig['CLASS_NAME_NORMALISED'] . ' email',
+            'factory'         => sprintf(
+                '%s::%s',
+                $oApp->slug,
+                $aConfig['CLASS_NAME_NORMALISED']
+            ),
         ];
 
-        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-        $oNow     = Factory::factory('DateTime');
-
-        $oEmailer::loadTypes(static::EMAIL_CONFIG_PATH, $aTypes);
+        $aTypes = [];
+        $oEmailer::addType($oType, $oApp, $aTypes);
+        $oEmailer::loadTypes(static::EMAIL_CONFIG_PATH, $oApp, $aTypes);
 
         ksort($aTypes);
 
@@ -402,6 +414,8 @@ class Email extends BaseMaker
             $aFile[] = "        'template_body'   => '" . str_replace("'", "\'", $oType->template_body) . "',";
             $aFile[] = "        'template_footer' => '" . str_replace("'", "\'", $oType->template_footer) . "',";
             $aFile[] = "        'default_subject' => '" . str_replace("'", "\'", $oType->default_subject) . "',";
+            $aFile[] = "        'is_hidden'       => " . ($oType->is_hidden ? 'true' : 'false') . ",";
+            $aFile[] = "        'can_unsubscribe' => " . ($oType->can_unsubscribe ? 'true' : 'false') . ",";
             $aFile[] = "        'factory'         => '" . str_replace("'", "\'", $oType->factory) . "',";
             $aFile[] = '    ],';
         }
@@ -409,6 +423,6 @@ class Email extends BaseMaker
         $aFile[] = '];';
         $aFile[] = '';
 
-        file_put_contents(static::EMAIL_CONFIG_PATH, implode("\n", $aFile));
+        file_put_contents(static::EMAIL_CONFIG_PATH, implode(PHP_EOL, $aFile));
     }
 }

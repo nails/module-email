@@ -240,7 +240,7 @@ class Emailer
      *
      * @return bool
      */
-    protected static function addType(stdClass $oData, Component $oComponent, array &$aArray): bool
+    public static function addType(stdClass $oData, Component $oComponent, array &$aArray): bool
     {
         if (!empty($oData->slug) && !empty($oData->template_body)) {
 
