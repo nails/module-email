@@ -44,7 +44,10 @@ class Email extends BaseMaker
                 'description' => 'Define the name of the email to create',
                 'required'    => true,
                 'validation'  => function (string $sValue) {
-                    $this->validateClassName($sValue);
+                    $aClasses = explode(',', $sValue);
+                    foreach ($aClasses as $sClass) {
+                        $this->validateClassName($sClass);
+                    }
                 },
             ],
         ];
@@ -114,7 +117,7 @@ class Email extends BaseMaker
             $aEmails   = array_filter(
                 array_map(function ($sEmail) {
                     $sEmail = str_replace('/', '\\', $sEmail);
-                    return implode('/', array_map('ucfirst', explode('/', ucfirst(trim($sEmail)))));
+                    return implode('\\', array_map('ucfirst', explode('\\', ucfirst(trim($sEmail)))));
                 }, explode(',', $aFields['NAME']))
             );
 
@@ -125,7 +128,7 @@ class Email extends BaseMaker
                 $sEmail = ucwords($sEmail);
                 $sEmail = str_replace(' ', '', $sEmail);
 
-                $aEmailBits = explode('/', $sEmail);
+                $aEmailBits = explode('\\', $sEmail);
                 $aEmailBits = array_map('ucfirst', $aEmailBits);
 
                 $sNamespace       = $this->generateNamespace($aEmailBits);
@@ -183,6 +186,7 @@ class Email extends BaseMaker
                 //  Generate emails
                 $aServiceDefinitions = [];
                 foreach ($aToCreate as $aConfig) {
+
                     $this->oOutput->writeln('');
                     $this->oOutput->write('Creating email <comment>' . $aConfig['CLASS_NAME_FULL'] . '</comment>... ');
                     $this->createPath($aConfig['DIRECTORY']);
@@ -352,8 +356,8 @@ class Email extends BaseMaker
         $sClassName = end($aEmailBits);
 
         return $sType === 'HTML'
-            ? $this->generateTemplateDir($aEmailBits) . strtolower($sClassName) . '.php'
-            : $this->generateTemplateDir($aEmailBits) . strtolower($sClassName) . '_plaintext.php';
+            ? $this->generateTemplateDir($aEmailBits) . preg_replace('#[/\\\]#', DIRECTORY_SEPARATOR, strtolower($sClassName)) . '.php'
+            : $this->generateTemplateDir($aEmailBits) . preg_replace('#[/\\\]#', DIRECTORY_SEPARATOR, strtolower($sClassName)) . '_plaintext.php';
     }
 
     // --------------------------------------------------------------------------
