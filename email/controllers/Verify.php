@@ -36,6 +36,8 @@ class Verify extends Base
         $oSession = Factory::service('Session');
         /** @var Auth\Model\User $oUserModel */
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
+        /** @var Auth\Model\User\Password $oPasswordModel */
+        $oPasswordModel = Factory::model('UserPassword', Constants::MODULE_SLUG);
 
         $iId      = $oUri->segment(3);
         $sCode    = $oUri->segment(4);
@@ -69,15 +71,19 @@ class Verify extends Base
 
         if ($oInput->get('return_to')) {
             $sRedirect = $oInput->get('return_to');
+
         } elseif (!isLoggedIn() && $oUser) {
             if ($oUser->temp_pw) {
-                $sRedirect = 'auth/password/reset/' . $oUser->id . '/' . md5($oUser->salt);
+                $sRedirect = $oPasswordModel::resetUrl($oUser);
+
             } else {
                 $oUserModel->setLoginData($oUser->id);
                 $sRedirect = $oUser->group_homepage;
             }
+
         } elseif ($oUser) {
             $sRedirect = $oUser->group_homepage;
+
         } else {
             $sRedirect = '/';
         }
