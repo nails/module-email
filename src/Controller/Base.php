@@ -13,6 +13,7 @@
 namespace Nails\Email\Controller;
 
 use Nails\Auth;
+use Nails\Common\Exception\NailsException;
 use Nails\Factory;
 
 /**
