@@ -37,7 +37,7 @@ class Verify extends Base
         /** @var Auth\Model\User $oUserModel */
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
         /** @var Auth\Model\User\Password $oPasswordModel */
-        $oPasswordModel = Factory::model('UserPassword', Constants::MODULE_SLUG);
+        $oPasswordModel = Factory::model('UserPassword', Auth\Constants::MODULE_SLUG);
 
         $iId      = $oUri->segment(3);
         $sCode    = $oUri->segment(4);
