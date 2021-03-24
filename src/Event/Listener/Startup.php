@@ -36,19 +36,10 @@ class Startup extends Subscription
      */
     public function execute()
     {
-        //  @todo (Pablo - 2019-12-06) - Remove this once a unified settings system is in place
         //  Email constants
         Config::default('APP_DEVELOPER_EMAIL', '');
         Config::default('EMAIL_OVERRIDE', '');
         Config::default('EMAIL_WHITELIST', '');
-
-        //  Specify these first for backwards compatability
-        //  @todo (Pablo - 2019-12-06) - Remove these
-        Config::default('DEPLOY_EMAIL_HOST', '127.0.0.1');
-        Config::default('DEPLOY_EMAIL_USER', null);
-        Config::default('DEPLOY_EMAIL_PASS', null);
-        Config::default('DEPLOY_EMAIL_PORT', 25);
-
         Config::default('EMAIL_HOST', '127.0.0.1');
         Config::default('EMAIL_USERNAME', null);
         Config::default('EMAIL_PASSWORD', null);
