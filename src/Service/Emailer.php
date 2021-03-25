@@ -285,7 +285,7 @@ class Emailer
             if (!$graceful) {
                 throw new EmailerException('No Input');
             } else {
-                $this->setError('EMAILER: No input');
+                $this->setError('No input');
             }
             return false;
         }
@@ -304,7 +304,7 @@ class Emailer
             if (!$graceful) {
                 throw new EmailerException('Missing user ID, user email or email type');
             } else {
-                $this->setError('EMAILER: Missing user ID, user email or email type');
+                $this->setError('Missing user ID, user email or email type');
             }
             return false;
         }
@@ -337,7 +337,7 @@ class Emailer
             if (!$graceful) {
                 throw new EmailerException('"' . $input->type . '" is not a valid email type', 1);
             } else {
-                $this->setError('EMAILER: Invalid Email Type "' . $input->type . '"');
+                $this->setError('Invalid Email Type "' . $input->type . '"');
             }
 
             return false;
@@ -384,7 +384,7 @@ class Emailer
             if (!$graceful) {
                 throw new EmailerException('No email address to send to', 1);
             } else {
-                $this->setError('EMAILER: No email address to send to.');
+                $this->setError('No email address to send to.');
                 false;
             }
         }
@@ -406,7 +406,7 @@ class Emailer
             if (!$graceful) {
                 throw new EmailerException('Failed to create the email record', 1);
             } else {
-                $this->setError('EMAILER: Failed to create the email record.');
+                $this->setError('Failed to create the email record.');
                 false;
             }
         }
@@ -565,7 +565,7 @@ class Emailer
             $oEmail = $this->getById($emailId);
             if (!$oEmail) {
 
-                $this->setError('EMAILER: Invalid email ID');
+                $this->setError('Invalid email ID');
                 return false;
             }
 
@@ -573,7 +573,7 @@ class Emailer
             $oEmail = $emailId;
 
         } else {
-            $this->setError('EMAILER: Invalid email ID');
+            $this->setError('Invalid email ID');
             return false;
         }
 
@@ -666,7 +666,7 @@ class Emailer
                 $this->setEmailAsFailed($oEmail, $sError);
 
                 throw new EmailerException(
-                    'EMAILER: ' . $sError
+                    $sError
                 );
             }
         }
@@ -710,7 +710,7 @@ class Emailer
                     if (!$graceful) {
                         throw new EmailerException($sError, 1);
                     } else {
-                        $this->setError('EMAILER: ' . $sError);
+                        $this->setError($sError);
                         return false;
                     }
                 }
