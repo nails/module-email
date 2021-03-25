@@ -45,7 +45,7 @@ class Clean extends Base
 
         try {
 
-            $this->banner('Email Archive Clean');
+            $this->banner('Email: Archive Clean');
 
             $iRetention = (int) appSetting('retention_period', Constants::MODULE_SLUG);
             if ($iRetention) {
