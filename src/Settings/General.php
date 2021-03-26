@@ -37,6 +37,16 @@ class General implements Interfaces\Component\Settings
     /**
      * @inheritDoc
      */
+    public function getPermissions(): array
+    {
+        return [];
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * @inheritDoc
+     */
     public function get(): array
     {
         /** @var Setting $oFromName */
