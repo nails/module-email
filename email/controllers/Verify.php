@@ -70,7 +70,7 @@ class Verify extends Base
         // --------------------------------------------------------------------------
 
         if ($oInput->get('return_to')) {
-            $sRedirect = $oInput->get('return_to');
+            $sRedirect = html_entity_decode($oInput->get('return_to'));
 
         } elseif (!isLoggedIn() && $oUser) {
             if ($oUser->temp_pw) {
