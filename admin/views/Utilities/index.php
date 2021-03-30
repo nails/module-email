@@ -49,7 +49,7 @@
             echo form_field([
                 'key'      => '',
                 'label'    => 'Password',
-                'default'  => mask(\Nails\Config::get('EMAIL_PASSWORD')),
+                'default'  => mask(\Nails\Config::get('EMAIL_PASSWORD') ?? ''),
                 'readonly' => true,
             ]);
 
