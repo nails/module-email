@@ -12,6 +12,8 @@
 
 use Nails\Auth;
 use Nails\Common\Exception\NailsException;
+use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
 use Nails\Common\Service\Input;
 use Nails\Common\Service\Session;
 use Nails\Common\Service\Uri;
@@ -25,6 +27,12 @@ class Verify extends Base
 {
     /**
      * Attempt to validate the user's activation code
+     */
+    /**
+     * @throws NailsException
+     * @throws ReflectionException
+     * @throws FactoryException
+     * @throws ModelException
      */
     public function index()
     {
@@ -94,6 +102,7 @@ class Verify extends Base
                 $sMessage
             );
         }
+
         redirect($sRedirect);
     }
 
@@ -101,6 +110,11 @@ class Verify extends Base
 
     /**
      *  Map the class so that index() does all the work
+     *
+     * @throws FactoryException
+     * @throws ModelException
+     * @throws NailsException
+     * @throws ReflectionException
      */
     public function _remap()
     {
