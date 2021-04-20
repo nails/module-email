@@ -128,7 +128,7 @@ $oInput = \Nails\Factory::service('Input');
 
                             if (!empty($sIcon)) {
                                 ?>
-                                <td class="text-center <?=$sCellStatus?>" rel="tipsy" title="<?=$sCellText?>">
+                                <td class="text-center <?=$sCellStatus?> hint--bottom" aria-label="<?=$sCellText?>">
                                     <b class="fa fa-lg <?=$sIcon?>"></b>
                                     <?=!empty($sCellSubText) ? '<small>' . $sCellSubText . '</small>' : ''?>
                                 </td>
