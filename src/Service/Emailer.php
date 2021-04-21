@@ -19,6 +19,7 @@ use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\NailsException;
 use Nails\Common\Factory\Component;
 use Nails\Common\Service\Database;
+use Nails\Common\Service\Encrypt;
 use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
@@ -1633,14 +1634,18 @@ class Emailer
 
             $iCounter  = 0;
             $iAttempts = 20;
-            $oEncrypt  = Factory::service('Encrypt');
+
+            /** @var Encrypt $oEncrypt */
+            $oEncrypt = Factory::service('Encrypt');
 
             do {
 
-                $sToken = $oEncrypt->encode(
-                    $oEmail->type->slug . '|' . $oEmail->data->emailRef . '|' . $oEmail->to->id,
-                    Config::get('PRIVATE_KEY')
-                );
+                $sToken = $oEncrypt->encode(implode('|', [
+                    $oEmail->type->slug,
+                    $oEmail->data->emailRef,
+                    $oEmail->to->id,
+                ]));
+
                 $iCounter++;
 
             } while ($iCounter <= $iAttempts && strpos($sToken, '+') !== false);

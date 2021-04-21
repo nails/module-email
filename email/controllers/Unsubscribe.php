@@ -46,7 +46,7 @@ class Unsubscribe extends Base
             show404();
         }
 
-        $aToken = $oEncrypt->decode($sToken, Config::get('PRIVATE_KEY'));
+        $aToken = $oEncrypt->decode($sToken);
         $aToken = explode('|', $aToken);
 
         if (count($aToken) != 3) {
