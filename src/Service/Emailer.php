@@ -1769,6 +1769,11 @@ class Emailer
                 'Render Failure: %s',
                 $e->getMessage()
             );
+        } catch (\Error $e) {
+            return sprintf(
+                'Render Failure: %s',
+                $e->getMessage()
+            );
         }
     }
 

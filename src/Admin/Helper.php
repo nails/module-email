@@ -12,7 +12,15 @@ use Nails\Email\Service\Emailer;
  */
 class Helper
 {
-    public static function emailStatusCell(Email $oEmail): string
+    /**
+     * Renders a status cell for an email
+     *
+     * @param Email|\stdClass $oEmail             The email object
+     * @param bool            $bIncludeCellMarkup Whether to include the surrounding cell markup
+     *
+     * @return string
+     */
+    public static function emailStatusCell(object $oEmail, bool $bIncludeCellMarkup = true): string
     {
         switch ($oEmail->status) {
             case Emailer::STATUS_PENDING:
@@ -93,26 +101,28 @@ class Helper
                 break;
         }
 
+        $sCellOpen    = $bIncludeCellMarkup ? '<td class="text-center' . $sCellStatus . '">' : '';
+        $sCellClose   = $bIncludeCellMarkup ? '</td>' : '';
         $sCellSubText = !empty($sCellSubText) ? '<small>' . $sCellSubText . '</small>' : '';
 
         if (!empty($sIcon)) {
 
             $sOut = <<<EOT
-            <td class="text-center $sCellStatus">
+            $sCellOpen
                 <span class="hint--bottom" aria-label="$sCellText">
                     <b class="fa fa-lg $sIcon"></b>
                 </span>
-               $sCellSubText
-            </td>
+            $sCellSubText
+            $sCellClose
             EOT;
 
         } else {
 
             $sOut = <<<EOT
-            <td class="text-center $sCellStatus">
-                $sCellText
-                $sCellSubText
-            </td>
+            $sCellOpen
+            $sCellText
+            $sCellSubText
+            $sCellClose
             EOT;
         }
 
