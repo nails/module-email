@@ -45,7 +45,7 @@ $oInput = \Nails\Factory::service('Input');
                                 <?=$oEmail->type->name?>
                                 <small>Subject: <?=$oEmail->subject?></small>
                             </td>
-                            <?=\Nails\Email\Admin\Helper::emailStatusCell($oEmail->email)?>
+                            <?=\Nails\Email\Admin\Helper::emailStatusCell($oEmail)?>
                             <td class="text-center reads"><?=$oEmail->read_count?></td>
                             <td class="text-center clicks"><?=$oEmail->link_click_count?></td>
                             <td class="actions">
