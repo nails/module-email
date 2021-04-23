@@ -101,7 +101,7 @@ class Helper
                 break;
         }
 
-        $sCellOpen    = $bIncludeCellMarkup ? '<td class="text-center' . $sCellStatus . '">' : '';
+        $sCellOpen    = $bIncludeCellMarkup ? '<td class="text-center ' . $sCellStatus . '">' : '';
         $sCellClose   = $bIncludeCellMarkup ? '</td>' : '';
         $sCellSubText = !empty($sCellSubText) ? '<small>' . $sCellSubText . '</small>' : '';
 
