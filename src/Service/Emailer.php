@@ -1741,27 +1741,35 @@ class Emailer
      * @param object|Array $mData     The data to use
      *
      * @return string
-     * @throws FactoryException
      */
     protected function render(string $sTemplate, $mData): string
     {
-        /** @var Mustache_Engine $oMustache */
-        $oMustache = Factory::service('Mustache');
+        try {
 
-        //  Any function which takes a single argument
-        $sTemplate = preg_replace_callback(
-            '/{{\s*([a-zA-Z0-9_]+)(\(([\'" ]*)?(.*?)([\'" ]*)?\))\s*}}/',
-            function ($aMatches) {
-                $sFunction = getFromArray(1, $aMatches);
-                $sArgument = getFromArray(4, $aMatches);
-                return function_exists($sFunction)
-                    ? call_user_func($sFunction, $sArgument)
-                    : $aMatches[0];
-            },
-            $sTemplate
-        );
+            /** @var Mustache_Engine $oMustache */
+            $oMustache = Factory::service('Mustache');
 
-        return $oMustache->render($sTemplate, $mData);
+            //  Any function which takes a single argument
+            $sTemplate = preg_replace_callback(
+                '/{{\s*([a-zA-Z0-9_]+)(\(([\'" ]*)?(.*?)([\'" ]*)?\))\s*}}/',
+                function ($aMatches) {
+                    $sFunction = getFromArray(1, $aMatches);
+                    $sArgument = getFromArray(4, $aMatches);
+                    return function_exists($sFunction)
+                        ? call_user_func($sFunction, $sArgument)
+                        : $aMatches[0];
+                },
+                $sTemplate
+            );
+
+            return $oMustache->render($sTemplate, $mData);
+
+        } catch (\Exception $e) {
+            return sprintf(
+                'Render Failure: %s',
+                $e->getMessage()
+            );
+        }
     }
 
     // --------------------------------------------------------------------------
