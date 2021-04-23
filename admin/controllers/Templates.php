@@ -211,7 +211,7 @@ class Templates extends Base
                 [
                     'url'     => 'preview/{{slug}}',
                     'label'   => lang('action_preview'),
-                    'class'   => 'btn-default hint--bottom',
+                    'class'   => 'btn-default hint--left',
                     'attr'    => 'aria-label="Sends a test email to your email using this template."',
                     'enabled' => function (Type $oType) {
                         return !empty($oType->factory);
