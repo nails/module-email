@@ -2,7 +2,7 @@
     <p>
         Use this form to send a test email, useful for testing that emails being sent are received by the end user.
     </p>
-    <hr/>
+    <hr />
     <?=form_open();?>
     <fieldset>
         <legend>Recipient</legend>
@@ -13,6 +13,15 @@
             'label'       => 'Email',
             'required'    => true,
             'placeholder' => 'Type recipient\'s email address',
+            'default'     => activeUser('email'),
+        ]);
+        echo form_field_dropdown([
+            'key'      => 'type',
+            'label'    => 'Type',
+            'required' => true,
+            'class'    => 'select2',
+            'options'  => $aTypes,
+            'default'  => 'test_email',
         ]);
 
         ?>

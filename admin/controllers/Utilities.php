@@ -14,10 +14,17 @@ namespace Nails\Admin\Email;
 
 use Nails\Admin\Controller\Base;
 use Nails\Admin\Helper;
+use Nails\Common\Exception\ValidationException;
 use Nails\Common\Service\FormValidation;
 use Nails\Email\Constants;
+use Nails\Email\Resource\Type;
 use Nails\Factory;
 
+/**
+ * Class Utilities
+ *
+ * @package Nails\Admin\Email
+ */
 class Utilities extends Base
 {
     /**
@@ -27,6 +34,7 @@ class Utilities extends Base
      */
     public static function announce()
     {
+        /** @var \Nails\Admin\Factory\Nav $oNavGroup */
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Utilities');
 
@@ -66,14 +74,18 @@ class Utilities extends Base
             unauthorised();
         }
 
-        // --------------------------------------------------------------------------
-
-        //  Page Title
-        $this->data['page']->title = 'Send a Test Email';
-
-        // --------------------------------------------------------------------------
-
+        /** @var \Nails\Email\Service\Emailer $oEmailer */
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var \Nails\Common\Service\Input $oInput */
         $oInput = Factory::service('Input');
+
+        // --------------------------------------------------------------------------
+
+        $this->data['page']->title = 'Send a Test Email';
+        $this->data['aTypes']      = $oEmailer->getTypesFlat();
+
+        // --------------------------------------------------------------------------
+
         if ($oInput->post()) {
             try {
 
@@ -85,11 +97,25 @@ class Utilities extends Base
                             FormValidation::RULE_REQUIRED,
                             FormValidation::RULE_VALID_EMAIL,
                         ],
+                        'type'      => [
+                            FormValidation::RULE_REQUIRED,
+                            function ($sType) use ($oEmailer) {
+                                $oType = $oEmailer->getType($sType);
+                                if (empty($oType)) {
+                                    throw new ValidationException('Invalid selection');
+                                }
+                                try {
+                                    $oType->getFactory();
+                                } catch (\Exception $e) {
+                                    throw new ValidationException('Cannot test this type of email');
+                                }
+                            },
+                        ],
                     ])
                     ->run();
 
-                /** @var \Nails\Email\Factory\Email\Test $oEmail */
-                $oEmail = Factory::factory('EmailTest', Constants::MODULE_SLUG);
+                $oType  = $oEmailer->getType($oInput->post('type'));
+                $oEmail = $oType->getFactory();
                 $oEmail
                     ->to($oInput->post('recipient'))
                     ->data($oEmail->getTestData())

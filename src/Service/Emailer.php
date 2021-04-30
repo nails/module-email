@@ -219,6 +219,22 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
+     * Return the email types as a flat array
+     *
+     * @return string[]
+     */
+    public function getTypesFlat(): array
+    {
+        $aTypes = $this->getTypes();
+        return array_combine(
+            arrayExtractProperty($aTypes, 'slug'),
+            arrayExtractProperty($aTypes, 'name'),
+        );
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Returns a specific type of email
      *
      * @param string $sType The type to look for
