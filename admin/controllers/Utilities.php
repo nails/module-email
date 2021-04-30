@@ -100,12 +100,17 @@ class Utilities extends Base
                         'type'      => [
                             FormValidation::RULE_REQUIRED,
                             function ($sType) use ($oEmailer) {
+
                                 $oType = $oEmailer->getType($sType);
+
                                 if (empty($oType)) {
                                     throw new ValidationException('Invalid selection');
+                                } elseif (empty($oType->factory)) {
+                                    throw new ValidationException('Cannot test this type of email');
                                 }
+
                                 try {
-                                    $oType->getFactory();
+                                    $oFactory = $oType->getFactory();
                                 } catch (\Exception $e) {
                                     throw new ValidationException('Cannot test this type of email');
                                 }
