@@ -57,7 +57,7 @@ abstract class Base extends BaseMiddle
         if (!is_file($sView)) {
             $oAsset = Factory::service('Asset');
             $oAsset->clear();
-            $oAsset->load('nails.min.css', 'nails/common');
+            $oAsset->load('nails.min.css', \Nails\Common\Constants::MODULE_SLUG);
             $oAsset->load('styles.min.css', Auth\Constants::MODULE_SLUG);
         }
     }
