@@ -1,3 +1,9 @@
+<?php
+
+use Nails\Config;
+use Nails\Environment;
+
+?>
 <div class="group-utilities send-test">
     <p>
         Use this form to send a test email, useful for testing that emails being sent are received by the end user.
@@ -77,7 +83,9 @@
             echo form_field([
                 'key'      => '',
                 'label'    => 'To Override',
-                'default'  => \Nails\Config::get('EMAIL_OVERRIDE') ?: \Nails\Config::get('APP_DEVELOPER_EMAIL'),
+                'default'  => Environment::not(Environment::ENV_PROD)
+                    ? Config::get('EMAIL_OVERRIDE') ?: Config::get('APP_DEVELOPER_EMAIL')
+                    : '',
                 'info'     => 'If defined, all email is routed to this address',
                 'readonly' => true,
             ]);
