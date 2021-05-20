@@ -3,11 +3,10 @@
 /**
  * This class manages email template overrides
  *
- * @package     Nails
- * @subpackage  module-email
- * @category    AdminController
- * @author      Nails Dev Team
- * @link
+ * @package    Nails
+ * @subpackage module-email
+ * @category   AdminController
+ * @author     Nails Dev Team
  */
 
 namespace Nails\Admin\Email;
@@ -45,6 +44,7 @@ class Templates extends Base
      */
     public static function announce()
     {
+        /** @var \Nails\Admin\Factory\Nav $oNavGroup */
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Email');
         $oNavGroup->setIcon('fa-paper-plane');
