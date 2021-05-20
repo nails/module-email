@@ -267,6 +267,7 @@ class Emailer
                 'component'       => $oComponent,
                 'description'     => $oData->description,
                 'is_hidden'       => (bool) ($oData->is_hidden ?? false),
+                'is_editable'     => (bool) ($oData->is_editable ?? true),
                 'can_unsubscribe' => (bool) ($oData->can_unsubscribe ?? true),
                 'template_header' => $oData->template_header ?? null,
                 'template_body'   => $oData->template_body,

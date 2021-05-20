@@ -37,6 +37,9 @@ class Type extends Resource
     public $is_hidden;
 
     /** @var bool */
+    public $is_editable;
+
+    /** @var bool */
     public $can_unsubscribe;
 
     /** @var string */
@@ -71,6 +74,17 @@ class Type extends Resource
         [$sProvider, $sFactory] = explode('::', $this->factory);
 
         return Factory::factory($sFactory, $sProvider);
+    }
+
+    // --------------------------------------------------------------------------
+    /**
+     * Returns whether a template can be eited/overriden in admin
+     *
+     * @return bool
+     */
+    public function isEditable(): bool
+    {
+        return $this->is_editable;
     }
 
     // --------------------------------------------------------------------------

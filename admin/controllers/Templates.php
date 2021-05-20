@@ -200,14 +200,20 @@ class Templates extends Base
             'INDEX_CENTERED_FIELDS' => [],
             'INDEX_ROW_BUTTONS'     => [
                 [
-                    'url'   => 'edit/{{slug}}',
-                    'label' => lang('action_edit'),
-                    'class' => 'btn-primary',
+                    'url'     => 'edit/{{slug}}',
+                    'label'   => lang('action_edit'),
+                    'class'   => 'btn-primary',
+                    'enabled' => function (Type $oType) {
+                        return $oType->isEditable();
+                    },
                 ],
                 [
-                    'url'   => 'reset/{{slug}}',
-                    'label' => lang('action_reset'),
-                    'class' => 'btn-warning confirm',
+                    'url'     => 'reset/{{slug}}',
+                    'label'   => lang('action_reset'),
+                    'class'   => 'btn-warning confirm',
+                    'enabled' => function (Type $oType) {
+                        return $oType->isEditable();
+                    },
                 ],
                 [
                     'url'     => 'preview/{{slug}}',
@@ -253,7 +259,7 @@ class Templates extends Base
         $oOverrideModel = Factory::model('TemplateOverride', Constants::MODULE_SLUG);
 
         $oType = $oEmailer->getType($oUri->segment(5));
-        if (empty($oType)) {
+        if (empty($oType) || !$oType->isEditable()) {
             show404();
         }
         $oTypeFactory = $oType->getFactory();

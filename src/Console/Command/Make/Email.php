@@ -419,6 +419,7 @@ class Email extends BaseMaker
             $aFile[] = "        'template_footer' => '" . str_replace("'", "\'", $oType->template_footer) . "',";
             $aFile[] = "        'default_subject' => '" . str_replace("'", "\'", $oType->default_subject) . "',";
             $aFile[] = "        'is_hidden'       => " . ($oType->is_hidden ? 'true' : 'false') . ",";
+            $aFile[] = "        'is_editable'     => " . ($oType->is_editable ? 'true' : 'false') . ",";
             $aFile[] = "        'can_unsubscribe' => " . ($oType->can_unsubscribe ? 'true' : 'false') . ",";
             $aFile[] = "        'factory'         => '" . str_replace("'", "\'", $oType->factory) . "',";
             $aFile[] = '    ],';
