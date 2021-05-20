@@ -46,8 +46,9 @@ class Templates extends Base
     {
         /** @var \Nails\Admin\Factory\Nav $oNavGroup */
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
-        $oNavGroup->setLabel('Email');
-        $oNavGroup->setIcon('fa-paper-plane');
+        $oNavGroup
+            ->setLabel('Email')
+            ->setIcon('fa-paper-plane');
 
         if (userHasPermission('admin:email:templates:edit')) {
             $oNavGroup->addAction('Manage Templates');
