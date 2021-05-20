@@ -184,10 +184,10 @@ class Templates extends Base
             'PERMISSION'            => null,
             'INDEX_PAGE_ID'         => null,
             'INDEX_FIELDS'          => [
-                'Label'       => 'name',
-                'Provided By' => function (Type $oType) {
+                'Label'       => function (Type $oType) {
                     return sprintf(
-                        '<code>%s</code>',
+                        '%s<small>Provided by <code>%s</code></small>',
+                        $oType->name,
                         $oType->component->name
                     );
                 },
