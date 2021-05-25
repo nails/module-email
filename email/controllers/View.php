@@ -73,7 +73,9 @@ class View extends Base
 
             /** @var Asset $oAsset */
             $oAsset = Factory::service('Asset');
-            $oAsset->load('debugger.min.css', Constants::MODULE_SLUG);
+            $oAsset
+                ->clear()
+                ->load('debugger.min.css', Constants::MODULE_SLUG);
 
             Factory::service('View')
                 ->setData([
