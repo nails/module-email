@@ -2,7 +2,7 @@
     <div class="header">
         This page is viewable in development environments only.
         <a href="http://docs.nailsapp.co.uk">
-            <img src="<?=NAILS_ASSETS_URL?>img/nails-logo.png" id="nailsLogo"/>
+            <img src="<?=\Nails\Common\Helper\Logo::nails()?>" id="nailsLogo" />
         </a>
     </div>
     <div class="sub-header">
