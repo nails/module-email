@@ -12,7 +12,7 @@
     </div>
     <div class="body">
         <div class="column variables">
-            <pre><?=print_r($oEmail->data, true);?></pre>
+            <pre><?=json_encode($oEmail->data, JSON_PRETTY_PRINT);?></pre>
         </div>
         <div class="column html">
             <iframe srcdoc="<?=htmlentities($oEmail->body->html)?>"></iframe>
