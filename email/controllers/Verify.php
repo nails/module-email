@@ -15,7 +15,7 @@ use Nails\Common\Exception\NailsException;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Service\Input;
-use Nails\Common\Service\Session;
+use Nails\Common\Service\UserFeedback;
 use Nails\Common\Service\Uri;
 use Nails\Email\Controller\Base;
 use Nails\Factory;
@@ -40,8 +40,8 @@ class Verify extends Base
         $oUri = Factory::service('Uri');
         /** @var Input $oInput */
         $oInput = Factory::service('Input');
-        /** @var Session $oSession */
-        $oSession = Factory::service('Session');
+        /** @var UserFeedback $oUserFeedback */
+        $oUserFeedback = Factory::service('UserFeedback');
         /** @var Auth\Model\User $oUserModel */
         $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
         /** @var Auth\Model\User\Password $oPasswordModel */
@@ -64,10 +64,10 @@ class Verify extends Base
                     $oUserModel->rewardReferral($oUser->id, $oUser->referred_by);
                 }
 
-                $oSession->success('Success! Email verified successfully, thanks!');
+                $oUserFeedback->success('Success! Email verified successfully, thanks!');
 
             } catch (\Exception $e) {
-                $oSession->error('Sorry, we couldn\'t verify your email address. ' . $e->getMessage());
+                $oUserFeedback->error('Sorry, we couldn\'t verify your email address. ' . $e->getMessage());
             }
         }
 
