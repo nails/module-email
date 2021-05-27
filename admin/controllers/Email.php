@@ -14,7 +14,7 @@ namespace Nails\Admin\Email;
 
 use Nails\Admin\Controller\Base;
 use Nails\Admin\Helper;
-use Nails\Common\Service\Session;
+use Nails\Common\Service\UserFeedback;
 use Nails\Email\Constants;
 use Nails\Factory;
 
@@ -177,6 +177,8 @@ class Email extends Base
 
         $oInput   = Factory::service('Input');
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var UserFeedback $oUserFeedback */
+        $oUserFeedback = Factory::service('UserFeedback');
 
         // --------------------------------------------------------------------------
 
@@ -185,16 +187,11 @@ class Email extends Base
         $sReturn  = $oInput->get('return') ? $oInput->get('return') : 'admin/email/index';
 
         if ($oEmailer->resend($iEmailId)) {
-            $sStatus  = 'success';
-            $sMessage = 'Message was resent successfully.';
+            $oUserFeedback->success('Message was resent successfully.');
         } else {
-            $sStatus  = 'error';
-            $sMessage = 'Message failed to resend. ' . $oEmailer->lastError();
+            $oUserFeedback->error('Message failed to resend. ' . $oEmailer->lastError());
         }
 
-        /** @var Session $oSession */
-        $oSession = Factory::service('Session');
-        $oSession->setFlashData($sStatus, $sMessage);
         redirect($sReturn);
     }
 }

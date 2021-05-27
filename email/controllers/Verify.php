@@ -49,8 +49,6 @@ class Verify extends Base
 
         $iId      = $oUri->segment(3);
         $sCode    = $oUri->segment(4);
-        $sStatus  = '';
-        $sMessage = '';
         $oUser    = $oUserModel->getById($iId);
 
         if ($oUser && !$oUser->email_is_verified && $sCode) {
@@ -66,12 +64,10 @@ class Verify extends Base
                     $oUserModel->rewardReferral($oUser->id, $oUser->referred_by);
                 }
 
-                $sStatus  = 'success';
-                $sMessage = 'Success! Email verified successfully, thanks!';
+                $oSession->success('Success! Email verified successfully, thanks!');
 
             } catch (\Exception $e) {
-                $sStatus  = 'error';
-                $sMessage = 'Sorry, we couldn\'t verify your email address. ' . $e->getMessage();
+                $oSession->error('Sorry, we couldn\'t verify your email address. ' . $e->getMessage());
             }
         }
 
@@ -94,13 +90,6 @@ class Verify extends Base
 
         } else {
             $sRedirect = '/';
-        }
-
-        if (!empty($sStatus)) {
-            $oSession->setFlashData(
-                $sStatus,
-                $sMessage
-            );
         }
 
         redirect($sRedirect);

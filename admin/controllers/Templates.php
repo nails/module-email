@@ -20,7 +20,7 @@ use Nails\Common\Exception\ViewNotFoundCaseException;
 use Nails\Common\Exception\ViewNotFoundException;
 use Nails\Common\Service\FormValidation;
 use Nails\Common\Service\Input;
-use Nails\Common\Service\Session;
+use Nails\Common\Service\UserFeedback;
 use Nails\Common\Service\Uri;
 use Nails\Common\Service\View;
 use Nails\Email\Constants;
@@ -349,9 +349,9 @@ class Templates extends Base
                     }
                 }
 
-                /** @var Session $oSession */
-                $oSession = Factory::service('Session');
-                $oSession->setFlashData('success', 'Override updated successfully.');
+                /** @var UserFeedback $oUserFeedback */
+                $oUserFeedback = Factory::service('UserFeedback');
+                $oUserFeedback->success('Override updated successfully.');
                 redirect('admin/email/templates/edit/' . $oType->slug);
 
             } catch (\Exception $e) {
@@ -435,8 +435,8 @@ class Templates extends Base
         $oUri = Factory::service('Uri');
         /** @var Override $oOverrideModel */
         $oOverrideModel = Factory::model('TemplateOverride', Constants::MODULE_SLUG);
-        /** @var Session $oSession */
-        $oSession = Factory::service('Session');
+        /** @var UserFeedback $oUserFeedback */
+        $oUserFeedback = Factory::service('UserFeedback');
 
         $oType = $oEmailer->getType($oUri->segment(5));
         if (empty($oType)) {
@@ -453,13 +453,13 @@ class Templates extends Base
                     );
                 }
 
-                $oSession->setFlashData('success', 'Template reset successfully.');
+                $oUserFeedback->success('Template reset successfully.');
 
             } catch (\Exception $e) {
-                $oSession->setFlashData('error', $e->getMessage());
+                $oUserFeedback->error($e->getMessage());
             }
         } else {
-            $oSession->setFlashData('success', 'Template reset successfully.');
+            $oUserFeedback->success('Template reset successfully.');
         }
 
         redirect('admin/email/templates/index');
@@ -482,8 +482,8 @@ class Templates extends Base
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var Uri $oUri */
         $oUri = Factory::service('Uri');
-        /** @var Session $oSession */
-        $oSession = Factory::service('Session');
+        /** @var UserFeedback $oUserFeedback */
+        $oUserFeedback = Factory::service('UserFeedback');
 
         $oType = $oEmailer->getType($oUri->segment(5));
         if (empty($oType)) {
@@ -511,36 +511,27 @@ class Templates extends Base
             }
 
             if (count($aGeneratedEmails) === 1) {
-                $oSession->setFlashData(
-                    'success',
-                    sprintf(
-                        'Preview email sent successfully. View it in your browser <a href="%s" style="text-decoration: underline" target="_blank:">here</a>.',
-                        reset($aGeneratedEmails)->data->url->viewOnline
-                    )
-                );
+                $oUserFeedback->success(sprintf(
+                    'Preview email sent successfully. View it in your browser <a href="%s" style="text-decoration: underline" target="_blank:">here</a>.',
+                    reset($aGeneratedEmails)->data->url->viewOnline
+                ));
             } else {
-                $oSession->setFlashData(
-                    'success',
-                    sprintf(
-                        'Multiple preview emails sent successfully. View them in your browser:',
-                        implode(
-                            '<br>',
-                            array_map(
-                                function ($oEmail) {
-                                    return $oEmail->data->url->viewOnline;
-                                },
-                                $aGeneratedEmails
-                            )
+                $oUserFeedback->success(sprintf(
+                    'Multiple preview emails sent successfully. View them in your browser:',
+                    implode(
+                        '<br>',
+                        array_map(
+                            function ($oEmail) {
+                                return $oEmail->data->url->viewOnline;
+                            },
+                            $aGeneratedEmails
                         )
                     )
-                );
+                ));
             }
 
         } catch (EmailerException $e) {
-            $oSession->setFlashData(
-                'error',
-                'An error occurred whislt sending the test email: ' . $e->getMessage()
-            );
+            $oUserFeedback->error('An error occurred whislt sending the test email: ' . $e->getMessage());
         }
 
         redirect('admin/email/templates/index');
