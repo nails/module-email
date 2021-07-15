@@ -486,7 +486,7 @@ class Emailer
         $oDb = Factory::service('Database');
         $oDb->where('user_id', $iUSerId);
         $oDb->where('type', $sType);
-        return (bool) $oDb->count_all_results(Config::get('NAILS_DB_PREFIX') . 'user_email_blocker');
+        return (bool) $oDb->count_all_results($this->getEmailBlockerTableName());
     }
 
     // --------------------------------------------------------------------------
@@ -530,7 +530,7 @@ class Emailer
         $oDb->set('user_id', $user_id);
         $oDb->set('type', $type);
         $oDb->set('created', 'NOW()', false);
-        $oDb->insert(Config::get('NAILS_DB_PREFIX') . 'user_email_blocker');
+        $oDb->insert($this->getEmailBlockerTableName());
 
         return (bool) $oDb->affected_rows();
     }
@@ -557,7 +557,7 @@ class Emailer
         $oDb = Factory::service('Database');
         $oDb->where('user_id', $user_id);
         $oDb->where('type', $type);
-        $oDb->delete(Config::get('NAILS_DB_PREFIX') . 'user_email_blocker');
+        $oDb->delete($this->getEmailBlockerTableName());
 
         return (bool) $oDb->affected_rows();
     }
@@ -1801,7 +1801,7 @@ class Emailer
      *
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return $this->oEmailModel->getTableName();
     }
@@ -1813,9 +1813,21 @@ class Emailer
      *
      * @return string
      */
-    public function getTableAlias()
+    public function getTableAlias(): string
     {
         return $this->oEmailModel->getTableAlias();
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the name of the table used for storing email blocks
+     *
+     * @return string
+     */
+    public function getEmailBlockerTableName(): string
+    {
+        return Config::get('NAILS_DB_PREFIX') . 'user_email_blocker';
     }
 
     // --------------------------------------------------------------------------
