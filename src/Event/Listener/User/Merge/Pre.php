@@ -4,9 +4,11 @@ namespace Nails\Email\Event\Listener\User\Merge;
 
 use Nails\Auth;
 use Nails\Common\Events\Subscription;
-use Nails\Email\Constants;
-use Nails\Factory;
 use Nails\Common\Exception\FactoryException;
+use Nails\Common\Service\Database;
+use Nails\Email\Constants;
+use Nails\Email\Service\Emailer;
+use Nails\Factory;
 
 /**
  * Class Pre
@@ -54,9 +56,9 @@ class Pre extends Subscription
      */
     private function deleteEmailBlocks(array $aMergeIds): void
     {
-        /** @var \Nails\Common\Service\Database $oDb */
+        /** @var Database $oDb */
         $oDb = Factory::service('Database');
-        /** @var \Nails\Email\Service\Emailer $oEmailer */
+        /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         $oDb->where_in('user_id', $aMergeIds);
