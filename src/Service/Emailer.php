@@ -702,7 +702,7 @@ class Emailer
         $this->oPhpMailer->isHTML(true);
 
         //  If the email can be unsubscribed from, set the List-Unsubscribe header
-        if ($oEmail->data->url->unsubscribe) {
+        if (!empty($oEmail->data->url->unsubscribe)) {
             $this->oPhpMailer->addCustomHeader('List-Unsubscribe', sprintf(
                 '<%s>',
                 $oEmail->data->url->unsubscribe
@@ -1641,7 +1641,6 @@ class Emailer
         );
 
         //  1-Click Unsubscribe
-        $oEmail->data->url->unsubscribe = '';
         if ($oEmail->type->can_unsubscribe && !empty($oEmail->to->id)) {
 
             /**
