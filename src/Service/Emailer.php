@@ -509,7 +509,7 @@ class Emailer
     {
         $oModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
         return (bool) $oModel->countAll([
-            new Where('id', $iUserId),
+            new Where($oModel->getTableAlias() . '.id', $iUserId),
             new Where('is_suspended', true),
         ]);
     }
@@ -1298,31 +1298,35 @@ class Emailer
     /**
      * Parses a string for <a> links and replaces them with a trackable URL
      *
-     * @param string $body            The string to parse
-     * @param int    $emailId         The email's ID
-     * @param string $emailRef        The email's reference
-     * @param bool   $isHtml          Whether or not this is the HTML version of the email
-     * @param bool   $needsVerified   Whether or not this user needs verified (i.e route tracking links through the
+     * @param string $sBody           The string to parse
+     * @param int    $iEmailId        The email's ID
+     * @param string $sEmailRef       The email's reference
+     * @param bool   $bIsHtml         Whether or not this is the HTML version of the email
+     * @param bool   $bNeedsVerified  Whether or not this user needs verified (i.e route tracking links through the
      *                                verifier)
      *
      * @return string
      */
-    protected function parseLinks($body, $emailId, $emailRef, $isHtml = true, $needsVerified = false)
+    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, bool $bNeedsVerified = false)
     {
         //    Set the class variables for the ID and ref (need those in the callbacks)
-        $this->iGenerateTrackingEmailId       = $emailId;
-        $this->sGenerateTrackingEmailRef      = $emailRef;
-        $this->mGenerateTrackingNeedsVerified = $needsVerified;
+        $this->iGenerateTrackingEmailId       = $iEmailId;
+        $this->sGenerateTrackingEmailRef      = $sEmailRef;
+        $this->mGenerateTrackingNeedsVerified = $bNeedsVerified;
 
         // --------------------------------------------------------------------------
 
-        if ($isHtml) {
-            $pattern = '/<a .*?(href="(https?.*?|\/.*?)").*?>(.*?)<\/a>/';
-            $body    = preg_replace_callback($pattern, [$this, 'processLinkHtml'], $body);
-        } else {
-            $pattern = '/(https?:\/\/|\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/';
-            $body    = preg_replace_callback($pattern, [$this, 'processLinkUrl'], $body);
-        }
+        $sBody = $bIsHtml
+            ? preg_replace_callback(
+                '/<a .*?(href="(https?:\/\/[^"]+)").*?>((.|\n)*?)<\/a>/',
+                [$this, 'processLinkHtml'],
+                $sBody
+            )
+            : preg_replace_callback(
+                '/https?:\/\/[^ \n]+/',
+                [$this, 'processLinkUrl'],
+                $sBody
+            );
 
         // --------------------------------------------------------------------------
 
@@ -1333,25 +1337,29 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        return $body;
+        return $sBody;
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Processes a link found by _parse_links()
+     * Processes a link found by parseLinks()
      *
-     * @param array $link The link elements
+     * @param array $aLink The link elements
      *
-     * @return mixed|string
+     * @return string
      * @throws FactoryException
      * @throws HostNotKnownException
      */
-    protected function processLinkHtml($link)
+    protected function processLinkHtml(array $aLink): string
     {
-        $_html  = !empty($link[0]) ? $link[0] : '';
-        $_url   = !empty($link[2]) ? $link[2] : '';
-        $_title = isset($link[3]) && strip_tags($link[3]) ? strip_tags($link[3]) : $_url;
+        $sHtml  = !empty($aLink[0]) ? $aLink[0] : '';
+        $sUrl   = !empty($aLink[2]) ? $aLink[2] : '';
+        $sTitle = !empty($aLink[3]) ? $aLink[3] : '';
+
+        $sTitle = strip_tags($sTitle);
+        $sTitle = trim($sTitle);
+        $sTitle = $sTitle ?: $sUrl;
 
         // --------------------------------------------------------------------------
 
@@ -1360,11 +1368,11 @@ class Emailer
          * otherwise it's not worth it/possible to accurately replace the tag
          */
 
-        if ($_html && $_url) {
-            $_html = $this->processLinkGenerate($_html, $_url, $_title, true);
+        if ($sHtml && $sUrl) {
+            $sHtml = $this->processLinkGenerate($sHtml, $sUrl, $sTitle, true);
         }
 
-        return $_html;
+        return $sHtml;
     }
 
     // --------------------------------------------------------------------------
@@ -1372,27 +1380,26 @@ class Emailer
     /**
      * Process the URL of a link found by processLinkHtml()
      *
-     * @param array $url The URL elements
+     * @param array $aUrl The URL elements
      *
      * @return string
-     * @return mixed|string
      * @throws FactoryException
      * @throws HostNotKnownException
      */
-    protected function processLinkUrl($url)
+    protected function processLinkUrl(array $aUrl): string
     {
-        $_html  = !empty($url[0]) ? $url[0] : '';
-        $_url   = $_html;
-        $_title = $_html;
+        $sHtml  = !empty($aUrl[0]) ? $aUrl[0] : '';
+        $sUrl   = $sHtml;
+        $sTitle = null;
 
         // --------------------------------------------------------------------------
 
         //  Only process if there's a URL to process
-        if ($_html && $_url) {
-            $_html = $this->processLinkGenerate($_html, $_url, $_title, false);
+        if ($sHtml && $sUrl) {
+            $sHtml = $this->processLinkGenerate($sHtml, $sUrl, $sTitle, false);
         }
 
-        return $_html;
+        return $sHtml;
     }
 
     // --------------------------------------------------------------------------
@@ -1400,20 +1407,20 @@ class Emailer
     /**
      * Generate a tracking URL
      *
-     * @param string $html    The Link HTML
-     * @param string $url     The Link's URL
-     * @param string $title   The Link's Title
-     * @param bool   $is_html Whether this is HTML or not
+     * @param string $sHtml   The Link HTML
+     * @param string $sUrl    The Link's URL
+     * @param string $sTitle  The Link's Title
+     * @param bool   $bIsHtml Whether this is HTML or not
      *
      * @return string
      * @throws HostNotKnownException
      * @throws FactoryException
      */
-    protected function processLinkGenerate($html, $url, $title, $is_html)
+    protected function processLinkGenerate(string $sHtml, string $sUrl, ?string $sTitle, bool $bIsHtml): string
     {
         //  Ensure URLs have a domain
-        if (preg_match('/^\//', $url)) {
-            $url = $this->getDomain() . $url;
+        if (preg_match('/^\//', $sUrl)) {
+            $sUrl = $this->getDomain() . $sUrl;
         }
 
         /**
@@ -1421,12 +1428,12 @@ class Emailer
          * Firstly, check this URL hasn't been processed already (for this email)
          */
 
-        if (isset($this->aTrackLinkCache[md5($url)])) {
+        if (isset($this->aTrackLinkCache[md5($sUrl)])) {
 
-            $trackingUrl = $this->aTrackLinkCache[md5($url)];
+            $trackingUrl = $this->aTrackLinkCache[md5($sUrl)];
 
             //  Replace the URL and return the new tag
-            $html = str_replace($url, $trackingUrl, $html);
+            $sHtml = str_replace($sUrl, $trackingUrl, $sHtml);
 
         } else {
 
@@ -1444,20 +1451,20 @@ class Emailer
             if ($this->mGenerateTrackingNeedsVerified) {
 
                 //  Make sure we're not applying this to an activation URL
-                if (!preg_match('#email/verify/[0-9]*?/(.*?)#', $url)) {
+                if (!preg_match('#email/verify/[0-9]*?/(.*?)#', $sUrl)) {
 
                     $_user_id = $this->mGenerateTrackingNeedsVerified['id'];
                     $_code    = $this->mGenerateTrackingNeedsVerified['code'];
-                    $_return  = urlencode($url);
+                    $_return  = urlencode($sUrl);
 
                     $_url = siteUrl('email/verify/' . $_user_id . '/' . $_code . '?return_to=' . $_return);
 
                 } else {
-                    $_url = $url;
+                    $_url = $sUrl;
                 }
 
             } else {
-                $_url = $url;
+                $_url = $sUrl;
             }
 
             /** @var \DateTime $oNow */
@@ -1467,9 +1474,9 @@ class Emailer
             $iLinkId = $oLinkModel->create([
                 'email_id' => $this->iGenerateTrackingEmailId,
                 'url'      => $_url,
-                'title'    => $title,
+                'title'    => $sTitle,
                 'created'  => $oNow->format('Y-m-d H:i:s'),
-                'id_html'  => $is_html,
+                'is_html'  => $bIsHtml,
             ]);
 
             if ($iLinkId) {
@@ -1483,20 +1490,22 @@ class Emailer
                     $iLinkId
                 ));
 
-                $this->aTrackLinkCache[md5($url)] = $sTrackingUrl;
+                $this->aTrackLinkCache[md5($sUrl)] = $sTrackingUrl;
 
                 // --------------------------------------------------------------------------
 
                 /**
-                 * Replace the URL and return the new tag. $url in quotes so we only replace
+                 * Replace the URL and return the new tag. $sUrl in quotes so we only replace
                  * hyperlinks and not something else, such as an image's URL
                  */
 
-                $html = str_replace('"' . $url . '"', $sTrackingUrl, $html);
+                $sHtml = $bIsHtml
+                    ? str_replace('"' . $sUrl . '"', $sTrackingUrl, $sHtml)
+                    : str_replace($sUrl, $sTrackingUrl, $sHtml);
             }
         }
 
-        return $html;
+        return $sHtml;
     }
 
     // --------------------------------------------------------------------------
@@ -1512,6 +1521,7 @@ class Emailer
     {
         if (!empty($this->sDomain)) {
             return $this->sDomain;
+
         } elseif (siteUrl() === '/') {
             /** @var Input $oInput */
             $oInput    = Factory::service('Input');
@@ -1519,14 +1529,16 @@ class Emailer
             $sProtocol = $oInput->server('REQUEST_SCHEME') ?: 'http';
             if (empty($sHost)) {
                 throw new HostNotKnownException('Failed to resolve host; email links will be incomplete.');
-            } else {
-                $this->sDomain = $sProtocol . '://' . $sHost . '/';
             }
+
+            $this->sDomain = $sProtocol . '://' . $sHost . '/';
+
         } else {
             $this->sDomain = siteUrl();
         }
 
         $this->sDomain = rtrim($this->sDomain, '/');
+
         return $this->sDomain;
     }
 
