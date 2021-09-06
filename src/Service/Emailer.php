@@ -21,12 +21,14 @@ use Nails\Common\Factory\Component;
 use Nails\Common\Helper\Model\Where;
 use Nails\Common\Service\Database;
 use Nails\Common\Service\Encrypt;
+use Nails\Common\Service\Event;
 use Nails\Common\Service\Input;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
 use Nails\Config;
 use Nails\Email\Constants;
+use Nails\Email\Events;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Exception\HostNotKnownException;
 use Nails\Email\Model\Email;
@@ -1219,11 +1221,16 @@ class Emailer
      */
     public function trackOpen(string $sRef): self
     {
-        $oEmail = $this->getByRef($sRef);
+        $oEmail = $this->oEmailModel->getByRef($sRef);
+
         if ($oEmail) {
 
             /** @var Database $oDb */
             $oDb = Factory::service('Database');
+            /** @var Event $oEvent */
+            $oEvent = Factory::service('Event');
+            /** @var Email\Track\Open $oTrackModel */
+            $oTrackModel = Factory::model('EmailTrackOpen', Constants::MODULE_SLUG);
             /** @var \DateTime $oNow */
             $oNow = Factory::factory('DateTime');
 
@@ -1232,12 +1239,17 @@ class Emailer
                 ->where('id', $oEmail->id)
                 ->update($this->oEmailModel->getTableName());
 
-            $oTrackModel = Factory::model('EmailTrackOpen', Constants::MODULE_SLUG);
             $oTrackModel->create([
                 'email_id' => $oEmail->id,
                 'user_id'  => activeUser('id') ?: null,
                 'created'  => $oNow->format('Y-m-d H:i:s'),
             ]);
+
+            $oEvent->trigger(
+                Events::EMAIL_TRACK_OPEN,
+                Events::getEventNamespace(),
+                [$oEmail]
+            );
         }
 
         return $this;
@@ -1257,27 +1269,31 @@ class Emailer
      */
     public function trackLink(string $sRef, int $iLinkId): ?string
     {
-        $oEmail = $this->getByRef($sRef);
+        $oEmail = $this->oEmailModel->getByRef($sRef);
 
         if ($oEmail) {
 
+            /** @var Event $oEvent */
+            $oEvent = Factory::service('Event');
+            /** @var Database $oDb */
+            $oDb = Factory::service('Database');
+            /** @var Email\Link $oLinkModel */
             $oLinkModel = Factory::model('EmailLink', Constants::MODULE_SLUG);
+            /** @var Email\Track\Link $oTrackModel */
+            $oTrackModel = Factory::model('EmailTrackLink', Constants::MODULE_SLUG);
+            /** @var \DateTime $oNow */
+            $oNow = Factory::factory('DateTime');
+
             /** @var \Nails\Email\Resource\Email\Link $oLink */
             $oLink = $oLinkModel->getById($iLinkId);
 
             if ($oLink && $oLink->email_id === $oEmail->id) {
-
-                /** @var Database $oDb */
-                $oDb = Factory::service('Database');
-                /** @var \DateTime $oNow */
-                $oNow = Factory::factory('DateTime');
 
                 $oDb
                     ->set('link_click_count', 'link_click_count + 1', false)
                     ->where('id', $oEmail->id)
                     ->update($this->oEmailModel->getTableName());
 
-                $oTrackModel = Factory::model('EmailTrackLink', Constants::MODULE_SLUG);
                 $oTrackModel->create([
                     'email_id' => $oEmail->id,
                     'link_id'  => $oLink->id,
@@ -1285,12 +1301,15 @@ class Emailer
                     'created'  => $oNow->format('Y-m-d H:i:s'),
                 ]);
 
-                //  Return the URL to go to
-                return $oLink->url;
+                $oEvent->trigger(
+                    Events::EMAIL_TRACK_LINK,
+                    Events::getEventNamespace(),
+                    [$oEmail]
+                );
             }
         }
 
-        return null;
+        return $oLink->url ?? null;
     }
 
     // --------------------------------------------------------------------------
