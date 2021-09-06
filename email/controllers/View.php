@@ -34,24 +34,23 @@ class View extends Base
         $oUri = Factory::service('Uri');
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-        $sRef     = $oUri->segment(3);
-        $sGuid    = $oUri->segment(4);
-        $sHash    = $oUri->segment(5);
+
+        $sRef  = (string) $oUri->segment(3);
+        $sGuid = (string) $oUri->segment(4);
+        $sHash = (string) $oUri->segment(5);
 
         // --------------------------------------------------------------------------
 
         //  Fetch the email
-        if (is_numeric($sRef)) {
-            $oEmail = $oEmailer->getById($sRef);
-        } else {
-            $oEmail = $oEmailer->getByRef($sRef);
-        }
+        $oEmail = is_numeric($sRef)
+            ? $oEmailer->getById($sRef)
+            : $oEmailer->getByRef($sRef);
 
         if (!$oEmail || !$oEmailer->validateHash($oEmail->ref, $sGuid, $sHash)) {
 
             /**
              * Using this to generate a JSON 404 as the standard show404() will attempt to
-             * render the module's header/footer and it looks like a btoken email template.
+             * render the module's header/footer and it looks like a broken email template.
              */
 
             /** @var HttpCodes $oHttpCodes */

@@ -1,60 +1,107 @@
 <?php
 
+use Nails\Email\Service;
+use Nails\Email\Model;
+use Nails\Email\Resource;
+use Nails\Email\Factory;
+
 return [
     'services'  => [
-        'Emailer' => function () {
+        'Emailer' => function (): Service\Emailer {
             if (class_exists('\App\Email\Service\Emailer')) {
                 return new \App\Email\Service\Emailer();
             } else {
-                return new \Nails\Email\Service\Emailer();
+                return new Service\Emailer();
             }
         },
     ],
     'models'    => [
-        'Email'            => function () {
+        'Email'            => function (): Model\Email {
             if (class_exists('\App\Email\Model\Email')) {
                 return new \App\Email\Model\Email();
             } else {
-                return new \Nails\Email\Model\Email();
+                return new Model\Email();
             }
         },
-        'TemplateOverride' => function () {
+        'EmailLink'        => function (): Model\Email\Link {
+            if (class_exists('\App\Email\Model\Email\Link')) {
+                return new \App\Email\Model\Email\Link();
+            } else {
+                return new Model\Email\Link();
+            }
+        },
+        'EmailTrackLink'   => function (): Model\Email\Track\Link {
+            if (class_exists('\App\Email\Model\Email\Track\Link')) {
+                return new \App\Email\Model\Email\Track\Link();
+            } else {
+                return new Model\Email\Track\Link();
+            }
+        },
+        'EmailTrackOpen'   => function (): Model\Email\Track\Open {
+            if (class_exists('\App\Email\Model\Email\Track\Open')) {
+                return new \App\Email\Model\Email\Track\Open();
+            } else {
+                return new Model\Email\Track\Open();
+            }
+        },
+        'TemplateOverride' => function (): Model\Template\Override {
             if (class_exists('\App\Email\Model\Template\Override')) {
                 return new \App\Email\Model\Template\Override();
             } else {
-                return new \Nails\Email\Model\Template\Override();
+                return new Model\Template\Override();
             }
         },
     ],
     'resources' => [
-        'Email'            => function ($mObj) {
+        'Email'            => function ($mObj): Resource\Email {
             if (class_exists('\App\Email\Resource\Email')) {
                 return new \App\Email\Resource\Email($mObj);
             } else {
-                return new \Nails\Email\Resource\Email($mObj);
+                return new Resource\Email($mObj);
             }
         },
-        'TemplateOverride' => function ($mObj) {
+        'EmailLink'        => function ($mObj): Resource\Email\Link {
+            if (class_exists('\App\Email\Resource\Email\Link')) {
+                return new \App\Email\Resource\Email\Link($mObj);
+            } else {
+                return new Resource\Email\Link($mObj);
+            }
+        },
+        'EmailTrackLink'   => function ($mObj): Resource\Email\Track\Link {
+            if (class_exists('\App\Email\Resource\Email\Track\Link')) {
+                return new \App\Email\Resource\Email\Track\Link($mObj);
+            } else {
+                return new Resource\Email\Track\Link($mObj);
+            }
+        },
+        'EmailTrackOpen'   => function ($mObj): Resource\Email\Track\Open {
+            if (class_exists('\App\Email\Resource\Email\Track\Open')) {
+                return new \App\Email\Resource\Email\Track\Open($mObj);
+            } else {
+                return new Resource\Email\Track\Open($mObj);
+            }
+        },
+        'TemplateOverride' => function ($mObj): Resource\Template\Override {
             if (class_exists('\App\Email\Resource\Template\Override')) {
                 return new \App\Email\Resource\Template\Override($mObj);
             } else {
-                return new \Nails\Email\Resource\Template\Override($mObj);
+                return new Resource\Template\Override($mObj);
             }
         },
-        'Type'             => function ($mObj) {
+        'Type'             => function ($mObj): Resource\Type {
             if (class_exists('\App\Email\Resource\Type')) {
                 return new \App\Email\Resource\Type($mObj);
             } else {
-                return new \Nails\Email\Resource\Type($mObj);
+                return new Resource\Type($mObj);
             }
         },
     ],
     'factories' => [
-        'EmailTest' => function () {
+        'EmailTest' => function (): Factory\Email\Test {
             if (class_exists('\App\Email\Factory\Email\Test')) {
                 return new \App\Email\Factory\Email\Test();
             } else {
-                return new \Nails\Email\Factory\Email\Test();
+                return new Factory\Email\Test();
             }
         },
     ],
