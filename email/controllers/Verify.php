@@ -47,9 +47,11 @@ class Verify extends Base
         /** @var Auth\Model\User\Password $oPasswordModel */
         $oPasswordModel = Factory::model('UserPassword', Auth\Constants::MODULE_SLUG);
 
-        $iId      = $oUri->segment(3);
-        $sCode    = $oUri->segment(4);
-        $oUser    = $oUserModel->getById($iId);
+        $iId   = $oUri->segment(3);
+        $sCode = $oUri->segment(4);
+
+        /** @var \Nails\Auth\Resource\User $oUser */
+        $oUser = $oUserModel->getById($iId);
 
         if ($oUser && !$oUser->email_is_verified && $sCode) {
 

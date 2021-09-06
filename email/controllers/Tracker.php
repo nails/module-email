@@ -12,6 +12,7 @@
 
 use Nails\Common\Service\Uri;
 use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
 use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
 use Nails\Email\Service\Emailer;
@@ -26,6 +27,7 @@ class Tracker extends Base
      * Track an email open
      *
      * @throws FactoryException
+     * @throws ModelException
      */
     protected function trackOpen()
     {
@@ -33,10 +35,12 @@ class Tracker extends Base
         $oUri = Factory::service('Uri');
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var \DateTime $oNow */
+        $oNow = Factory::factory('DateTime');
 
-        $sRef  = $oUri->segment(3);
-        $sGuid = $oUri->segment(4);
-        $sHash = $oUri->segment(5);
+        $sRef  = (string) $oUri->segment(3);
+        $sGuid = (string) $oUri->segment(4);
+        $sHash = (string) $oUri->segment(5);
 
         // --------------------------------------------------------------------------
 
@@ -58,7 +62,7 @@ class Tracker extends Base
 
         header('Content-Type: image/gif');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-        header('Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT');
+        header('Last-Modified: ' . $oNow->format('D, d M Y H:i:s') . ' GMT');
         header('Cache-Control: no-store, no-cache, must-revalidate');
         header('Cache-Control: post-check=0, pre-check=0', false);
         header('Pragma: no-cache');
@@ -81,6 +85,7 @@ class Tracker extends Base
      * Track a link
      *
      * @throws FactoryException
+     * @throws ModelException
      */
     protected function trackLink()
     {
@@ -89,9 +94,9 @@ class Tracker extends Base
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
-        $sRef    = $oUri->segment(4);
-        $sGuid   = $oUri->segment(5);
-        $sHash   = $oUri->segment(6);
+        $sRef    = (string) $oUri->segment(4);
+        $sGuid   = (string) $oUri->segment(5);
+        $sHash   = (string) $oUri->segment(6);
         $iLinkId = (int) $oUri->segment(7) ?: null;
 
         // --------------------------------------------------------------------------
@@ -118,10 +123,11 @@ class Tracker extends Base
      * @param $sMethod
      *
      * @throws FactoryException
+     * @throws ModelException
      */
     public function _remap($sMethod)
     {
-        if ($sMethod == 'link') {
+        if ($sMethod === 'link') {
             $this->trackLink();
         } else {
             $this->trackOpen();

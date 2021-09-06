@@ -1,6 +1,6 @@
 <?php
 
-namespace Nails\Email\Model;
+namespace Nails\Email\Model\Email\Track;
 
 use Nails\Common\Model\Base;
 use Nails\Email\Constants;
@@ -8,23 +8,23 @@ use Nails\Email\Constants;
 /**
  * Class Email
  *
- * @package Nails\Email\Model
+ * @package Nails\Email\Model\Email\Track
  */
-class Email extends Base
+class Open extends Base
 {
     /**
      * The table this model represents
      *
      * @var string
      */
-    const TABLE = NAILS_DB_PREFIX . 'email_archive';
+    const TABLE = NAILS_DB_PREFIX . 'email_archive_track_open';
 
     /**
      * The name of the resource to use (as passed to \Nails\Factory::resource())
      *
      * @var string
      */
-    const RESOURCE_NAME = 'Email';
+    const RESOURCE_NAME = 'EmailTrackOpen';
 
     /**
      * The provider of the resource to use (as passed to \Nails\Factory::resource())
@@ -46,20 +46,4 @@ class Email extends Base
      * @var bool
      */
     const AUTO_SET_USER = false;
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns an email by it's ref
-     *
-     * @param string $sRef  The email's ref
-     * @param array  $aData Any data to pass to getAll()
-     *
-     * @return \Nails\Email\Resource\Email|null
-     * @throws \Nails\Common\Exception\ModelException
-     */
-    public function getByRef(string $sRef, array $aData = []): ?\Nails\Email\Resource\Email
-    {
-        return $this->getByColumn('ref', $sRef, $aData);
-    }
 }
