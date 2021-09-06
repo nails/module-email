@@ -46,4 +46,20 @@ class Email extends Base
      * @var bool
      */
     const AUTO_SET_USER = false;
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an email by it's ref
+     *
+     * @param string $sRef  The email's ref
+     * @param array  $aData Any data to pass to getAll()
+     *
+     * @return \Nails\Email\Resource\Email|null
+     * @throws \Nails\Common\Exception\ModelException
+     */
+    public function getByRef(string $sRef, array $aData = []): ?\Nails\Email\Resource\Email
+    {
+        return $this->getByColumn('ref', $sRef, $aData);
+    }
 }
