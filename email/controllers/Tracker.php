@@ -12,6 +12,7 @@
 
 use Nails\Common\Service\Uri;
 use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
 use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
 use Nails\Email\Service\Emailer;
@@ -26,6 +27,7 @@ class Tracker extends Base
      * Track an email open
      *
      * @throws FactoryException
+     * @throws ModelException
      */
     protected function trackOpen()
     {
@@ -83,6 +85,7 @@ class Tracker extends Base
      * Track a link
      *
      * @throws FactoryException
+     * @throws ModelException
      */
     protected function trackLink()
     {
@@ -120,10 +123,11 @@ class Tracker extends Base
      * @param $sMethod
      *
      * @throws FactoryException
+     * @throws ModelException
      */
     public function _remap($sMethod)
     {
-        if ($sMethod == 'link') {
+        if ($sMethod === 'link') {
             $this->trackLink();
         } else {
             $this->trackOpen();

@@ -12,9 +12,11 @@
 
 use Nails\Auth;
 use Nails\Auth\Model\User;
+use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
+use Nails\Common\Exception\ViewNotFoundException;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Service\Input;
-use Nails\Config;
 use Nails\Email\Constants;
 use Nails\Email\Controller\Base;
 use Nails\Email\Service\Emailer;
@@ -29,6 +31,9 @@ class Unsubscribe extends Base
      * Renders the subscribe/unsubscribe page
      *
      * @return void
+     * @throws FactoryException
+     * @throws ModelException
+     * @throws ViewNotFoundException
      */
     public function index()
     {
@@ -36,6 +41,8 @@ class Unsubscribe extends Base
         $oInput = Factory::service('Input');
         /** @var Encrypt $oEncrypt */
         $oEncrypt = Factory::service('Encrypt');
+        /** @var \Nails\Common\Service\View $oView */
+        $oView = Factory::service('View');
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var User $oUserModel */
@@ -46,15 +53,22 @@ class Unsubscribe extends Base
             show404();
         }
 
-        $aToken = $oEncrypt->decode($sToken);
-        $aToken = explode('|', $aToken);
+        try {
 
-        if (count($aToken) != 3) {
+            $aToken = $oEncrypt->decode($sToken);
+            $aToken = explode('|', $aToken);
+
+            if (count($aToken) != 3) {
+                show404();
+            }
+
+        } catch (Throwable $e) {
             show404();
         }
 
         [$sType, $sRef, $iUserId] = $aToken;
 
+        /** @var \Nails\Auth\Resource\User $oUser */
         $oUser = $oUserModel->getById($iUserId);
         if (empty($oUser)) {
             show404();
@@ -68,21 +82,18 @@ class Unsubscribe extends Base
         // --------------------------------------------------------------------------
 
         //  All seems above board, action the request
-        if ($oInput->get('undo')) {
-            if ($oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
-                $oEmailer->subscribeUser($oUser->id, $sType);
-            }
-        } else {
-            if (!$oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
-                $oEmailer->unsubscribeUser($oUser->id, $sType);
-            }
+        if ($oInput->get('undo') && $oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
+            $oEmailer->subscribeUser($oUser->id, $sType);
+
+        } elseif (!$oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
+            $oEmailer->unsubscribeUser($oUser->id, $sType);
         }
 
         // --------------------------------------------------------------------------
 
         $this->loadStyles(NAILS_APP_PATH . 'application/modules/email/views/utilities/unsubscribe.php');
 
-        Factory::service('View')
+        $oView
             ->load([
                 'structure/header/blank',
                 'email/utilities/unsubscribe',
@@ -96,7 +107,10 @@ class Unsubscribe extends Base
      * Map all requests to index
      *
      * @return  void
-     **/
+     * @throws FactoryException
+     * @throws ModelException
+     * @throws ViewNotFoundException
+     */
     public function _remap()
     {
         $this->index();

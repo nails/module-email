@@ -1447,12 +1447,14 @@ class Emailer
          * Firstly, check this URL hasn't been processed already (for this email)
          */
 
-        if (isset($this->aTrackLinkCache[md5($sUrl)])) {
-
-            $trackingUrl = $this->aTrackLinkCache[md5($sUrl)];
+        if (array_key_exists(md5($sUrl), $this->aTrackLinkCache)) {
 
             //  Replace the URL and return the new tag
-            $sHtml = str_replace($sUrl, $trackingUrl, $sHtml);
+            $sHtml = str_replace(
+                $sUrl,
+                $this->aTrackLinkCache[md5($sUrl)],
+                $sHtml
+            );
 
         } else {
 
@@ -1471,19 +1473,13 @@ class Emailer
 
                 //  Make sure we're not applying this to an activation URL
                 if (!preg_match('#email/verify/[0-9]*?/(.*?)#', $sUrl)) {
-
-                    $_user_id = $this->mGenerateTrackingNeedsVerified['id'];
-                    $_code    = $this->mGenerateTrackingNeedsVerified['code'];
-                    $_return  = urlencode($sUrl);
-
-                    $_url = siteUrl('email/verify/' . $_user_id . '/' . $_code . '?return_to=' . $_return);
-
-                } else {
-                    $_url = $sUrl;
+                    $sUrl = siteUrl(sprintf(
+                        'email/verify/%s/%s?return_to=%s',
+                        $this->mGenerateTrackingNeedsVerified['id'],
+                        $this->mGenerateTrackingNeedsVerified['code'],
+                        urlencode($sUrl)
+                    ));
                 }
-
-            } else {
-                $_url = $sUrl;
             }
 
             /** @var \DateTime $oNow */
@@ -1492,7 +1488,7 @@ class Emailer
 
             $iLinkId = $oLinkModel->create([
                 'email_id' => $this->iGenerateTrackingEmailId,
-                'url'      => $_url,
+                'url'      => $sUrl,
                 'title'    => $sTitle,
                 'created'  => $oNow->format('Y-m-d H:i:s'),
                 'is_html'  => $bIsHtml,
