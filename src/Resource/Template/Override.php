@@ -18,4 +18,25 @@ use Nails\Common\Resource\Entity;
  */
 class Override extends Entity
 {
+    /** @var string|null */
+    public $slug;
+
+    /** @var string|null */
+    public $subject;
+
+    /** @var string|null */
+    public $subject_original_hash;
+
+    /** @var string|null */
+    public $body_html;
+
+    /** @var string|null */
+    public $body_html_original_hash;
+
+    /** @var string|null */
+    public $body_text;
+
+    /** @var string|null */
+    public $body_text_original_hash;
+
 }
