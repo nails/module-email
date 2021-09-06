@@ -9,7 +9,7 @@ Trouble viewing this email? View it online here:
 
 {{#url.unsubscribe}}
 Rather not receive this type of email? Unsubscribe here:
-{{url.unsubscribe}}
+{{{url.unsubscribe}}}
 {{/url.unsubscribe}}
 
 Email Ref: {{emailRef}}

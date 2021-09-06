@@ -9,7 +9,7 @@
                                             <a href="{{url.viewOnline}}">View this E-mail Online</a>
                                         {{/url.viewOnline}}
                                         {{#url.unsubscribe}}
-                                            <a href="{{url.unsubscribe}}">Unsubscribe</a>
+                                            <a href="{{{url.unsubscribe}}}">Unsubscribe</a>
                                         {{/url.unsubscribe}}
                                 </td>
                             </tr>
