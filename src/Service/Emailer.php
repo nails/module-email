@@ -1304,7 +1304,7 @@ class Emailer
                 $oEvent->trigger(
                     Events::EMAIL_TRACK_LINK,
                     Events::getEventNamespace(),
-                    [$oEmail]
+                    [$oLink]
                 );
             }
         }

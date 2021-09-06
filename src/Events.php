@@ -30,7 +30,7 @@ class Events extends Base
     /**
      * Fired when an email link is tracked
      *
-     * @param \Nails\Email\Resource\Email $oEmail The link which was clicked
+     * @param \Nails\Email\Resource\Email\Link $oLink The link which was clicked
      */
     const EMAIL_TRACK_LINK = 'EMAIL:TRACK:LINK';
 }
