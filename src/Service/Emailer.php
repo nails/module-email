@@ -89,7 +89,7 @@ class Emailer
     protected $sGenerateTrackingEmailRef;
 
     /** @var mixed */
-    protected $mGenerateTrackingNeedsVerified;
+    protected $aGenerateTrackingNeedsVerified;
 
     /** @var string */
     protected $sDomain;
@@ -629,12 +629,12 @@ class Emailer
         $this->aTrackLinkCache = [];
 
         if ($oEmail->to->id && !$oEmail->to->email_verified) {
-            $mNeedsVerified = [
+            $aVerify = [
                 'id'   => $oEmail->to->id,
                 'code' => $oEmail->to->email_verified_code,
             ];
         } else {
-            $mNeedsVerified = false;
+            $aVerify = null;
         }
 
         $oEmail->body->html = $this->parseLinks(
@@ -642,7 +642,7 @@ class Emailer
             $oEmail->id,
             $oEmail->ref,
             true,
-            $mNeedsVerified
+            $aVerify
         );
 
         $oEmail->body->text = $this->parseLinks(
@@ -650,7 +650,7 @@ class Emailer
             $oEmail->id,
             $oEmail->ref,
             false,
-            $mNeedsVerified
+            $aVerify
         );
 
         // --------------------------------------------------------------------------
@@ -1317,21 +1317,20 @@ class Emailer
     /**
      * Parses a string for <a> links and replaces them with a trackable URL
      *
-     * @param string $sBody           The string to parse
-     * @param int    $iEmailId        The email's ID
-     * @param string $sEmailRef       The email's reference
-     * @param bool   $bIsHtml         Whether or not this is the HTML version of the email
-     * @param bool   $bNeedsVerified  Whether or not this user needs verified (i.e route tracking links through the
-     *                                verifier)
+     * @param string   $sBody          The string to parse
+     * @param int      $iEmailId       The email's ID
+     * @param string   $sEmailRef      The email's reference
+     * @param bool     $bIsHtml        Whether or not this is the HTML version of the email
+     * @param string[] $aVerify Whether or not this user needs verified (i.e route tracking links through the verifier), false if not required, array if required
      *
      * @return string
      */
-    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, bool $bNeedsVerified = false)
+    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, array $aVerify = null)
     {
         //    Set the class variables for the ID and ref (need those in the callbacks)
         $this->iGenerateTrackingEmailId       = $iEmailId;
         $this->sGenerateTrackingEmailRef      = $sEmailRef;
-        $this->mGenerateTrackingNeedsVerified = $bNeedsVerified;
+        $this->aGenerateTrackingNeedsVerified = $aVerify;
 
         // --------------------------------------------------------------------------
 
@@ -1349,10 +1348,10 @@ class Emailer
 
         // --------------------------------------------------------------------------
 
-        //    And null these again, so nothing gets confused
+        //  And null these again, so nothing gets confused
         $this->iGenerateTrackingEmailId       = null;
         $this->sGenerateTrackingEmailRef      = null;
-        $this->mGenerateTrackingNeedsVerified = null;
+        $this->aGenerateTrackingNeedsVerified = null;
 
         // --------------------------------------------------------------------------
 
@@ -1469,14 +1468,14 @@ class Emailer
              * do this for the actual email verifier...
              */
 
-            if ($this->mGenerateTrackingNeedsVerified) {
+            if ($this->aGenerateTrackingNeedsVerified) {
 
                 //  Make sure we're not applying this to an activation URL
                 if (!preg_match('#email/verify/[0-9]*?/(.*?)#', $sUrl)) {
                     $sUrl = siteUrl(sprintf(
                         'email/verify/%s/%s?return_to=%s',
-                        $this->mGenerateTrackingNeedsVerified['id'],
-                        $this->mGenerateTrackingNeedsVerified['code'],
+                        $this->aGenerateTrackingNeedsVerified['id'],
+                        $this->aGenerateTrackingNeedsVerified['code'],
                         urlencode($sUrl)
                     ));
                 }
