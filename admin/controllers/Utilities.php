@@ -126,11 +126,14 @@ class Utilities extends Base
                     ->data($oEmail->getTestData())
                     ->send();
 
-                $this->data['success'] = '<strong>Done!</strong> Test email successfully sent to <strong>';
-                $this->data['success'] .= $oInput->post('recipient') . '</strong> at ' . toUserDatetime();
+                $this->oUserFeedback->success(sprintf(
+                    '<strong>Done!</strong> Test email successfully sent to <strong>%s</strong> at %s.',
+                    $oInput->post('recipient'),
+                    toUserDatetime()
+                ));
 
             } catch (\Exception $e) {
-                $this->data['error'] = $e->getMessage();
+                $this->oUserFeedback->error($e->getMessage());
             }
         }
 

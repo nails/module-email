@@ -20,7 +20,6 @@ use Nails\Common\Exception\ViewNotFoundCaseException;
 use Nails\Common\Exception\ViewNotFoundException;
 use Nails\Common\Service\FormValidation;
 use Nails\Common\Service\Input;
-use Nails\Common\Service\UserFeedback;
 use Nails\Common\Service\Uri;
 use Nails\Common\Service\View;
 use Nails\Email\Constants;
@@ -349,13 +348,11 @@ class Templates extends Base
                     }
                 }
 
-                /** @var UserFeedback $oUserFeedback */
-                $oUserFeedback = Factory::service('UserFeedback');
-                $oUserFeedback->success('Override updated successfully.');
+                $this->oUserFeedback->success('Override updated successfully.');
                 redirect('admin/email/templates/edit/' . $oType->slug);
 
             } catch (\Exception $e) {
-                $this->data['error'] = 'Failed to set override. ' . $e->getMessage();
+                $this->oUserFeedback->error('Failed to set override. ' . $e->getMessage());
             }
         }
 
@@ -435,8 +432,6 @@ class Templates extends Base
         $oUri = Factory::service('Uri');
         /** @var Override $oOverrideModel */
         $oOverrideModel = Factory::model('TemplateOverride', Constants::MODULE_SLUG);
-        /** @var UserFeedback $oUserFeedback */
-        $oUserFeedback = Factory::service('UserFeedback');
 
         $oType = $oEmailer->getType($oUri->segment(5));
         if (empty($oType)) {
@@ -453,13 +448,13 @@ class Templates extends Base
                     );
                 }
 
-                $oUserFeedback->success('Template reset successfully.');
+                $this->oUserFeedback->success('Template reset successfully.');
 
             } catch (\Exception $e) {
-                $oUserFeedback->error($e->getMessage());
+                $this->oUserFeedback->error($e->getMessage());
             }
         } else {
-            $oUserFeedback->success('Template reset successfully.');
+            $this->oUserFeedback->success('Template reset successfully.');
         }
 
         redirect('admin/email/templates/index');
@@ -482,8 +477,6 @@ class Templates extends Base
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var Uri $oUri */
         $oUri = Factory::service('Uri');
-        /** @var UserFeedback $oUserFeedback */
-        $oUserFeedback = Factory::service('UserFeedback');
 
         $oType = $oEmailer->getType($oUri->segment(5));
         if (empty($oType)) {
@@ -511,12 +504,12 @@ class Templates extends Base
             }
 
             if (count($aGeneratedEmails) === 1) {
-                $oUserFeedback->success(sprintf(
+                $this->oUserFeedback->success(sprintf(
                     'Preview email sent successfully. View it in your browser <a href="%s" style="text-decoration: underline" target="_blank:">here</a>.',
                     reset($aGeneratedEmails)->data->url->viewOnline
                 ));
             } else {
-                $oUserFeedback->success(sprintf(
+                $this->oUserFeedback->success(sprintf(
                     'Multiple preview emails sent successfully. View them in your browser:',
                     implode(
                         '<br>',
@@ -531,7 +524,7 @@ class Templates extends Base
             }
 
         } catch (EmailerException $e) {
-            $oUserFeedback->error('An error occurred whislt sending the test email: ' . $e->getMessage());
+            $this->oUserFeedback->error('An error occurred whislt sending the test email: ' . $e->getMessage());
         }
 
         redirect('admin/email/templates/index');
