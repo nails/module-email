@@ -12,13 +12,13 @@
     </div>
     <div class="body">
         <div class="column variables">
-            <pre><?=json_encode($oEmail->data, JSON_PRETTY_PRINT);?></pre>
+            <pre><?=htmlentities(json_encode($oEmail->data, JSON_PRETTY_PRINT), ENT_QUOTES);?></pre>
         </div>
         <div class="column html">
-            <iframe srcdoc="<?=htmlentities($oEmail->body->html)?>"></iframe>
+            <iframe srcdoc="<?=htmlentities($oEmail->body->html, ENT_QUOTES)?>"></iframe>
         </div>
         <div class="column text">
-            <pre><?=$oEmail->body->text?></pre>
+            <pre style="white-space: pre-wrap;"><?=$oEmail->body->text?></pre>
         </div>
     </div>
 </div>
