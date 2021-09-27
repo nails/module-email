@@ -378,7 +378,7 @@ trait Email
      */
     public function queue(int $iPriority = 0): self
     {
-        return $this->doSend(false);
+        return $this->doSend(false, $iPriority);
     }
 
     // --------------------------------------------------------------------------
@@ -501,14 +501,15 @@ trait Email
 
     // --------------------------------------------------------------------------
 
-    protected function compileEmailForSend(): array
+    protected function compileEmailForSend(int $iPriority = 0): array
     {
         $aEmail = $this->toArray();
         $oData  = (object) [
-            'type'     => $aEmail['sType'],
-            'to_id'    => null,
-            'to_email' => null,
-            'data'     => (object) $aEmail['aData'],
+            'type'           => $aEmail['sType'],
+            'to_id'          => null,
+            'to_email'       => null,
+            'queue_priority' => $iPriority,
+            'data'           => (object) $aEmail['aData'],
         ];
 
         if (!empty($aEmail['aAttachments'])) {
@@ -562,7 +563,8 @@ trait Email
     /**
      * Processes the email sending
      *
-     * @param bool $bSendNow Whether to send the email now, or via cron
+     * @param bool $bSendNow  Whether to send the email now, or via cron
+     * @param int  $iPriority The priority of the queued item
      *
      * @return $this
      * @throws \Nails\Common\Exception\FactoryException
@@ -570,9 +572,9 @@ trait Email
      * @throws \Nails\Email\Exception\EmailerException
      * @throws \PHPMailer\PHPMailer\Exception
      */
-    protected function doSend(bool $bSendNow): self
+    protected function doSend(bool $bSendNow, int $iPriority = 0): self
     {
-        $aEmails = $this->compileEmailForSend();
+        $aEmails = $this->compileEmailForSend($iPriority);
 
         /** @var Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);

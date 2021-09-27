@@ -416,14 +416,15 @@ class Emailer
         /** @var \DateTime $oNow */
         $oNow       = Factory::factory('DateTime');
         $oInput->id = $this->oEmailModel->create([
-            'ref'          => $oInput->ref,
-            'status'       => $bSendNow ? $this->oEmailModel::STATUS_PENDING : $this->oEmailModel::STATUS_QUEUED,
-            'user_id'      => $oInput->to_id,
-            'user_email'   => $oInput->to_email,
-            'type'         => $oInput->type,
-            'email_vars'   => json_encode($oInput->data),
-            'internal_ref' => $oInput->internal_ref,
-            'queued'       => $oNow->format('Y-m-d H:i:s'),
+            'ref'            => $oInput->ref,
+            'status'         => $bSendNow ? $this->oEmailModel::STATUS_PENDING : $this->oEmailModel::STATUS_QUEUED,
+            'user_id'        => $oInput->to_id,
+            'user_email'     => $oInput->to_email,
+            'type'           => $oInput->type,
+            'email_vars'     => json_encode($oInput->data),
+            'internal_ref'   => $oInput->internal_ref,
+            'queued'         => $oNow->format('Y-m-d H:i:s'),
+            'queue_priority' => $oInput->queue_priority ?? 0,
         ]);
 
         if (empty($oInput->id)) {
