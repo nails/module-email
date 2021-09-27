@@ -98,6 +98,7 @@ class Queued extends Base
 
                 } finally {
                     $iSent++;
+                    $oEmail = $this->getNextEmail();
                 }
 
             } while ($iSent < $iLimit && $oEmail);
