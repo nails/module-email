@@ -31,6 +31,12 @@ class Email extends Resource
     public $user_email;
 
     /** @var \Nails\Common\Resource\DateTime */
+    public $queued;
+
+    /** @var int|null */
+    public $queue_priority;
+
+    /** @var \Nails\Common\Resource\DateTime */
     public $sent;
 
     /** @var string */
