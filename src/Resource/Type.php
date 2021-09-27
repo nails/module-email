@@ -62,10 +62,10 @@ class Type extends Resource
     /**
      * Returns the Factory class this email type is represented by, if available
      *
-     * @return Nails\Email\Factory\Email|null
+     * @return Nails\Email\Interfaces\Email|null
      * @throws FactoryException
      */
-    public function getFactory(): ?\Nails\Email\Factory\Email
+    public function getFactory(): ?\Nails\Email\Interfaces\Email
     {
         if (empty($this->factory)) {
             return null;

@@ -14,17 +14,10 @@ use Nails\Cron\Task\Base;
 /**
  * Class Clean
  *
- * @package Nails\Email\Cron\Task
+ * @package Nails\Email\Cron\Task\Archive
  */
 class Clean extends Base
 {
-    /**
-     * The task description
-     *
-     * @var string
-     */
-    const DESCRIPTION = 'Cleans the archive according to data retention rules';
-
     /**
      * The cron expression of when to run
      *

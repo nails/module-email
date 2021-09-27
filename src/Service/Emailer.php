@@ -51,16 +51,24 @@ class Emailer
 
     // --------------------------------------------------------------------------
 
-    const STATUS_PENDING        = 'PENDING';
-    const STATUS_SENT           = 'SENT';
-    const STATUS_BOUNCED        = 'BOUNCED';
-    const STATUS_OPENED         = 'OPENED';
-    const STATUS_REJECTED       = 'REJECTED';
-    const STATUS_DELAYED        = 'DELAYED';
-    const STATUS_SOFT_BOUNCED   = 'SOFT_BOUNCED';
-    const STATUS_MARKED_AS_SPAM = 'MARKED_AS_SPAM';
-    const STATUS_CLICKED        = 'CLICKED';
-    const STATUS_FAILED         = 'FAILED';
+    const STATUS_PENDING = Email::STATUS_PENDING;
+    const STATUS_SENT    = EMAIL::STATUS_SENT;
+    const STATUS_FAILED  = EMAIL::STATUS_FAILED;
+
+    /** @deprecated */
+    const STATUS_BOUNCED = EMAIL::STATUS_BOUNCED;
+    /** @deprecated */
+    const STATUS_OPENED = EMAIL::STATUS_OPENED;
+    /** @deprecated */
+    const STATUS_REJECTED = EMAIL::STATUS_REJECTED;
+    /** @deprecated */
+    const STATUS_DELAYED = EMAIL::STATUS_DELAYED;
+    /** @deprecated */
+    const STATUS_SOFT_BOUNCED = EMAIL::STATUS_SOFT_BOUNCED;
+    /** @deprecated */
+    const STATUS_MARKED_AS_SPAM = EMAIL::STATUS_MARKED_AS_SPAM;
+    /** @deprecated */
+    const STATUS_CLICKED = EMAIL::STATUS_CLICKED;
 
     // --------------------------------------------------------------------------
 
@@ -292,97 +300,86 @@ class Emailer
     /**
      * Send an email
      *
-     * @param object $input    The email object
-     * @param bool   $graceful Whether to gracefully fail or not
+     * @param array|object $mInput    The email object
+     * @param bool         $bGraceful Whether to gracefully fail or not
+     * @param bool         $bSendNow  Whether to send now, or soon via cron
      *
-     * @return bool|stdClass
+     * @return stdClass|null
      * @throws EmailerException
      * @throws FactoryException
      * @throws ModelException
      * @throws PHPMailer\Exception
      */
-    public function send($input, $graceful = false)
+    public function send($mInput, bool $bGraceful = false, bool $bSendNow = true): ?stdClass
     {
         //  We got something to work with?
-        if (empty($input)) {
-            if (!$graceful) {
-                throw new EmailerException('No Input');
-            } else {
-                $this->setError('No input');
-            }
-            return false;
+        if (empty($mInput)) {
+            return $this->sendError('No Input.', $bGraceful);
         }
 
         // --------------------------------------------------------------------------
 
-        //  Ensure $input is an object
-        if (!is_object($input)) {
-            $input = (object) $input;
-        }
+        //  Ensure $mInput is an object
+        $oInput = !is_object($mInput)
+            ? (object) $mInput
+            : $mInput;
 
         // --------------------------------------------------------------------------
 
         //  Check we have at least a user_id/email and an email type
-        if ((empty($input->to_id) && empty($input->to_email)) || empty($input->type)) {
-            if (!$graceful) {
-                throw new EmailerException('Missing user ID, user email or email type');
-            } else {
-                $this->setError('Missing user ID, user email or email type');
-            }
-            return false;
+        if ((empty($oInput->to_id) && empty($oInput->to_email)) || empty($oInput->type)) {
+            return $this->sendError('Missing user ID, user email or email type.', $bGraceful);
         }
 
         //  If no email has been given make sure it's null
-        if (empty($input->to_email)) {
-            $input->to_email = null;
+        if (empty($oInput->to_email)) {
+            $oInput->to_email = null;
         }
 
         //  If no id has been given make sure it's null
-        if (empty($input->to_id)) {
-            $input->to_id = null;
+        if (empty($oInput->to_id)) {
+            $oInput->to_id = null;
         }
 
         //  If no internal_ref has been given make sure it's null
-        if (empty($input->internal_ref)) {
-            $input->internal_ref = null;
+        if (empty($oInput->internal_ref)) {
+            $oInput->internal_ref = null;
         }
 
         //  Make sure that at least empty data is available
-        if (empty($input->data)) {
-            $input->data = new stdClass();
+        if (empty($oInput->data)) {
+            $oInput->data = new stdClass();
         }
 
         // --------------------------------------------------------------------------
 
         //  Lookup the email type
-        if (empty($this->aEmailType[$input->type])) {
-
-            if (!$graceful) {
-                throw new EmailerException('"' . $input->type . '" is not a valid email type', 1);
-            } else {
-                $this->setError('Invalid Email Type "' . $input->type . '"');
-            }
-
-            return false;
+        if (empty($this->aEmailType[$oInput->type])) {
+            return $this->sendError('"' . $oInput->type . '" is not a valid email type.', $bGraceful);
         }
 
         // --------------------------------------------------------------------------
 
         //  If we're sending to an email address, try and associate it to a registered user
         try {
+
+            /** @var \Nails\Auth\Model\User $oUserModel */
             $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
-            if ($input->to_email) {
-                $_user = $oUserModel->getByEmail($input->to_email);
-                if ($_user) {
-                    $input->to_id = $_user->id;
-                }
-            } else {
+
+            if ($oInput->to_email) {
+
+                /** @var \Nails\Auth\Resource\User $oUser */
+                $oUser         = $oUserModel->getByEmail($oInput->to_email);
+                $oInput->to_id = $oUser->id ?? null;
+
+            } elseif ($oInput->to_id) {
+
                 //  Sending to an ID, fetch the user's email
-                $_user = $oUserModel->getById($input->to_id);
-                if (!empty($_user->email)) {
-                    $input->to_email = $_user->email;
-                }
+                /** @var \Nails\Auth\Resource\User $oUser */
+                $oUser            = $oUserModel->getById($oInput->to_id);
+                $oInput->to_email = $oUser->email ?? null;
             }
+
         } catch (FactoryException $e) {
             //  If this goes wrong, don't worry about it
         }
@@ -394,7 +391,7 @@ class Emailer
          * system to generate 'view online' links
          */
 
-        $input->ref = $this->generateReference();
+        $oInput->ref = $this->generateReference();
 
         // --------------------------------------------------------------------------
 
@@ -403,46 +400,46 @@ class Emailer
          * email address set)
          */
 
-        if (empty($input->to_email)) {
-            if (!$graceful) {
-                throw new EmailerException('No email address to send to', 1);
-            } else {
-                $this->setError('No email address to send to.');
-                false;
-            }
+        if (empty($oInput->to_email)) {
+            return $this->sendError('No email address to send to.', $bGraceful);
         }
 
         // --------------------------------------------------------------------------
 
         //  Add to the archive table
-        $input->id = $this->oEmailModel->create([
-            'ref'          => $input->ref,
+        /** @var \DateTime $oNow */
+        $oNow       = Factory::factory('DateTime');
+        $oInput->id = $this->oEmailModel->create([
+            'ref'          => $oInput->ref,
             'status'       => static::STATUS_PENDING,
-            'user_id'      => $input->to_id,
-            'user_email'   => $input->to_email,
-            'type'         => $input->type,
-            'email_vars'   => json_encode($input->data),
-            'internal_ref' => $input->internal_ref,
+            'user_id'      => $oInput->to_id,
+            'user_email'   => $oInput->to_email,
+            'type'         => $oInput->type,
+            'email_vars'   => json_encode($oInput->data),
+            'internal_ref' => $oInput->internal_ref,
+            'queued'       => $oNow->format('Y-m-d H:i:s'),
         ]);
 
-        if (empty($input->id)) {
-            if (!$graceful) {
-                throw new EmailerException('Failed to create the email record', 1);
+        if (empty($oInput->id)) {
+            return $this->sendError('Failed to create the email record.', $bGraceful);
+
+        } elseif ($bSendNow) {
+
+            if ($this->doSend($oInput->id)) {
+                return (object) [
+                    'id'  => $oInput->id,
+                    'ref' => $oInput->ref,
+                ];
+
             } else {
-                $this->setError('Failed to create the email record.');
-                false;
+                return $this->sendError($this->lastError(), $bGraceful);
             }
-        }
-
-        if ($this->doSend($input->id, $graceful)) {
-
-            return (object) [
-                'id'  => $input->id,
-                'ref' => $input->ref,
-            ];
 
         } else {
-            return false;
+            return (object) [
+                'id'  => $oInput->id,
+                'ref' => $oInput->ref,
+            ];
         }
     }
 
@@ -576,8 +573,7 @@ class Emailer
     /**
      * Sends a template email immediately
      *
-     * @param int|object $mEmailId  The ID of the email to send, or the email object itself
-     * @param bool       $bGraceful Whether or not to fail gracefully
+     * @param int|object $mEmailId The ID of the email to send, or the email object itself
      *
      * @return bool
      * @throws FactoryException
@@ -585,14 +581,13 @@ class Emailer
      * @throws EmailerException
      * @throws PHPMailer\Exception
      */
-    protected function doSend($mEmailId = false, bool $bGraceful = false): bool
+    public function doSend($mEmailId = false): bool
     {
         //  Get the email if $mEmailId is not an object
         if (is_numeric($mEmailId)) {
 
             $oEmail = $this->getById($mEmailId);
             if (!$oEmail) {
-
                 $this->setError('Invalid email ID');
                 return false;
             }
@@ -612,8 +607,8 @@ class Emailer
             if ($this->userHasUnsubscribed($oEmail->to->id, $oEmail->type)) {
                 $this->setEmailAsFailed($oEmail, 'Recipient has unsubscribed from this type of email');
                 return true;
-            }
-            if ($this->userIsSuspended($oEmail->to->id)) {
+
+            } elseif ($this->userIsSuspended($oEmail->to->id)) {
                 $this->setEmailAsFailed($oEmail, 'Recipient is suspended');
                 return true;
             }
@@ -657,6 +652,7 @@ class Emailer
 
         //  Handle routing of email on non-production environments
         if (Environment::not(Environment::ENV_PROD)) {
+
             if (Config::get('EMAIL_OVERRIDE')) {
                 $oEmail->to->email = Config::get('EMAIL_OVERRIDE');
 
@@ -743,13 +739,8 @@ class Emailer
 
                     $sError = 'Failed to add attachment "' . $_file . '"';
                     $this->setEmailAsFailed($oEmail, $sError);
-
-                    if (!$bGraceful) {
-                        throw new EmailerException($sError, 1);
-                    } else {
-                        $this->setError($sError);
-                        return false;
-                    }
+                    $this->setError($sError);
+                    return false;
                 }
             }
         }
@@ -799,23 +790,7 @@ class Emailer
 
             $sError = 'Email failed to send at SMTP time; ' . $this->oPhpMailer->ErrorInfo;
             $this->setEmailAsFailed($oEmail, $sError);
-
-            if (Environment::is(Environment::ENV_PROD)) {
-                $this->setError($sError);
-
-            } else {
-
-                /**
-                 * On non-production environments halt execution, this is an error with the configs
-                 * and should probably be addressed
-                 */
-
-                if (!$bGraceful) {
-                    throw new EmailerException($sError);
-                }
-
-                $this->setError($sError);
-            }
+            $this->setError($sError);
 
             return false;
         }
@@ -1317,11 +1292,11 @@ class Emailer
     /**
      * Parses a string for <a> links and replaces them with a trackable URL
      *
-     * @param string   $sBody          The string to parse
-     * @param int      $iEmailId       The email's ID
-     * @param string   $sEmailRef      The email's reference
-     * @param bool     $bIsHtml        Whether or not this is the HTML version of the email
-     * @param string[] $aVerify Whether or not this user needs verified (i.e route tracking links through the verifier), false if not required, array if required
+     * @param string   $sBody     The string to parse
+     * @param int      $iEmailId  The email's ID
+     * @param string   $sEmailRef The email's reference
+     * @param bool     $bIsHtml   Whether or not this is the HTML version of the email
+     * @param string[] $aVerify   Whether or not this user needs verified (i.e route tracking links through the verifier), false if not required, array if required
      *
      * @return string
      */
@@ -1933,5 +1908,26 @@ class Emailer
             throw new EmailerException('nobody@' . $sDomain . ' is not a valid from email');
         }
         return 'nobody@' . $sDomain;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Handles send errors, taking into account the graceful behaviour
+     *
+     * @param string $sError    The error
+     * @param bool   $bGraceful Whether to be graceful or not
+     *
+     * @return null
+     * @throws EmailerException
+     */
+    protected function sendError(string $sError, bool $bGraceful)
+    {
+        if (!$bGraceful) {
+            throw new EmailerException($sError);
+        }
+
+        $this->setError($sError);
+        return null;
     }
 }

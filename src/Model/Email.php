@@ -47,6 +47,28 @@ class Email extends Base
      */
     const AUTO_SET_USER = false;
 
+    /**
+     * The various email statuses
+     */
+    const STATUS_PENDING = 'PENDING';
+    const STATUS_SENT    = 'SENT';
+    const STATUS_FAILED  = 'FAILED';
+
+    /** @deprecated */
+    const STATUS_BOUNCED = 'BOUNCED';
+    /** @deprecated */
+    const STATUS_OPENED = 'OPENED';
+    /** @deprecated */
+    const STATUS_REJECTED = 'REJECTED';
+    /** @deprecated */
+    const STATUS_DELAYED = 'DELAYED';
+    /** @deprecated */
+    const STATUS_SOFT_BOUNCED = 'SOFT_BOUNCED';
+    /** @deprecated */
+    const STATUS_MARKED_AS_SPAM = 'MARKED_AS_SPAM';
+    /** @deprecated */
+    const STATUS_CLICKED = 'CLICKED';
+
     // --------------------------------------------------------------------------
 
     /**
@@ -61,5 +83,30 @@ class Email extends Base
     public function getByRef(string $sRef, array $aData = []): ?\Nails\Email\Resource\Email
     {
         return $this->getByColumn('ref', $sRef, $aData);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns's the various statuses
+     *
+     * @return string[]
+     */
+    public function getStatuses(): array
+    {
+        return [
+            static::STATUS_PENDING        => 'Pending',
+            static::STATUS_SENT           => 'Sent',
+            static::STATUS_FAILED         => 'Failed',
+
+            // Deprecated
+            static::STATUS_BOUNCED        => 'Bounced',
+            static::STATUS_OPENED         => 'Opened',
+            static::STATUS_REJECTED       => 'Rejected',
+            static::STATUS_DELAYED        => 'Delayed',
+            static::STATUS_SOFT_BOUNCED   => 'Soft Bounced',
+            static::STATUS_MARKED_AS_SPAM => 'Marked as spam',
+            static::STATUS_CLICKED        => 'Clicked',
+        ];
     }
 }

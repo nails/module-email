@@ -3,6 +3,8 @@
 namespace Nails\Email\Traits;
 
 use Nails\Auth\Resource\User;
+use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
 use Nails\Common\Exception\ValidationException;
 use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
@@ -348,76 +350,33 @@ trait Email
     // --------------------------------------------------------------------------
 
     /**
-     * Send the email
+     * Send the email now
      *
      * @return $this
+     * @throws FactoryException
+     * @throws ModelException
      * @throws EmailerException
+     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function send(): self
     {
-        $aEmail = $this->toArray();
-        $aData  = [
-            'type'     => $aEmail['sType'],
-            'to_id'    => null,
-            'to_email' => null,
-            'data'     => (object) $aEmail['aData'],
-        ];
+        return $this->doSend(true);
+    }
 
-        if (!empty($aEmail['aAttachments'])) {
-            $aData['data']->attachments = $aEmail['aAttachments'];
-        }
+    // --------------------------------------------------------------------------
 
-        if (!empty($aEmail['sSubject']) & empty($aData['data']->email_subject)) {
-            $aData['data']->email_subject = $aEmail['sSubject'];
-        }
-
-        if (!empty($aEmail['sFromName']) & empty($aData['data']->email_from_name)) {
-            $aData['data']->email_from_name = $aEmail['sFromName'];
-        }
-
-        if (!empty($aEmail['sFromEmail']) & empty($aData['data']->email_from_email)) {
-            $aData['data']->email_from_email = $aEmail['sFromEmail'];
-        }
-
-        if (!empty($aEmail['aCc']) & empty($aData['data']->cc)) {
-            $aData['data']->cc = $aEmail['aCc'];
-        }
-
-        if (!empty($aEmail['aBcc']) & empty($aData['data']->bcc)) {
-            $aData['data']->bcc = $aEmail['aBcc'];
-        }
-
-        /** @var Emailer $oEmailer */
-        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-
-        $this->aEmailsGenerated = [];
-
-        foreach ($aEmail['aTo'] as $mUserIdOrEmail) {
-
-            if ($mUserIdOrEmail instanceof User) {
-                $aData['to_id'] = $mUserIdOrEmail->id;
-
-            } elseif (is_numeric($mUserIdOrEmail)) {
-                $aData['to_id'] = $mUserIdOrEmail;
-
-            } elseif (valid_email($mUserIdOrEmail)) {
-                $aData['to_email'] = $mUserIdOrEmail;
-            }
-
-            $this->bLastEmailDidSend = $oEmailer->send($aData);
-            $oLastEmail              = $oEmailer->getLastEmail();
-
-            /**
-             * There might not always be an email generated:
-             * - unsubscribed users will not received an email, and send() will not fail
-             * - suspended users will not receive an email, and send() will not fail
-             */
-            if (!empty($oLastEmail)) {
-                $this->aEmailsGenerated[] = clone $oLastEmail;;
-            }
-        }
-
-        return $this;
+    /**
+     * Send the email soon, via cron
+     *
+     * @return $this
+     * @throws FactoryException
+     * @throws ModelException
+     * @throws EmailerException
+     * @throws \PHPMailer\PHPMailer\Exception
+     */
+    public function sendSoon(): self
+    {
+        return $this->doSend(false);
     }
 
     // --------------------------------------------------------------------------
@@ -536,5 +495,103 @@ trait Email
         } elseif (is_string($sEmail) && !valid_email($sEmail)) {
             throw new ValidationException('"' . $sEmail . '" is not a valid email');
         }
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function compileEmailForSend(): array
+    {
+        $aEmail = $this->toArray();
+        $oData  = (object) [
+            'type'     => $aEmail['sType'],
+            'to_id'    => null,
+            'to_email' => null,
+            'data'     => (object) $aEmail['aData'],
+        ];
+
+        if (!empty($aEmail['aAttachments'])) {
+            $oData->data->attachments = $aEmail['aAttachments'];
+        }
+
+        if (!empty($aEmail['sSubject']) && empty($oData->data->email_subject)) {
+            $oData->data->email_subject = $aEmail['sSubject'];
+        }
+
+        if (!empty($aEmail['sFromName']) && empty($oData->data->email_from_name)) {
+            $oData->data->email_from_name = $aEmail['sFromName'];
+        }
+
+        if (!empty($aEmail['sFromEmail']) && empty($oData->data->email_from_email)) {
+            $oData->data->email_from_email = $aEmail['sFromEmail'];
+        }
+
+        if (!empty($aEmail['aCc']) && empty($oData->data->cc)) {
+            $oData->data->cc = $aEmail['aCc'];
+        }
+
+        if (!empty($aEmail['aBcc']) && empty($oData->data->bcc)) {
+            $oData->data->bcc = $aEmail['aBcc'];
+        }
+
+        $aOut = [];
+        foreach ($aEmail['aTo'] as $mUserIdOrEmail) {
+
+            $oData->to_id    = null;
+            $oData->to_email = null;
+
+            if ($mUserIdOrEmail instanceof User) {
+                $oData->to_id = $mUserIdOrEmail->id;
+
+            } elseif (is_numeric($mUserIdOrEmail)) {
+                $oData->to_id = $mUserIdOrEmail;
+
+            } elseif (valid_email($mUserIdOrEmail)) {
+                $oData->to_email = $mUserIdOrEmail;
+            }
+
+            $aOut[] = (array) (clone $oData);
+        }
+
+        return $aOut;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Processes the email sending
+     *
+     * @param bool $bSendNow Whether to send the email now, or via cron
+     *
+     * @return $this
+     * @throws \Nails\Common\Exception\FactoryException
+     * @throws \Nails\Common\Exception\ModelException
+     * @throws \Nails\Email\Exception\EmailerException
+     * @throws \PHPMailer\PHPMailer\Exception
+     */
+    protected function doSend(bool $bSendNow): self
+    {
+        $aEmails = $this->compileEmailForSend();
+
+        /** @var Emailer $oEmailer */
+        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+
+        $this->aEmailsGenerated = [];
+
+        foreach ($aEmails as $aData) {
+
+            $this->bLastEmailDidSend = $oEmailer->send($aData, false, $bSendNow);
+            $oLastEmail              = $oEmailer->getLastEmail();
+
+            /**
+             * There might not always be an email generated:
+             * - unsubscribed users will not received an email, and send() will not fail
+             * - suspended users will not receive an email, and send() will not fail
+             */
+            if (!empty($oLastEmail)) {
+                $this->aEmailsGenerated[] = clone $oLastEmail;;
+            }
+        }
+
+        return $this;
     }
 }

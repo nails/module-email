@@ -198,6 +198,15 @@ interface Email
     // --------------------------------------------------------------------------
 
     /**
+     * Send the email soon, via cron
+     *
+     * @return $this
+     */
+    public function sendSoon(): self;
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Whether the last email was sent successfully
      *
      * @return bool
