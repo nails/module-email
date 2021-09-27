@@ -31,6 +31,7 @@ class Email extends Base
      */
     public static function announce()
     {
+        /** @var Nav $oNavGroup */
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Email');
         $oNavGroup->setIcon('fa-paper-plane');
@@ -79,8 +80,12 @@ class Email extends Base
 
         // --------------------------------------------------------------------------
 
-        $oInput   = Factory::service('Input');
+        /** @var \Nails\Common\Service\Input $oInput */
+        $oInput = Factory::service('Input');
+        /** @var \Nails\Email\Service\Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var \Nails\Email\Model\Email $oModel */
+        $oModel = Factory::model('Email', Constants::MODULE_SLUG);
 
         // --------------------------------------------------------------------------
 
@@ -107,13 +112,8 @@ class Email extends Base
 
         // --------------------------------------------------------------------------
 
-        $aTypeOptions = ['All email types'];
-        $aEmailTypes  = $oEmailer->getTypes();
-        foreach ($aEmailTypes as $oType) {
-            if (empty($oType->is_hidden)) {
-                $aTypeOptions[$oType->slug] = $oType->name;
-            }
-        }
+        $aTypeOptions   = ['All email types'] + $oEmailer->getTypesFlat();
+        $aStatusOptions = ['All email statuses'] + $oModel->getStatuses();
 
         $aCbFilters = [];
         $aDdFilters = [
@@ -121,6 +121,11 @@ class Email extends Base
                 $sPrefix . '.type',
                 'Type',
                 $aTypeOptions
+            ),
+            Helper::searchFilterObject(
+                $sPrefix . '.status',
+                'Status',
+                $aStatusOptions
             ),
         ];
 

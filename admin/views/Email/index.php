@@ -1,7 +1,6 @@
 <?php
 
 use Nails\Common\Service\Input;
-use Nails\Email\Service\Emailer;
 
 /** @var Input $oInput */
 $oInput = \Nails\Factory::service('Input');
