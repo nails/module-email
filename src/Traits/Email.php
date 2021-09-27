@@ -366,7 +366,9 @@ trait Email
     // --------------------------------------------------------------------------
 
     /**
-     * Send the email soon, via cron
+     * Queue the email to be sent via cron
+     *
+     * @param int $iPriority The priority of the queued item, 0 is highest
      *
      * @return $this
      * @throws FactoryException
@@ -374,7 +376,7 @@ trait Email
      * @throws EmailerException
      * @throws \PHPMailer\PHPMailer\Exception
      */
-    public function sendSoon(): self
+    public function queue(int $iPriority = 0): self
     {
         return $this->doSend(false);
     }

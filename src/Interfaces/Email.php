@@ -198,11 +198,13 @@ interface Email
     // --------------------------------------------------------------------------
 
     /**
-     * Send the email soon, via cron
+     * Queue the email to be sent via cron
+     *
+     * @param int $iPriority The priority of the queued item, 0 is highest
      *
      * @return $this
      */
-    public function sendSoon(): self;
+    public function queue(int $iPriority = 0): self;
 
     // --------------------------------------------------------------------------
 

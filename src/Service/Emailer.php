@@ -52,6 +52,8 @@ class Emailer
     // --------------------------------------------------------------------------
 
     const STATUS_PENDING = Email::STATUS_PENDING;
+    const STATUS_QUEUED  = Email::STATUS_QUEUED;
+    const STATUS_SENDING = EMAIL::STATUS_SENDING;
     const STATUS_SENT    = EMAIL::STATUS_SENT;
     const STATUS_FAILED  = EMAIL::STATUS_FAILED;
 
@@ -411,7 +413,7 @@ class Emailer
         $oNow       = Factory::factory('DateTime');
         $oInput->id = $this->oEmailModel->create([
             'ref'          => $oInput->ref,
-            'status'       => static::STATUS_PENDING,
+            'status'       => $bSendNow ? static::STATUS_PENDING : static::STATUS_QUEUED,
             'user_id'      => $oInput->to_id,
             'user_email'   => $oInput->to_email,
             'type'         => $oInput->type,
@@ -599,6 +601,10 @@ class Emailer
             $this->setError('Invalid email ID');
             return false;
         }
+
+        // --------------------------------------------------------------------------
+
+        $this->setEmailAsSending($oEmail);
 
         // --------------------------------------------------------------------------
 
@@ -839,6 +845,29 @@ class Emailer
             [
                 'status' => static::STATUS_SENT,
                 'sent'   => Factory::factory('DateTime')->format('Y-m-d H:i:s'),
+            ]
+        );
+
+        return $this;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Sets an email as sending
+     *
+     * @param \Nails\Email\Resource\Email|\stdClass $oEmail
+     *
+     * @return $this
+     * @throws FactoryException
+     * @throws ModelException
+     */
+    public function setEmailAsSending($oEmail): Emailer
+    {
+        $this->oEmailModel->update(
+            $oEmail->id,
+            [
+                'status' => static::STATUS_SENDING,
             ]
         );
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The Send Pending Cron task
+ * The Send Queued Cron task
  *
  * @package  Nails\Email
  * @category Task
@@ -12,11 +12,11 @@ namespace Nails\Email\Cron\Task\Send;
 use Nails\Cron\Task\Base;
 
 /**
- * Class Pending
+ * Class Queued
  *
  * @package Nails\Email\Cron\Task\Send
  */
-class Pending extends Base
+class Queued extends Base
 {
     /**
      * The cron expression of when to run
@@ -30,12 +30,12 @@ class Pending extends Base
      *
      * @var string
      */
-    const CONSOLE_COMMAND = 'email:send:pending';
+    const CONSOLE_COMMAND = 'email:send:queued';
 
     /**
      * The maximum number of simultaneous processes which  will be executed
      *
      * @var int
      */
-    const MAX_PROCESSES = 5;
+    const MAX_PROCESSES = 2;
 }

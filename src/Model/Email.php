@@ -51,6 +51,8 @@ class Email extends Base
      * The various email statuses
      */
     const STATUS_PENDING = 'PENDING';
+    const STATUS_QUEUED  = 'QUEUED';
+    const STATUS_SENDING = 'SENDING';
     const STATUS_SENT    = 'SENT';
     const STATUS_FAILED  = 'FAILED';
 
@@ -96,6 +98,8 @@ class Email extends Base
     {
         return [
             static::STATUS_PENDING        => 'Pending',
+            static::STATUS_QUEUED         => 'Queued',
+            static::STATUS_SENDING        => 'Sending',
             static::STATUS_SENT           => 'Sent',
             static::STATUS_FAILED         => 'Failed',
 

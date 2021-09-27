@@ -2,9 +2,13 @@
 
 namespace Nails\Email\Console\Command\Send;
 
+use Nails\Common\Exception\FactoryException;
+use Nails\Common\Exception\ModelException;
 use Nails\Common\Helper\Inflector;
+use Nails\Common\Helper\Model\Limit;
 use Nails\Common\Helper\Model\Paginate;
 use Nails\Common\Helper\Model\Select;
+use Nails\Common\Helper\Model\Sort;
 use Nails\Common\Helper\Model\Where;
 use Nails\Config;
 use Nails\Console\Command\Base;
@@ -20,13 +24,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class Pending
+ * Class Queued
  *
  * @package Nails\Email\Console\Command\Send
  */
-class Pending extends Base
+class Queued extends Base
 {
-    const PER_PROCESS = 500;
+    const MAX_PER_PROCESS = 1;
 
     // --------------------------------------------------------------------------
 
@@ -36,8 +40,8 @@ class Pending extends Base
     protected function configure(): void
     {
         $this
-            ->setName('email:send:pending')
-            ->setDescription('Sends pending emails');
+            ->setName('email:send:queued')
+            ->setDescription('Sends queued emails');
     }
 
     // --------------------------------------------------------------------------
@@ -56,26 +60,23 @@ class Pending extends Base
 
         try {
 
-            $this->banner('Send pending email');
+            $this->banner('Send queued email');
 
-            /** @var \Nails\Email\Model\Email $oModel */
-            $oModel = Factory::model('Email', Constants::MODULE_SLUG);
             /** @var \Nails\Email\Service\Emailer $oEmailer */
             $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
-            $oResult = $oModel->getAllRawQuery([
-                new Select(['id', 'ref']),
-                new Where('status', Email::STATUS_PENDING),
-                new Paginate(Config::get('EMAIL_SEND_PENDING_LIMIT', static::PER_PROCESS)),
-            ]);
-
-            if (!$oResult->num_rows()) {
-                $oOutput->writeln('No pending email to send.');
+            $oEmail = $this->getNextEmail();
+            if (empty($oEmail)) {
+                $oOutput->writeln('No queued email to send.');
                 $oOutput->writeln('');
                 return static::EXIT_CODE_SUCCESS;
             }
 
-            while ($oEmail = $oResult->unbuffered_row()) {
+            $iSent  = 0;
+            $iLimit = Config::get('EMAIL_SEND_QUEUED_MAX_PER_PROCESS', static::MAX_PER_PROCESS);
+
+            do {
+
                 try {
 
                     $oOutput->write(sprintf(
@@ -94,8 +95,12 @@ class Pending extends Base
                         '<error>%s</error>',
                         $e->getMessage()
                     ));
+
+                } finally {
+                    $iSent++;
                 }
-            }
+
+            } while ($iSent < $iLimit && $oEmail);
 
             $oOutput->writeln('');
 
@@ -107,5 +112,32 @@ class Pending extends Base
         }
 
         return self::EXIT_CODE_SUCCESS;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the next email to process
+     *
+     * @return \stdClass|null
+     * @throws FactoryException
+     * @throws ModelException
+     */
+    protected function getNextEmail(): ?\stdClass
+    {
+        /** @var \Nails\Email\Model\Email $oModel */
+        $oModel = Factory::model('Email', Constants::MODULE_SLUG);
+
+        $oResult = $oModel->getAllRawQuery([
+            new Select(['id', 'ref']),
+            new Where('status', Email::STATUS_QUEUED),
+            new Sort('queue_priority'),
+            new Sort('queued'),
+            new Limit(1),
+        ]);
+
+        return $oResult->num_rows()
+            ? $oResult->unbuffered_row()
+            : null;
     }
 }
