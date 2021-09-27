@@ -3,7 +3,8 @@
 namespace Nails\Email\Factory\Email;
 
 use Nails\Common\Exception\FactoryException;
-use Nails\Email\Factory\Email;
+use Nails\Email\Interfaces;
+use Nails\Email\Traits;
 use Nails\Factory;
 
 /**
@@ -11,9 +12,19 @@ use Nails\Factory;
  *
  * @package Nails\Email\Factory\Email
  */
-class Test extends Email
+class Test implements Interfaces\Email
 {
-    protected $sType = 'test_email';
+    use Traits\Email;
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Construct Test
+     */
+    public function __construct()
+    {
+        $this->type('test_email');
+    }
 
     // --------------------------------------------------------------------------
 
@@ -25,8 +36,11 @@ class Test extends Email
      */
     public function getTestData(): array
     {
+        /** @var \DateTime $oNow */
+        $oNow = Factory::factory('DateTime');
+
         return [
-            'sentAt' => Factory::factory('DateTime')->format('Y-m-d H:i:s'),
+            'sentAt' => $oNow->format('Y-m-d H:i:s'),
         ];
     }
 }
