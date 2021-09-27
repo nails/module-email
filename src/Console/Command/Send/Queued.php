@@ -30,7 +30,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Queued extends Base
 {
-    const MAX_PER_PROCESS = 1;
+    const MAX_PER_PROCESS = 500;
 
     // --------------------------------------------------------------------------
 
