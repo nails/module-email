@@ -6,6 +6,12 @@ use Nails\Auth\Resource\User;
 
 interface Email
 {
+    const QUEUE_PRIORITY_HIGH   = 0;
+    const QUEUE_PRIORITY_NORMAL = 500;
+    const QUEUE_PRIORITY_LOW    = 1000;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Set the email's type
      *
@@ -204,7 +210,7 @@ interface Email
      *
      * @return $this
      */
-    public function queue(int $iPriority = 0): self;
+    public function queue(int $iPriority = self::QUEUE_PRIORITY_NORMAL): self;
 
     // --------------------------------------------------------------------------
 

@@ -424,7 +424,7 @@ class Emailer
             'email_vars'     => json_encode($oInput->data),
             'internal_ref'   => $oInput->internal_ref,
             'queued'         => $oNow->format('Y-m-d H:i:s'),
-            'queue_priority' => $oInput->queue_priority ?? 0,
+            'queue_priority' => $oInput->queue_priority ?? \Nails\Email\Interfaces\Email::QUEUE_PRIORITY_NORMAL,
         ]);
 
         if (empty($oInput->id)) {

@@ -376,7 +376,7 @@ trait Email
      * @throws EmailerException
      * @throws \PHPMailer\PHPMailer\Exception
      */
-    public function queue(int $iPriority = 0): self
+    public function queue(int $iPriority = self::QUEUE_PRIORITY_NORMAL): self
     {
         return $this->doSend(false, $iPriority);
     }
@@ -501,7 +501,7 @@ trait Email
 
     // --------------------------------------------------------------------------
 
-    protected function compileEmailForSend(int $iPriority = 0): array
+    protected function compileEmailForSend(int $iPriority = self::QUEUE_PRIORITY_NORMAL): array
     {
         $aEmail = $this->toArray();
         $oData  = (object) [
@@ -572,7 +572,7 @@ trait Email
      * @throws \Nails\Email\Exception\EmailerException
      * @throws \PHPMailer\PHPMailer\Exception
      */
-    protected function doSend(bool $bSendNow, int $iPriority = 0): self
+    protected function doSend(bool $bSendNow, int $iPriority = self::QUEUE_PRIORITY_NORMAL): self
     {
         $aEmails = $this->compileEmailForSend($iPriority);
 
