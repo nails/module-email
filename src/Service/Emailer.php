@@ -51,12 +51,16 @@ class Emailer
 
     // --------------------------------------------------------------------------
 
+    /** @deprecated */
     const STATUS_PENDING = Email::STATUS_PENDING;
-    const STATUS_QUEUED  = Email::STATUS_QUEUED;
+    /** @deprecated */
+    const STATUS_QUEUED = Email::STATUS_QUEUED;
+    /** @deprecated */
     const STATUS_SENDING = EMAIL::STATUS_SENDING;
-    const STATUS_SENT    = EMAIL::STATUS_SENT;
-    const STATUS_FAILED  = EMAIL::STATUS_FAILED;
-
+    /** @deprecated */
+    const STATUS_SENT = EMAIL::STATUS_SENT;
+    /** @deprecated */
+    const STATUS_FAILED = EMAIL::STATUS_FAILED;
     /** @deprecated */
     const STATUS_BOUNCED = EMAIL::STATUS_BOUNCED;
     /** @deprecated */
@@ -413,7 +417,7 @@ class Emailer
         $oNow       = Factory::factory('DateTime');
         $oInput->id = $this->oEmailModel->create([
             'ref'          => $oInput->ref,
-            'status'       => $bSendNow ? static::STATUS_PENDING : static::STATUS_QUEUED,
+            'status'       => $bSendNow ? $this->oEmailModel::STATUS_PENDING : $this->oEmailModel::STATUS_QUEUED,
             'user_id'      => $oInput->to_id,
             'user_email'   => $oInput->to_email,
             'type'         => $oInput->type,
@@ -819,7 +823,7 @@ class Emailer
         $this->oEmailModel->update(
             $oEmail->id,
             [
-                'status'      => static::STATUS_FAILED,
+                'status'      => $this->oEmailModel::STATUS_FAILED,
                 'fail_reason' => $sFailReason,
             ]
         );
@@ -843,7 +847,7 @@ class Emailer
         $this->oEmailModel->update(
             $oEmail->id,
             [
-                'status' => static::STATUS_SENT,
+                'status' => $this->oEmailModel::STATUS_SENT,
                 'sent'   => Factory::factory('DateTime')->format('Y-m-d H:i:s'),
             ]
         );
@@ -867,7 +871,7 @@ class Emailer
         $this->oEmailModel->update(
             $oEmail->id,
             [
-                'status' => static::STATUS_SENDING,
+                'status' => $this->oEmailModel::STATUS_SENDING,
             ]
         );
 
