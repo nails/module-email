@@ -17,11 +17,22 @@ return <<<'EOD'
 
 namespace {{NAMESPACE}};
 
-use Nails\Email\Factory\Email;
+use Nails\Email\Interfaces;
+use Nails\Email\Traits;
 
-class {{CLASS_NAME}} extends Email
+class {{CLASS_NAME}} implements Interfaces\Email
 {
-    protected $sType = '{{EMAIL_KEY}}';
+    use Traits\Email;
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Construct {{CLASS_NAME}}
+     */
+    public function __construct()
+    {
+        $this->type('{{EMAIL_KEY}}');
+    }
 
     // --------------------------------------------------------------------------
 
