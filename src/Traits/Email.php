@@ -494,8 +494,15 @@ trait Email
     {
         if (empty($sEmail)) {
             throw new ValidationException('No email address supplied');
-        } elseif (is_string($sEmail) && !valid_email($sEmail)) {
-            throw new ValidationException('"' . $sEmail . '" is not a valid email');
+
+        } elseif (is_string($sEmail)) {
+
+            $aEmails = preg_split('/[,;]/', $sEmail);
+            foreach ($aEmails as $sEmail) {
+                if (!valid_email($sEmail)) {
+                    throw new ValidationException('"' . $sEmail . '" is not a valid email');
+                }
+            }
         }
     }
 

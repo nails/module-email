@@ -713,8 +713,13 @@ class Emailer
         $this->oPhpMailer->clearAllRecipients();
         $this->oPhpMailer->clearAttachments();
         $this->oPhpMailer->clearCustomHeaders();
+
+        $aReplyTos = preg_split('/[,;]/', $oEmail->from->email);
+        foreach ($aReplyTos as $sReplyTo) {
+            $this->oPhpMailer->addReplyTo($sReplyTo, $oEmail->from->name);
+        }
+
         $this->oPhpMailer->setFrom($this->from->email, $oEmail->from->name);
-        $this->oPhpMailer->addReplyTo($oEmail->from->email, $oEmail->from->name);
         $this->oPhpMailer->addAddress($oEmail->to->email);
         $this->oPhpMailer->isHTML(true);
 
