@@ -1486,7 +1486,7 @@ class Emailer
 
                 //  Make sure we're not applying this to an activation URL
                 if (!preg_match('#email/verify/[0-9]*?/(.*?)#', $sUrl)) {
-                    $sUrl = siteUrl(sprintf(
+                    $sUrlWithVerification = siteUrl(sprintf(
                         'email/verify/%s/%s?return_to=%s',
                         $this->aGenerateTrackingNeedsVerified['id'],
                         $this->aGenerateTrackingNeedsVerified['code'],
@@ -1501,7 +1501,7 @@ class Emailer
 
             $iLinkId = $oLinkModel->create([
                 'email_id' => $this->iGenerateTrackingEmailId,
-                'url'      => $sUrl,
+                'url'      => $sUrlWithVerification ?? $sUrl,
                 'title'    => $sTitle,
                 'created'  => $oNow->format('Y-m-d H:i:s'),
                 'is_html'  => $bIsHtml,
