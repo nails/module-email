@@ -63,7 +63,7 @@ class Verify extends Base
                     $oUserModel->rewardReferral($oUser->id, $oUser->referred_by);
                 }
 
-                $this->oUserFeedback->success('Success! Email verified successfully, thanks!');
+                $this->oUserFeedback->success('Email verified successfully, thanks!');
 
             } catch (\Exception $e) {
                 $this->oUserFeedback->error('Sorry, we couldn\'t verify your email address. ' . $e->getMessage());
