@@ -112,8 +112,8 @@ class Email extends Base
 
         // --------------------------------------------------------------------------
 
-        $aTypeOptions   = ['All email types'] + $oEmailer->getTypesFlat();
-        $aStatusOptions = ['All email statuses'] + $oModel->getStatuses();
+        $aTypeOptions   = ['' => 'All email types'] + $oEmailer->getTypesFlat();
+        $aStatusOptions = ['' => 'All email statuses'] + $oModel->getStatuses();
 
         $aCbFilters = [];
         $aDdFilters = [
