@@ -112,21 +112,32 @@ class Email extends Base
 
         // --------------------------------------------------------------------------
 
-        $aTypeOptions   = ['' => 'All email types'] + $oEmailer->getTypesFlat();
-        $aStatusOptions = ['' => 'All email statuses'] + $oModel->getStatuses();
+        /** @var \Nails\Admin\Factory\IndexFilter $oFilterType */
+        $oFilterType = Factory::factory('IndexFilter', \Nails\Admin\Constants::MODULE_SLUG);
+        $oFilterType
+            ->setLabel('Type')
+            ->setColumn($sPrefix . '.type')
+            ->addOption('All email types');
+
+        foreach ($oEmailer->getTypesFlat() as $sKey => $sLabel) {
+            $oFilterType->addOption($sLabel, $sKey);
+        }
+
+        /** @var \Nails\Admin\Factory\IndexFilter $oFilterStatus */
+        $oFilterStatus = Factory::factory('IndexFilter', \Nails\Admin\Constants::MODULE_SLUG);
+        $oFilterStatus
+            ->setLabel('Status')
+            ->setColumn($sPrefix . '.type')
+            ->addOption('All email statuses');
+
+        foreach ($oModel->getStatuses() as $sKey => $sLabel) {
+            $oFilterStatus->addOption($sLabel, $sKey);
+        }
 
         $aCbFilters = [];
         $aDdFilters = [
-            Helper::searchFilterObject(
-                $sPrefix . '.type',
-                'Type',
-                $aTypeOptions
-            ),
-            Helper::searchFilterObject(
-                $sPrefix . '.status',
-                'Status',
-                $aStatusOptions
-            ),
+            $oFilterType,
+            $oFilterStatus,
         ];
 
         // --------------------------------------------------------------------------
