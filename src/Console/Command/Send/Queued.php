@@ -126,14 +126,27 @@ class Queued extends Base
      */
     protected function getNextEmail(): ?\stdClass
     {
+        /** @var \Nails\Common\Service\Database $oDb */
+        $oDb = Factory::service('Database');
         /** @var \Nails\Email\Model\Email $oModel */
         $oModel = Factory::model('Email', Constants::MODULE_SLUG);
+
+        $iTimestamp = (int) (microtime(true) * 1000);
+
+        $oDb
+            ->set('queue_process', $iTimestamp)
+            ->where('status', $oModel::STATUS_QUEUED)
+            ->where('queue_process', null)
+            ->order_by('queue_priority')
+            ->order_by('queued', $oModel::SORT_DESC)
+            ->order_by('id')
+            ->limit(1)
+            ->update($oModel->getTableName());
 
         $oResult = $oModel->getAllRawQuery([
             new Select(['id', 'ref']),
             new Where('status', Email::STATUS_QUEUED),
-            new Sort('queue_priority'),
-            new Sort('queued'),
+            new Where('queue_process', $iTimestamp),
             new Limit(1),
         ]);
 
