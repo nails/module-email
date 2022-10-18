@@ -5,10 +5,6 @@ use Nails\Environment;
 
 ?>
 <div class="group-utilities send-test">
-    <p>
-        Use this form to send a test email, useful for testing that emails being sent are received by the end user.
-    </p>
-    <hr />
     <?=form_open();?>
     <fieldset>
         <legend>Recipient</legend>
@@ -32,11 +28,16 @@ use Nails\Environment;
 
         ?>
     </fieldset>
-    <p>
-        <?=form_submit('submit', 'Send Test Email', 'class="btn btn-primary"')?>
-    </p>
-    <?=form_close()?>
     <?php
+
+    echo Nails\Admin\Helper::floatingControls([
+        'save' => [
+            'text' => 'Send Test Email'
+        ]
+    ]);
+
+    echo form_close();
+
     if (isSuperuser()) {
 
         ?>

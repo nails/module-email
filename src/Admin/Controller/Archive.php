@@ -10,19 +10,20 @@
  * @link
  */
 
-namespace Nails\Admin\Email;
+namespace Nails\Email\Admin\Controller;
 
 use Nails\Admin\Controller\Base;
 use Nails\Admin\Helper;
+use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Factory;
 
 /**
- * Class Email
+ * Class Archive
  *
  * @package Nails\Admin\Email
  */
-class Email extends Base
+class Archive extends Base
 {
     /**
      * Announces this controller's navGroups
@@ -36,28 +37,11 @@ class Email extends Base
         $oNavGroup->setLabel('Email');
         $oNavGroup->setIcon('fa-paper-plane');
 
-        if (userHasPermission('admin:email:email:browse')) {
-            $oNavGroup->addAction('Email Archive');
+        if (userHasPermission(Permission\Archive\Browse::class)) {
+            $oNavGroup->addAction('Browse Archive');
         }
 
         return $oNavGroup;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns an array of permissions which can be configured for the user
-     *
-     * @return array
-     */
-    public static function permissions(): array
-    {
-        $aPermissions = parent::permissions();
-
-        $aPermissions['browse'] = 'Can browse email archive';
-        $aPermissions['resend'] = 'Can resend email';
-
-        return $aPermissions;
     }
 
     // --------------------------------------------------------------------------
@@ -74,7 +58,7 @@ class Email extends Base
      */
     public function index()
     {
-        if (!userHasPermission('admin:email:email:browse')) {
+        if (!userHasPermission(Permission\Archive\Browse::class)) {
             unauthorised();
         }
 
@@ -90,7 +74,7 @@ class Email extends Base
         // --------------------------------------------------------------------------
 
         //  Set method info
-        $this->data['page']->title = 'Message Archive';
+        $this->setTitles(['Email', 'Archive']);
 
         // --------------------------------------------------------------------------
 
@@ -184,20 +168,25 @@ class Email extends Base
      */
     public function resend()
     {
-        if (!userHasPermission('admin:email:email:resend')) {
+        if (!userHasPermission(Permission\Archive\Resend::class)) {
             unauthorised();
         }
 
         // --------------------------------------------------------------------------
 
-        $oInput   = Factory::service('Input');
+        /** @var \Nails\Common\Service\Input $oInput */
+        $oInput = Factory::service('Input');
+        /** @var \Nails\Common\Service\Uri $oUri */
+        $oUri = Factory::service('Uri');
+        /** @var \Nails\Email\Service\Emailer $oEmailer */
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
 
         // --------------------------------------------------------------------------
 
-        $oUri     = Factory::service('Uri');
         $iEmailId = $oUri->segment(5);
-        $sReturn  = $oInput->get('return') ? $oInput->get('return') : 'admin/email/index';
+        $sReturn  = $oInput->get('return')
+            ? $oInput->get('return')
+            : self::url();
 
         if ($oEmailer->resend($iEmailId)) {
             $this->oUserFeedback->success('Message was resent successfully.');
