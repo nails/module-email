@@ -10,12 +10,13 @@
  * @link
  */
 
-namespace Nails\Admin\Email;
+namespace Nails\Email\Admin\Controller;
 
 use Nails\Admin\Controller\Base;
 use Nails\Admin\Helper;
 use Nails\Common\Exception\ValidationException;
 use Nails\Common\Service\FormValidation;
+use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Email\Resource\Type;
 use Nails\Factory;
@@ -38,27 +39,11 @@ class Utilities extends Base
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Utilities');
 
-        if (userHasPermission('admin:email:utilities:sendTest')) {
+        if (userHasPermission(Permission\Utilities\SendTest::class)) {
             $oNavGroup->addAction('Send Test Email');
         }
 
         return $oNavGroup;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns an array of permissions which can be configured for the user
-     *
-     * @return array
-     */
-    public static function permissions(): array
-    {
-        $aPermissions = parent::permissions();
-
-        $aPermissions['sendTest'] = 'Can send test email';
-
-        return $aPermissions;
     }
 
     // --------------------------------------------------------------------------
@@ -70,7 +55,7 @@ class Utilities extends Base
      */
     public function index()
     {
-        if (!userHasPermission('admin:email:utilities:sendTest')) {
+        if (!userHasPermission(Permission\Utilities\SendTest::class)) {
             unauthorised();
         }
 
@@ -81,8 +66,8 @@ class Utilities extends Base
 
         // --------------------------------------------------------------------------
 
-        $this->data['page']->title = 'Send a Test Email';
-        $this->data['aTypes']      = $oEmailer->getTypesFlat();
+        $this->setTitles(['Email', 'Send a test']);
+        $this->data['aTypes'] = $oEmailer->getTypesFlat();
 
         // --------------------------------------------------------------------------
 

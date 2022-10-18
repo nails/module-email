@@ -9,7 +9,7 @@
  * @author     Nails Dev Team
  */
 
-namespace Nails\Admin\Email;
+namespace Nails\Email\Admin\Controller;
 
 use Nails\Admin\Controller\Base;
 use Nails\Admin\Helper;
@@ -22,6 +22,7 @@ use Nails\Common\Service\FormValidation;
 use Nails\Common\Service\Input;
 use Nails\Common\Service\Uri;
 use Nails\Common\Service\View;
+use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Email\Exception\EmailerException;
 use Nails\Email\Model\Template\Override;
@@ -49,27 +50,11 @@ class Templates extends Base
             ->setLabel('Email')
             ->setIcon('fa-paper-plane');
 
-        if (userHasPermission('admin:email:templates:edit')) {
+        if (userHasPermission(Permission\Template\Edit::class)) {
             $oNavGroup->addAction('Manage Templates');
         }
 
         return $oNavGroup;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns an array of permissions which can be configured for the user
-     *
-     * @return array
-     */
-    public static function permissions(): array
-    {
-        $aPermissions = parent::permissions();
-
-        $aPermissions['edit'] = 'Can edit templates';
-
-        return $aPermissions;
     }
 
     // --------------------------------------------------------------------------
@@ -81,7 +66,7 @@ class Templates extends Base
      */
     public function index(): void
     {
-        if (!userHasPermission('admin:email:templates:edit')) {
+        if (!userHasPermission(Permission\Template\Edit::class)) {
             unauthorised();
         }
 
@@ -95,7 +80,7 @@ class Templates extends Base
         // --------------------------------------------------------------------------
 
         //  Set method info
-        $this->data['page']->title = 'Manage Templates';
+        $this->setTitles(['Email', 'Manage Templates']);
 
         // --------------------------------------------------------------------------
 
@@ -180,7 +165,7 @@ class Templates extends Base
 
         //  Mimic $aConfig
         $this->data['CONFIG'] = [
-            'BASE_URL'              => 'admin/email/templates',
+            'BASE_URL'              => static::url(),
             'PERMISSION'            => null,
             'INDEX_PAGE_ID'         => null,
             'INDEX_FIELDS'          => [
@@ -242,7 +227,7 @@ class Templates extends Base
      */
     public function edit(): void
     {
-        if (!userHasPermission('admin:email:templates:edit')) {
+        if (!userHasPermission(Permission\Template\Edit::class)) {
             unauthorised();
         }
 
@@ -349,7 +334,7 @@ class Templates extends Base
                 }
 
                 $this->oUserFeedback->success('Override updated successfully.');
-                redirect('admin/email/templates/edit/' . $oType->slug);
+                redirect(self::url('edit/' . $oType->slug));
 
             } catch (\Exception $e) {
                 $this->oUserFeedback->error('Failed to set override. ' . $e->getMessage());
@@ -371,10 +356,12 @@ class Templates extends Base
             $this->data['bDefaultBodyTextChanged'] = false;
         }
 
-        $this->data['oType']       = $oType;
-        $this->data['oOverride']   = $oOverride;
-        $this->data['page']->title = 'Edit Template for: ' . $oType->name;
-        Helper::loadView('edit');
+        $this->data['oType']     = $oType;
+        $this->data['oOverride'] = $oOverride;
+
+        $this
+            ->setTitles(['Email', 'Edit Template for: ' . $oType->name])
+            ->loadView('edit');
     }
 
     // --------------------------------------------------------------------------
@@ -422,7 +409,7 @@ class Templates extends Base
      */
     public function reset(): void
     {
-        if (!userHasPermission('admin:email:templates:edit')) {
+        if (!userHasPermission(Permission\Template\Edit::class)) {
             unauthorised();
         }
 
@@ -457,7 +444,7 @@ class Templates extends Base
             $this->oUserFeedback->success('Template reset successfully.');
         }
 
-        redirect('admin/email/templates/index');
+        redirect(self::url());
     }
 
     // --------------------------------------------------------------------------
@@ -469,7 +456,7 @@ class Templates extends Base
      */
     public function preview(): void
     {
-        if (!userHasPermission('admin:email:templates:edit')) {
+        if (!userHasPermission(Permission\Template\Edit::class)) {
             unauthorised();
         }
 
@@ -527,6 +514,6 @@ class Templates extends Base
             $this->oUserFeedback->error('An error occurred whislt sending the test email: ' . $e->getMessage());
         }
 
-        redirect('admin/email/templates/index');
+        redirect(self::url());
     }
 }
