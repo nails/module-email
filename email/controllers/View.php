@@ -15,6 +15,7 @@ use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Service\Asset;
 use Nails\Common\Service\HttpCodes;
+use Nails\Common\Service\Input;
 use Nails\Common\Service\Output;
 use Nails\Common\Service\Uri;
 use Nails\Email\Constants;
@@ -44,6 +45,8 @@ class View extends Base
         $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var HttpCodes $oHttpCodes */
         $oHttpCodes = Factory::service('HttpCodes');
+        /** @var Input $oInput */
+        $oInput = Factory::service('Input');
         /** @var Output $oOutput */
         $oOutput = Factory::service('Output');
         /** @var Asset $oAsset */
@@ -82,7 +85,7 @@ class View extends Base
             return;
         }
 
-        if (Environment::is(Environment::ENV_DEV)) {
+        if (Environment::is(Environment::ENV_DEV) && !$oInput::get('isModal')) {
 
             $oAsset
                 ->clear()
