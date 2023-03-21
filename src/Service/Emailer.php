@@ -12,7 +12,6 @@
 
 namespace Nails\Email\Service;
 
-use Mustache_Engine;
 use Nails\Auth;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
@@ -23,6 +22,7 @@ use Nails\Common\Service\Database;
 use Nails\Common\Service\Encrypt;
 use Nails\Common\Service\Event;
 use Nails\Common\Service\Input;
+use Nails\Common\Service\Mustache;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
@@ -1832,7 +1832,7 @@ class Emailer
     {
         try {
 
-            /** @var Mustache_Engine $oMustache */
+            /** @var Mustache $oMustache */
             $oMustache = Factory::service('Mustache');
 
             //  Any function which takes a single argument
