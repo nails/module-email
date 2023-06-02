@@ -38,7 +38,7 @@ use Nails\Environment;
 
     echo form_close();
 
-    if (isSuperuser()) {
+    if (isSuperUser()) {
 
         ?>
         <hr>
