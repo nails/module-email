@@ -127,7 +127,7 @@ class Email extends Base
         $oFilterStatus = Factory::factory('IndexFilter', \Nails\Admin\Constants::MODULE_SLUG);
         $oFilterStatus
             ->setLabel('Status')
-            ->setColumn($sPrefix . '.type')
+            ->setColumn($sPrefix . '.status')
             ->addOption('All email statuses');
 
         foreach ($oModel->getStatuses() as $sKey => $sLabel) {
