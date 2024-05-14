@@ -1623,7 +1623,7 @@ class Emailer
         } elseif (!empty($oEmail->type->default_subject)) {
             $oEmail->subject = $oEmail->type->default_subject;
         } else {
-            $oEmail->subject = 'An E-mail from ' . Config::get('APP_NAME');
+            $oEmail->subject = 'An E-mail from ' . \Nails\Factory::service('MetaData')->getAppName();
         }
 
         // --------------------------------------------------------------------------
@@ -1698,7 +1698,7 @@ class Emailer
         $oEmail->data->emailRef  = $oEmail->ref;
         $oEmail->data->sentFrom  = $oEmail->from;
         $oEmail->data->sentTo    = $oEmail->to;
-        $oEmail->data->appName   = Config::get('APP_NAME');
+        $oEmail->data->appName   = \Nails\Factory::service('MetaData')->getAppName();
 
         //  Common URLs
         $oEmail->data->url = new stdClass();
@@ -1910,14 +1910,14 @@ class Emailer
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the defined sending from name, or falls back to Config::get('APP_NAME')
+     * Returns the defined sending from name, or falls back to APP_NAME
      *
      * @return string|null
      * @throws FactoryException
      */
     public function getFromName(): ?string
     {
-        $sFromName = appSetting('from_name', Constants::MODULE_SLUG) ?: Config::get('APP_NAME');
+        $sFromName = appSetting('from_name', Constants::MODULE_SLUG) ?: \Nails\Factory::service('MetaData')->getAppName();
         return $sFromName ?: null;
     }
 
