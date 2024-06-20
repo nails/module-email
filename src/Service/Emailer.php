@@ -1841,6 +1841,11 @@ class Emailer
                 function ($aMatches) {
                     $sFunction = getFromArray(1, $aMatches);
                     $sArgument = getFromArray(4, $aMatches);
+
+                    if ($sArgument === 'null') {
+                        $sArgument = null;
+                    }
+
                     return function_exists($sFunction)
                         ? call_user_func($sFunction, $sArgument)
                         : $aMatches[0];
