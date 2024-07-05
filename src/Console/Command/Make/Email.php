@@ -411,17 +411,17 @@ class Email extends BaseMaker
 
         foreach ($aTypes as $oType) {
             $aFile[] = '    (object) [';
-            $aFile[] = "        'slug'            => '" . str_replace("'", "\'", $oType->slug) . "',";
-            $aFile[] = "        'name'            => '" . str_replace("'", "\'", $oType->name) . "',";
-            $aFile[] = "        'description'     => '" . str_replace("'", "\'", $oType->description) . "',";
-            $aFile[] = "        'template_header' => '" . str_replace("'", "\'", $oType->template_header) . "',";
-            $aFile[] = "        'template_body'   => '" . str_replace("'", "\'", $oType->template_body) . "',";
-            $aFile[] = "        'template_footer' => '" . str_replace("'", "\'", $oType->template_footer) . "',";
-            $aFile[] = "        'default_subject' => '" . str_replace("'", "\'", $oType->default_subject) . "',";
+            $aFile[] = "        'slug'            => '" . str_replace("'", "\'", (string) $oType->slug) . "',";
+            $aFile[] = "        'name'            => '" . str_replace("'", "\'", (string) $oType->name) . "',";
+            $aFile[] = "        'description'     => '" . str_replace("'", "\'", (string) $oType->description) . "',";
+            $aFile[] = "        'template_header' => '" . str_replace("'", "\'", (string) $oType->template_header) . "',";
+            $aFile[] = "        'template_body'   => '" . str_replace("'", "\'", (string) $oType->template_body) . "',";
+            $aFile[] = "        'template_footer' => '" . str_replace("'", "\'", (string) $oType->template_footer) . "',";
+            $aFile[] = "        'default_subject' => '" . str_replace("'", "\'", (string) $oType->default_subject) . "',";
             $aFile[] = "        'is_hidden'       => " . ($oType->is_hidden ? 'true' : 'false') . ",";
             $aFile[] = "        'is_editable'     => " . ($oType->is_editable ? 'true' : 'false') . ",";
             $aFile[] = "        'can_unsubscribe' => " . ($oType->can_unsubscribe ? 'true' : 'false') . ",";
-            $aFile[] = "        'factory'         => '" . str_replace("'", "\'", $oType->factory) . "',";
+            $aFile[] = "        'factory'         => '" . str_replace("'", "\'", (string) $oType->factory) . "',";
             $aFile[] = '    ],';
         }
 
