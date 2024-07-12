@@ -1,7 +1,11 @@
 <?php
 
 use Nails\Config;
+use Nails\Email;
 use Nails\Environment;
+
+/** @var Email\Service\Emailer $oEmailer */
+$oEmailer = \Nails\Factory::service('Emailer', Email\Constants::MODULE_SLUG);
 
 ?>
 <div class="group-utilities send-test">
@@ -79,13 +83,17 @@ use Nails\Environment;
         </fieldset>
         <fieldset>
             <legend>Overrides and Whitelist</legend>
+            <p class="alert alert-warning">
+                These values are applied on <strong>non-production</strong> environments to prevent the accidental
+                release of mail.
+            </p>
             <?php
 
             echo form_field([
                 'key'      => '',
                 'label'    => 'To Override',
                 'default'  => Environment::not(Environment::ENV_PROD)
-                    ? Config::get('EMAIL_OVERRIDE') ?: Config::get('APP_DEVELOPER_EMAIL')
+                    ? Config::get('EMAIL_OVERRIDE')
                     : '',
                 'info'     => 'If defined, all email is routed to this address',
                 'readonly' => true,
@@ -94,8 +102,10 @@ use Nails\Environment;
             echo form_field_textarea([
                 'key'      => '',
                 'label'    => 'Whitelist',
-                'default'  => implode(PHP_EOL, (array) \Nails\Config::get('EMAIL_WHITELIST') ?: []),
-                'info'     => 'If defined, email is only released if the "to" address is whitelisted',
+                'default'  => Environment::not(Environment::ENV_PROD)
+                    ? implode(PHP_EOL, $oEmailer::getWhitelist())
+                    : '',
+                'info'     => 'If defined, email is only released if the "to" address is whitelisted. This list supports regular expressions.',
                 'readonly' => true,
             ]);
             ?>

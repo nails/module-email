@@ -664,16 +664,16 @@ class Emailer
         //  Handle routing of email on non-production environments
         if (Environment::not(Environment::ENV_PROD)) {
 
+            /**
+             * EMAIL_OVERRIDE - ALWAYS send mail to this address
+             * EMAIL_WHITELIST - Only allow email to be sent if it is in this list (regex allowed)
+             * APP_DEVELOPER_EMAIL - Fallback to the above (deprecated)
+             */
+
             if (Config::get('EMAIL_OVERRIDE')) {
                 $oEmail->to->email = Config::get('EMAIL_OVERRIDE');
 
-            } elseif (!empty(Config::get('EMAIL_WHITELIST'))) {
-
-                $aWhitelist = array_values(
-                    array_filter(
-                        (array) Config::get('EMAIL_WHITELIST')
-                    )
-                );
+            } elseif (!empty($aWhitelist = static::getWhitelist())) {
 
                 if (!in_array($oEmail->to->email, $aWhitelist)) {
 
@@ -697,7 +697,7 @@ class Emailer
 
             } else {
 
-                $sError = 'Non-production environment detected and neither EMAIL_OVERRIDE, EMAIL_WHITELIST nor APP_DEVELOPER_EMAIL is set';
+                $sError = 'Non-production environment detected and no override (EMAIL_OVERRIDE, APP_DEVELOPER_EMAIL) or whitelist has been defined';
                 $this->setEmailAsFailed($oEmail, $sError);
 
                 throw new EmailerException(
@@ -1475,7 +1475,6 @@ class Emailer
              * New URL, needs processed. We take the URL and the Title, store it in the
              * database and generate the new tracking link (inc. hashes etc). We'll cache
              * this link so we don't have to process it again.
-             *
              * If the email we're sending to hasn't been verified yet we should set the
              * actual URL as the return_to value of the email verifier, that means that
              * every link in this email behaves as a verifying email. Obviously we shouldn't
@@ -1973,5 +1972,21 @@ class Emailer
 
         $this->setError($sError);
         return null;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Return the email whitelist from the Config
+     *
+     * @return array
+     */
+    public static function getWhitelist(): array
+    {
+        return array_values(
+            array_filter(
+                (array) Config::get('EMAIL_WHITELIST')
+            )
+        );
     }
 }
