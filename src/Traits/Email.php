@@ -599,7 +599,7 @@ trait Email
              * - suspended users will not receive an email, and send() will not fail
              */
             if (!empty($oLastEmail)) {
-                $this->aEmailsGenerated[] = clone $oLastEmail;;
+                $this->aEmailsGenerated[] = clone $oLastEmail;
             }
         }
 
