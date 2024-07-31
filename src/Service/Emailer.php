@@ -318,6 +318,11 @@ class Emailer
      */
     public function send($mInput, bool $bGraceful = false, bool $bSendNow = true): ?stdClass
     {
+        //  Reset the last email
+        $this->oLastEmail = null;
+
+        // --------------------------------------------------------------------------
+
         //  We got something to work with?
         if (empty($mInput)) {
             return $this->sendError('No Input.', $bGraceful);
