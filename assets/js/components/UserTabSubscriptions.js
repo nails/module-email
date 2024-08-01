@@ -113,21 +113,25 @@ class UserTabSubscriptions {
 
     showSubscribeButton($row) {
         $row
-            .find('.js-subscribe-action')
-            .text('Subscribe')
-            .data('action', 'subscribe')
-            .removeClass('btn-danger')
-            .addClass('btn-success');
+            .find('.js-subscribe-action[data-action=unsubscribe]')
+            .addClass('hidden');
+
+        $row
+            .find('.js-subscribe-action[data-action=subscribe]')
+            .removeClass('hidden');
+
         return this;
     }
 
     showUnsubscribeButton($row) {
         $row
-            .find('.js-subscribe-action')
-            .text('Unsubscribe')
-            .data('action', 'unsubscribe')
-            .removeClass('btn-success')
-            .addClass('btn-danger');
+            .find('.js-subscribe-action[data-action=unsubscribe]')
+            .removeClass('hidden');
+
+        $row
+            .find('.js-subscribe-action[data-action=subscribe]')
+            .addClass('hidden');
+
         return this;
     }
 }

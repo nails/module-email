@@ -5,6 +5,8 @@
  * @var array                     $groups
  */
 
+use \Nails\Email\Admin\Permission;
+
 ?>
 <table class="js-email-subscriptions" data-user-id="<?=$user->id?>">
     <thead>
@@ -46,18 +48,20 @@
                         ? 'success'
                         : 'danger';
 
-                    $action = sprintf(
-                        '<span class="js-subscribe-action btn btn-xs btn-%s" data-action="%s">%s</span>',
-                        $subscribed ? 'danger' : 'success',
-                        $subscribed ? 'unsubscribe' : 'subscribe',
-                        $subscribed ? 'Unsubscribe' : 'Subscribe'
-                    );
+                    $actions = array_filter([
+                        userHasPermission(Permission\Blocks\Delete::class)
+                            ? '<span class="js-subscribe-action btn btn-xs btn-success ' . ($subscribed ? 'hidden' : '') . '" data-action="subscribe">Subscribe</span>'
+                            : null,
+                        userHasPermission(Permission\Blocks\Create::class)
+                            ? '<span class="js-subscribe-action btn btn-xs btn-danger ' . ($subscribed ? '' : 'hidden') . '" data-action="unsubscribe" style="margin-top:0;">Unsubscribe</span>'
+                            : null,
+                    ]);
 
                 } else {
-                    $label  = 'Mandatory';
-                    $hint   = 'User will always recive this type of email';
-                    $status = 'warning';
-                    $action = '';
+                    $label   = 'Mandatory';
+                    $hint    = 'User will always recive this type of email';
+                    $status  = 'warning';
+                    $actions = [];
                 }
 
                 ?>
@@ -71,7 +75,7 @@
                         <?=$label?>
                     </span>
                     </td>
-                    <td class="actions"><?=$action?></td>
+                    <td class="actions"><?=implode(PHP_EOL, $actions)?></td>
                 </tr>
                 <?php
             }

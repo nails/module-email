@@ -8,6 +8,7 @@ use Nails\Auth\Resource\User;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ViewNotFoundException;
 use Nails\Common\Service\View;
+use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Email\Service\Emailer;
 use Nails\Factory;
@@ -27,6 +28,13 @@ class Subscriptions implements Tab
     public function getLabel(): string
     {
         return 'Email Subscriptions';
+    }
+
+    // --------------------------------------------------------------------------
+
+    public static function isEnabled(User $user): bool
+    {
+        return userHasPermission(Permission\Blocks\Browse::class);
     }
 
     // --------------------------------------------------------------------------

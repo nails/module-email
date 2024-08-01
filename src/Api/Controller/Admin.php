@@ -10,6 +10,7 @@ use Nails\Auth;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Exception\ModelException;
 use Nails\Common\Service\HttpCodes;
+use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Email\Resource\Type;
 use Nails\Email\Service\Emailer;
@@ -21,13 +22,6 @@ class Admin extends Base
 
     // --------------------------------------------------------------------------
 
-    public static function isAuthenticated($sHttpMethod = '', $sMethod = '')
-    {
-        return parent::isAuthenticated($sHttpMethod, $sMethod) && isAdmin();
-    }
-
-    // --------------------------------------------------------------------------
-
     /**
      * @throws ApiException
      * @throws FactoryException
@@ -35,6 +29,13 @@ class Admin extends Base
      */
     public function putSubscribe(): ApiResponse
     {
+        if (!userHasPermission(Permission\Blocks\Delete::class)) {
+            throw new Api\Exception\ApiException(
+                'Ypu do not have permission to subscribe a user',
+                HttpCodes::STATUS_UNAUTHORIZED
+            );
+        }
+
         /** @var Emailer $emailer */
         $emailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var ApiResponse $response */
@@ -62,6 +63,13 @@ class Admin extends Base
      */
     public function putUnsubscribe(): ApiResponse
     {
+        if (!userHasPermission(Permission\Blocks\Create::class)) {
+            throw new Api\Exception\ApiException(
+                'Ypu do not have permission to unsubscribe a user',
+                HttpCodes::STATUS_UNAUTHORIZED
+            );
+        }
+
         /** @var Emailer $emailer */
         $emailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var ApiResponse $response */
