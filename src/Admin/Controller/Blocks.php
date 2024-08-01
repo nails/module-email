@@ -9,7 +9,7 @@
  * @author     Nails Dev Team
  */
 
-namespace Nails\Admin\Email;
+namespace Nails\Email\Admin\Controller;
 
 use Nails\Admin\Controller\DefaultController;
 use Nails\Admin\Factory\IndexFilter;
