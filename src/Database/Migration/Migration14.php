@@ -25,6 +25,11 @@ class Migration14 implements Interfaces\Database\Migration
     const MAP = [
         'admin:email:email:browse'       => Permission\Archive\Browse::class,
         'admin:email:email:resend'       => Permission\Archive\Resend::class,
+        'admin:email:blocks:browse'      => Permission\Blocks\Browse::class,
+        'admin:email:blocks:create'      => Permission\Blocks\Create::class,
+        'admin:email:blocks:edit'        => null,
+        'admin:email:blocks:delete'      => Permission\Blocks\Delete::class,
+        'admin:email:blocks:restore'     => null,
         'admin:email:templates:edit'     => Permission\Template\Edit::class,
         'admin:email:utilities:sendtest' => Permission\Utilities\SendTest::class,
     ];
