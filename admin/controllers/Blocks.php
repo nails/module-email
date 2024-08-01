@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This class manages email subscriptions
+ * This class manages email blocks
  *
  * @package    Nails
  * @subpackage module-email
@@ -21,16 +21,16 @@ use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
 /**
- * Class Subscriptions
+ * Class Blocks
  *
  * @package Nails\Admin\Email
  */
-class Subscriptions extends DefaultController
+class Blocks extends DefaultController
 {
     const CONFIG_MODEL_NAME     = 'UserEmailBlocker';
     const CONFIG_MODEL_PROVIDER = Auth\Constants::MODULE_SLUG;
     const CONFIG_SIDEBAR_GROUP  = 'Email';
-    const CONFIG_TITLE_SINGLE   = 'Subscription';
+    const CONFIG_TITLE_SINGLE   = 'Block';
     const CONFIG_INDEX_FIELDS   = [
         'User'    => 'user_id',
         'Type'    => null,
@@ -42,7 +42,7 @@ class Subscriptions extends DefaultController
     ];
     const CONFIG_SORT_DIRECTION = self::SORT_DESCENDING;
     const CONFIG_CAN_EDIT       = false;
-    const CONFIG_PERMISSION     = 'email:subscriptions';
+    const CONFIG_PERMISSION     = 'email:blocks';
     const CHANGELOG_ENABLED     = false;
 
     // --------------------------------------------------------------------------

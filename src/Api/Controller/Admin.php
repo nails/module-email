@@ -28,7 +28,7 @@ class Admin extends Base
      */
     public function putSubscribe(): ApiResponse
     {
-        if (!userHasPermission('admin:email:subscriptions:delete')) {
+        if (!userHasPermission('admin:email:blocks:delete')) {
             throw new Api\Exception\ApiException(
                 'Ypu do not have permission to subscribe a user',
                 HttpCodes::STATUS_UNAUTHORIZED
@@ -62,7 +62,7 @@ class Admin extends Base
      */
     public function putUnsubscribe(): ApiResponse
     {
-        if (!userHasPermission('admin:email:subscriptions:create')) {
+        if (!userHasPermission('admin:email:blocks:create')) {
             throw new Api\Exception\ApiException(
                 'Ypu do not have permission to unsubscribe a user',
                 HttpCodes::STATUS_UNAUTHORIZED

@@ -33,7 +33,7 @@ class Subscriptions implements Tab
 
     public static function isEnabled(User $user): bool
     {
-        return userHasPermission('admin:email:subscriptions:browse');
+        return userHasPermission('admin:email:blocks:browse');
     }
 
     // --------------------------------------------------------------------------

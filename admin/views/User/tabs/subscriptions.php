@@ -47,10 +47,10 @@
                         : 'danger';
 
                     $actions = array_filter([
-                        userHasPermission('admin:email:subscriptions:delete')
+                        userHasPermission('admin:email:blocks:delete')
                             ? '<span class="js-subscribe-action btn btn-xs btn-success ' . ($subscribed ? 'hidden' : '') . '" data-action="subscribe">Subscribe</span>'
                             : null,
-                        userHasPermission('admin:email:subscriptions:create')
+                        userHasPermission('admin:email:blocks:create')
                             ? '<span class="js-subscribe-action btn btn-xs btn-danger ' . ($subscribed ? '' : 'hidden') . '" data-action="unsubscribe" style="margin-top:0;">Unsubscribe</span>'
                             : null,
                     ]);
