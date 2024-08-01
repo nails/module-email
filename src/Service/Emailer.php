@@ -23,6 +23,7 @@ use Nails\Common\Service\Encrypt;
 use Nails\Common\Service\Event;
 use Nails\Common\Service\Input;
 use Nails\Common\Service\Mustache;
+use Nails\Common\Service\View;
 use Nails\Common\Traits\ErrorHandling;
 use Nails\Common\Traits\GetCountCommon;
 use Nails\Components;
@@ -318,11 +319,6 @@ class Emailer
      */
     public function send($mInput, bool $bGraceful = false, bool $bSendNow = true): ?stdClass
     {
-        //  Reset the last email
-        $this->oLastEmail = null;
-
-        // --------------------------------------------------------------------------
-
         //  We got something to work with?
         if (empty($mInput)) {
             return $this->sendError('No Input.', $bGraceful);
@@ -489,19 +485,23 @@ class Emailer
     /**
      * Determines whether the user has unsubscribed from this email type
      *
-     * @param int    $iUserId The user ID to check for
-     * @param string $sType   The type of email to check against
+     * @param int|Auth\Resource\User $user The user or user ID to check for
+     * @param string                 $type The type of email to check against
      *
      * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function userHasUnsubscribed(int $iUserId, string $sType): bool
+    public function userHasUnsubscribed(int|Auth\Resource\User $user, string $type): bool
     {
-        $oModel = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
-        return (bool) $oModel->countAll([
-            new Where('user_id', $iUserId),
-            new Where('type', $sType),
+        $userId = $user instanceof Auth\Resource\User
+            ? $user->id
+            : $user;
+
+        $model = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
+        return (bool) $model->countAll([
+            new Where('user_id', $userId),
+            new Where('type', $type),
         ]);
     }
 
@@ -530,28 +530,32 @@ class Emailer
     /**
      * Unsubscribe a user from a particular email type
      *
-     * @param int    $iUserId The user ID to unsubscribe
-     * @param string $sType   The type of email to unsubscribe from
+     * @param int|Auth\Resource\User $user The user or user ID to unsubscribe
+     * @param string                 $type The type of email to unsubscribe from
      *
      * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function unsubscribeUser(int $iUserId, string $sType): bool
+    public function unsubscribeUser(int|Auth\Resource\User $user, string $type): bool
     {
-        if ($this->userHasUnsubscribed($iUserId, $sType)) {
+        $userId = $user instanceof Auth\Resource\User
+            ? $user->id
+            : $user;
+
+        if ($this->userHasUnsubscribed($userId, $type)) {
             return true;
         }
 
         // --------------------------------------------------------------------------
 
-        /** @var \DateTime $oNow */
-        $oNow   = Factory::factory('DateTime');
-        $oModel = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
-        return (bool) $oModel->create([
-            'user_id' => $iUserId,
-            'type'    => $sType,
-            'created' => $oNow->format('Y-m-d H:i:s'),
+        /** @var \DateTime $now */
+        $now   = Factory::factory('DateTime');
+        $model = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
+        return (bool) $model->create([
+            'user_id' => $userId,
+            'type'    => $type,
+            'created' => $now->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -560,23 +564,27 @@ class Emailer
     /**
      * Subscribe a user to a particular email type
      *
-     * @param int    $iUserId The user ID to subscribe
-     * @param string $sType   The type of email to subscribe to
+     * @param int|Auth\Resource\User $user The user or user ID to subscribe
+     * @param string                 $type The type of email to subscribe to
      *
      * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function subscribeUser(int $iUserId, string $sType): bool
+    public function subscribeUser(int|Auth\Resource\User $user, string $type): bool
     {
-        if (!$this->userHasUnsubscribed($iUserId, $sType)) {
+        $userId = $user instanceof Auth\Resource\User
+            ? $user->id
+            : $user;
+
+        if (!$this->userHasUnsubscribed($userId, $type)) {
             return true;
         }
 
-        $oModel = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
-        return $oModel->deleteWhere([
-            ['user_id', $iUserId],
-            ['type', $sType],
+        $model = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
+        return $model->deleteWhere([
+            ['user_id', $userId],
+            ['type', $type],
         ]);
     }
 
@@ -1716,34 +1724,10 @@ class Emailer
 
         //  1-Click Unsubscribe
         if ($oEmail->type->can_unsubscribe && !empty($oEmail->to->id)) {
-
-            /**
-             * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
-             * 20 times before giving up @TODO: make this less hacky
-             */
-
-            $iCounter  = 0;
-            $iAttempts = 20;
-
-            /** @var Encrypt $oEncrypt */
-            $oEncrypt = Factory::service('Encrypt');
-
-            do {
-
-                $sToken = $oEncrypt->encode(implode('|', [
-                    $oEmail->type->slug,
-                    $oEmail->data->emailRef,
-                    $oEmail->to->id,
-                ]));
-
-                $iCounter++;
-
-            } while ($iCounter <= $iAttempts && strpos($sToken, '+') !== false);
-
-            $oEmail->data->url->unsubscribe = sprintf(
-                siteUrl('email/unsubscribe?ref=%s&token=%s'),
-                $oEmail->ref,
-                $sToken
+            $oEmail->data->url->unsubscribe = $this->generateUnsubscribeUrl(
+                $oEmail->type->slug,
+                $oEmail->data->emailRef,
+                $oEmail->to->id
             );
         }
 
@@ -1764,13 +1748,14 @@ class Emailer
         //  Subject
         $oEmail->subject = $this->render($oEmail->subject, $oEmail->data);
 
-        //  Add the rendered subject to the data array so the body can sue it
+        //  Add the rendered subject to the data array so the body can use it
         $oEmail->data->email_subject = $oEmail->subject;
 
         //  Body
         $oEmail->body = new stdClass();
 
         //  HTML Version
+        /** @var View $oView */
         $oView = Factory::service('View');
 
         $oEmail->body->html = $oView->load(
@@ -1820,6 +1805,40 @@ class Emailer
 
         $oEmail->body->html = $this->render($oEmail->body->html, $oEmail->data);
         $oEmail->body->text = $this->render($oEmail->body->text, $oEmail->data);
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function generateUnsubscribeUrl(string $typeSlug, string $emailRef, int $iUserId): string
+    {
+        /**
+         * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
+         * 20 times before giving up @TODO: make this less hacky
+         */
+
+        $counter  = 0;
+        $attempts = 20;
+
+        /** @var Encrypt $oEncrypt */
+        $oEncrypt = Factory::service('Encrypt');
+
+        do {
+
+            $token = $oEncrypt->encode(implode('|', [
+                $typeSlug,
+                $emailRef,
+                $iUserId,
+            ]));
+
+            $counter++;
+
+        } while ($counter <= $attempts && strpos($token, '+') !== false);
+
+        return sprintf(
+            siteUrl('email/unsubscribe?ref=%s&token=%s'),
+            $oEmail->ref,
+            $token
+        );
     }
 
     // --------------------------------------------------------------------------
