@@ -9,9 +9,12 @@
 
 namespace Nails\Email\Resource;
 
+use Nails\Auth\Resource\User;
 use Nails\Common\Exception\FactoryException;
 use Nails\Common\Factory\Component;
 use Nails\Common\Resource;
+use Nails\Email\Constants;
+use Nails\Email\Service\Emailer;
 use Nails\Factory;
 
 /**
@@ -85,6 +88,29 @@ class Type extends Resource
     public function isEditable(): bool
     {
         return $this->is_editable;
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function isHidden(): bool
+    {
+        return $this->is_hidden;
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function canUnsubscribe(): bool
+    {
+        return $this->can_unsubscribe;
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function isSubscribed(User $user): bool
+    {
+        /** @var Emailer $emailer */
+        $emailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        return !$emailer->userHasUnsubscribed($user, $this->slug);
     }
 
     // --------------------------------------------------------------------------
