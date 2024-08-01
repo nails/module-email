@@ -14,10 +14,11 @@ namespace Nails\Admin\Email;
 
 use Nails\Admin\Controller\Base;
 use Nails\Admin\Helper;
+use Nails\Auth\Model\User;
 use Nails\Common\Exception\ValidationException;
 use Nails\Common\Service\FormValidation;
+use Nails\Common\Service\Input;
 use Nails\Email\Constants;
-use Nails\Email\Resource\Type;
 use Nails\Factory;
 
 /**
@@ -101,18 +102,27 @@ class Utilities extends Base
                             FormValidation::RULE_REQUIRED,
                             function ($sType) use ($oEmailer) {
 
-                                $oType = $oEmailer->getType($sType);
+                                $type = $oEmailer->getType($sType);
 
-                                if (empty($oType)) {
+                                if (empty($type)) {
                                     throw new ValidationException('Invalid selection');
-                                } elseif (empty($oType->factory)) {
+                                } elseif (empty($type->factory)) {
                                     throw new ValidationException('Cannot test this type of email');
                                 }
 
                                 try {
-                                    $oFactory = $oType->getFactory();
+                                    $oFactory = $type->getFactory();
                                 } catch (\Exception $e) {
                                     throw new ValidationException('Cannot test this type of email');
+                                }
+
+                                /** @var Input $input */
+                                $input = Factory::service('Input');
+                                /** @var User $userModel */
+                                $userModel = Factory::model('User', \Nails\Auth\Constants::MODULE_SLUG);
+                                $user      = $userModel->getByEmail($input->post('recipient'));
+                                if ($user && $oEmailer->userHasUnsubscribed($user, $type)) {
+                                    throw new ValidationException('User has unsubscribed from this type of email');
                                 }
                             },
                         ],
@@ -126,11 +136,19 @@ class Utilities extends Base
                     ->data($oEmail->getTestData())
                     ->send();
 
-                $this->oUserFeedback->success(sprintf(
-                    '<strong>Done!</strong> Test email successfully sent to <strong>%s</strong> at %s.',
-                    $oInput->post('recipient'),
-                    toUserDatetime()
-                ));
+                $aEmails = $oEmail->getGeneratedEmails();
+
+                $this->oUserFeedback
+                    ->success(sprintf(
+                        'Test email successfully sent to <strong>%s</strong> at %s.%s%s',
+                        $oInput->post('recipient'),
+                        toUserDatetime(),
+                        !empty($aEmails) ? '<br>The following email was generated: ' : '',
+                        implode(', ', array_map(
+                            fn($email) => anchor($email->data->url->viewOnline, $email->data->emailRef, 'target="_blank"'),
+                            $aEmails
+                        ))
+                    ));
 
             } catch (\Exception $e) {
                 $this->oUserFeedback->error($e->getMessage());
