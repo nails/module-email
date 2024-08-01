@@ -5,14 +5,14 @@
  * @var array                     $groups
  */
 
-use \Nails\Email\Admin\Permission;
+use Nails\Email\Admin\Permission;
 
 ?>
-<table class="js-email-subscriptions" data-user-id="<?=$user->id?>">
-    <thead>
+<table class="table table-hover table-bordered table-responsive js-email-subscriptions align-middle" data-user-id="<?=$user->id?>">
+    <thead class="table-dark">
         <tr>
             <th>Email Type</th>
-            <th class="text-center" style="width:150px;">Subscribed</th>
+            <th class="text-center" style="width:150px;">Status</th>
             <th class="actions" style="width:150px;">Actions</th>
         </tr>
     </thead>
@@ -45,8 +45,8 @@ use \Nails\Email\Admin\Permission;
                         : 'User will not received this type of email';
 
                     $status = $subscribed
-                        ? 'success'
-                        : 'danger';
+                        ? 'table-success'
+                        : 'table-danger';
 
                     $actions = array_filter([
                         userHasPermission(Permission\Blocks\Delete::class)
@@ -60,7 +60,7 @@ use \Nails\Email\Admin\Permission;
                 } else {
                     $label   = 'Mandatory';
                     $hint    = 'User will always recive this type of email';
-                    $status  = 'warning';
+                    $status  = 'table-warning';
                     $actions = [];
                 }
 

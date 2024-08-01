@@ -102,7 +102,7 @@ class UserTabSubscriptions {
     }
 
     setStatus($row, status) {
-        $row.find('.js-status').removeClass('success danger').addClass(status);
+        $row.find('.js-status').removeClass('table-success table-danger').addClass(`table-${status}`);
         return this;
     }
 
