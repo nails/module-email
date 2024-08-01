@@ -21,13 +21,6 @@ class Admin extends Base
 
     // --------------------------------------------------------------------------
 
-    public static function isAuthenticated($sHttpMethod = '', $sMethod = '')
-    {
-        return parent::isAuthenticated($sHttpMethod, $sMethod) && isAdmin();
-    }
-
-    // --------------------------------------------------------------------------
-
     /**
      * @throws ApiException
      * @throws FactoryException
@@ -35,6 +28,13 @@ class Admin extends Base
      */
     public function putSubscribe(): ApiResponse
     {
+        if (!userHasPermission('admin:email:subscriptions:delete')) {
+            throw new Api\Exception\ApiException(
+                'Ypu do not have permission to subscribe a user',
+                HttpCodes::STATUS_UNAUTHORIZED
+            );
+        }
+
         /** @var Emailer $emailer */
         $emailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var ApiResponse $response */
@@ -62,6 +62,13 @@ class Admin extends Base
      */
     public function putUnsubscribe(): ApiResponse
     {
+        if (!userHasPermission('admin:email:subscriptions:create')) {
+            throw new Api\Exception\ApiException(
+                'Ypu do not have permission to unsubscribe a user',
+                HttpCodes::STATUS_UNAUTHORIZED
+            );
+        }
+
         /** @var Emailer $emailer */
         $emailer = Factory::service('Emailer', Constants::MODULE_SLUG);
         /** @var ApiResponse $response */

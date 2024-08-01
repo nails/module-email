@@ -31,6 +31,13 @@ class Subscriptions implements Tab
 
     // --------------------------------------------------------------------------
 
+    public static function isEnabled(User $user): bool
+    {
+        return userHasPermission('admin:email:subscriptions:browse');
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Return the order in which the tabs should render
      *
