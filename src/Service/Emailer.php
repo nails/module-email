@@ -737,10 +737,10 @@ class Emailer
         $this->oPhpMailer->isHTML(true);
 
         //  If the email can be unsubscribed from, set the List-Unsubscribe header
-        if (!empty($oEmail->data->url->unsubscribe)) {
+        if (!empty($oEmail->data->url->unsubscribeOneClick)) {
             $this->oPhpMailer->addCustomHeader('List-Unsubscribe', sprintf(
                 '<%s>',
-                $oEmail->data->url->unsubscribe
+                $oEmail->data->url->unsubscribeOneClick
             ));
             $this->oPhpMailer->addCustomHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
         }
@@ -1727,7 +1727,14 @@ class Emailer
             $oEmail->data->url->unsubscribe = $this->generateUnsubscribeUrl(
                 $oEmail->type->slug,
                 $oEmail->data->emailRef,
-                $oEmail->to->id
+                $oEmail->to->id,
+                false
+            );
+            $oEmail->data->url->unsubscribeOneClick = $this->generateUnsubscribeUrl(
+                $oEmail->type->slug,
+                $oEmail->data->emailRef,
+                $oEmail->to->id,
+                true
             );
         }
 
@@ -1809,7 +1816,7 @@ class Emailer
 
     // --------------------------------------------------------------------------
 
-    public function generateUnsubscribeUrl(string $typeSlug, string $emailRef, int $iUserId): string
+    public function generateUnsubscribeUrl(string $typeSlug, string $emailRef, int $userId, bool $oneClick): string
     {
         /**
          * Bit of a hack; keep trying until there's no + symbol in the hash, try up to
@@ -1827,7 +1834,7 @@ class Emailer
             $token = $oEncrypt->encode(implode('|', [
                 $typeSlug,
                 $emailRef,
-                $iUserId,
+                $userId,
             ]));
 
             $counter++;
@@ -1835,9 +1842,10 @@ class Emailer
         } while ($counter <= $attempts && strpos($token, '+') !== false);
 
         return sprintf(
-            siteUrl('email/unsubscribe?ref=%s&token=%s'),
-            $oEmail->ref,
-            $token
+            siteUrl('email/unsubscribe?ref=%s&token=%s&oneclick=%s'),
+            $emailRef,
+            $token,
+            json_encode($oneClick)
         );
     }
 
