@@ -1841,10 +1841,10 @@ class Emailer
         } while ($counter <= $attempts && strpos($token, '+') !== false);
 
         return sprintf(
-            siteUrl('email/unsubscribe?ref=%s&token=%s&oneclick=%s'),
+            siteUrl('email/unsubscribe?ref=%s&token=%s%s'),
             $emailRef,
             $token,
-            json_encode($oneClick)
+            $oneClick ? '&confirm=1' : ''
         );
     }
 
