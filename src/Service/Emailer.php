@@ -485,23 +485,23 @@ class Emailer
     /**
      * Determines whether the user has unsubscribed from this email type
      *
-     * @param int|Auth\Resource\User $user The user or user ID to check for
-     * @param string                 $type The type of email to check against
-     *
-     * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function userHasUnsubscribed(int|Auth\Resource\User $user, string $type): bool
+    public function userHasUnsubscribed(int|Auth\Resource\User $user, string|Type $type): bool
     {
         $userId = $user instanceof Auth\Resource\User
             ? $user->id
             : $user;
 
+        $typeSlug = $type instanceof Type
+            ? $type->slug
+            : $type;
+
         $model = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
         return (bool) $model->countAll([
             new Where('user_id', $userId),
-            new Where('type', $type),
+            new Where('type', $typeSlug),
         ]);
     }
 
@@ -510,17 +510,18 @@ class Emailer
     /**
      * Determines whether a user is suspended
      *
-     * @param int $iUserId The user ID to check
-     *
-     * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function userIsSuspended(int $iUserId): bool
+    public function userIsSuspended(int|Auth\Resource\User $user): bool
     {
-        $oModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
-        return (bool) $oModel->countAll([
-            new Where($oModel->getTableAlias() . '.id', $iUserId),
+        $userId = $user instanceof Auth\Resource\User
+            ? $user->id
+            : $user;
+
+        $model = Factory::model('User', Auth\Constants::MODULE_SLUG);
+        return (bool) $model->countAll([
+            new Where($oModel->getTableAlias() . '.id', $userId),
             new Where('is_suspended', true),
         ]);
     }
@@ -530,31 +531,29 @@ class Emailer
     /**
      * Unsubscribe a user from a particular email type
      *
-     * @param int|Auth\Resource\User $user The user or user ID to unsubscribe
-     * @param string                 $type The type of email to unsubscribe from
-     *
-     * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function unsubscribeUser(int|Auth\Resource\User $user, string $type): bool
+    public function unsubscribeUser(int|Auth\Resource\User $user, string|Type $type): bool
     {
+        if ($this->userHasUnsubscribed($user, $type)) {
+            return true;
+        }
+
         $userId = $user instanceof Auth\Resource\User
             ? $user->id
             : $user;
 
-        if ($this->userHasUnsubscribed($userId, $type)) {
-            return true;
-        }
-
-        // --------------------------------------------------------------------------
+        $typeSlug = $user instanceof Type
+            ? $type->slug
+            : $type;
 
         /** @var \DateTime $now */
         $now   = Factory::factory('DateTime');
         $model = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
         return (bool) $model->create([
             'user_id' => $userId,
-            'type'    => $type,
+            'type'    => $typeSlug,
             'created' => $now->format('Y-m-d H:i:s'),
         ]);
     }
@@ -564,27 +563,27 @@ class Emailer
     /**
      * Subscribe a user to a particular email type
      *
-     * @param int|Auth\Resource\User $user The user or user ID to subscribe
-     * @param string                 $type The type of email to subscribe to
-     *
-     * @return bool
      * @throws FactoryException
      * @throws ModelException
      */
-    public function subscribeUser(int|Auth\Resource\User $user, string $type): bool
+    public function subscribeUser(int|Auth\Resource\User $user, string|Type $type): bool
     {
+        if (!$this->userHasUnsubscribed($user, $type)) {
+            return true;
+        }
+
         $userId = $user instanceof Auth\Resource\User
             ? $user->id
             : $user;
 
-        if (!$this->userHasUnsubscribed($userId, $type)) {
-            return true;
-        }
+        $typeSlug = $type instanceof Type
+            ? $type->slug
+            : $type;
 
         $model = Factory::model('UserEmailBlocker', Auth\Constants::MODULE_SLUG);
         return $model->deleteWhere([
             ['user_id', $userId],
-            ['type', $type],
+            ['type', $typeSlug],
         ]);
     }
 
@@ -1724,7 +1723,7 @@ class Emailer
 
         //  1-Click Unsubscribe
         if ($oEmail->type->can_unsubscribe && !empty($oEmail->to->id)) {
-            $oEmail->data->url->unsubscribe = $this->generateUnsubscribeUrl(
+            $oEmail->data->url->unsubscribe         = $this->generateUnsubscribeUrl(
                 $oEmail->type->slug,
                 $oEmail->data->emailRef,
                 $oEmail->to->id,
