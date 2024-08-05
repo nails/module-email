@@ -1,49 +1,37 @@
 <?php
-$oInput = \Nails\Factory::service('Input');
+
+/**
+ * @var string $logo
+ * @var string $title
+ * @var string $body
+ * @var string $btnText
+ * @var string $btnUrl
+ */
+
 ?>
 <div class="nails-auth login u-center-screen">
     <?php
-    $sLogo = logoDiscover();
-    if ($sLogo) {
+
+    if ($logo) {
         echo '<div class="logo">';
         echo img([
-            'src' => $sLogo,
+            'src' => $logo,
         ]);
         echo '</div>';
     }
+
     ?>
     <div class="panel">
         <h1 class="panel__header text-center">
-            <?php
-            if ($oInput->get('undo')) {
-                echo 'Successfully Re-subscribed';
-            } else {
-                echo 'Successfully Unsubscribed';
-            }
-            ?>
+            <?=$title?>
         </h1>
         <div class="panel__body">
-            <?php
-            if ($oInput->get('undo')) {
-                ?>
-                <p class="text-center">
-                    We'll continue to send you this type of email.
-                </p>
-                <p>
-                    <?=anchor('email/unsubscribe?token=' . $oInput->get('token'), 'Unsubscribe', 'class="btn btn--block"')?>
-                </p>
-                <?php
-            } else {
-                ?>
-                <p class="text-center">
-                    We won't send you this type of email again.
-                </p>
-                <p>
-                    <?=anchor('email/unsubscribe?token=' . $oInput->get('token') . '&undo=1', 'Undo', 'class="btn btn--block"')?>
-                </p>
-                <?php
-            }
-            ?>
+            <p class="text-center">
+                <?=$body?>
+            </p>
+            <p>
+                <?=anchor($btnUrl, $btnText, 'class="btn btn--block"')?>
+            </p>
         </div>
     </div>
 </div>

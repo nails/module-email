@@ -37,28 +37,28 @@ class Unsubscribe extends Base
      */
     public function index()
     {
-        /** @var Input $oInput */
-        $oInput = Factory::service('Input');
-        /** @var Encrypt $oEncrypt */
-        $oEncrypt = Factory::service('Encrypt');
-        /** @var \Nails\Common\Service\View $oView */
-        $oView = Factory::service('View');
-        /** @var Emailer $oEmailer */
-        $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-        /** @var User $oUserModel */
-        $oUserModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
+        /** @var Input $input */
+        $input = Factory::service('Input');
+        /** @var Encrypt $encrypt */
+        $encrypt = Factory::service('Encrypt');
+        /** @var \Nails\Common\Service\View $viewService */
+        $viewService = Factory::service('View');
+        /** @var Emailer $emailer */
+        $emailer = Factory::service('Emailer', Constants::MODULE_SLUG);
+        /** @var User $userModel */
+        $userModel = Factory::model('User', Auth\Constants::MODULE_SLUG);
 
-        $sToken = $oInput->get('token');
-        if (empty($sToken)) {
+        $token = $input->get('token');
+        if (empty($token)) {
             show404();
         }
 
         try {
 
-            $aToken = $oEncrypt->decode($sToken);
-            $aToken = explode('|', $aToken);
+            $tokenArr = $encrypt->decode($token);
+            $tokenArr = explode('|', $tokenArr);
 
-            if (count($aToken) != 3) {
+            if (count($tokenArr) != 3) {
                 show404();
             }
 
@@ -66,34 +66,60 @@ class Unsubscribe extends Base
             show404();
         }
 
-        [$sType, $sRef, $iUserId] = $aToken;
+        [$typeSlug, $emailRef, $userId] = $tokenArr;
 
-        /** @var \Nails\Auth\Resource\User $oUser */
-        $oUser = $oUserModel->getById($iUserId);
-        if (empty($oUser)) {
+        /** @var \Nails\Auth\Resource\User $user */
+        $user = $userModel->getById($userId);
+        if (empty($user)) {
             show404();
         }
 
-        $oEmail = $oEmailer->getByRef($sRef);
-        if (!$oEmail || empty($oEmail->type->can_unsubscribe)) {
+        $type = $emailer->getType($typeSlug);
+        if (empty($type) || !$type->canUnsubscribe()) {
+            show404();
+        }
+
+        $email = $emailer->getByRef($emailRef);
+        if (!$email) {
             show404();
         }
 
         // --------------------------------------------------------------------------
 
-        //  All seems above board, action the request
-        if ($oInput->get('undo') && $oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
-            $oEmailer->subscribeUser($oUser->id, $sType);
+        $unsubscribed = $emailer->userHasUnsubscribed($user, $type);
+        $title        = 'Are you sure?';
+        $body         = 'Please confirm you\'d like to unsubscribe from <strong>' . $type->name . '</strong> emails.';
+        $btnText      = 'Unsubscribe';
+        $btnUrl       = 'email/unsubscribe?token=' . $token . '&confirm=1';
 
-        } elseif (!$oEmailer->userHasUnsubscribed($oUser->id, $sType)) {
-            $oEmailer->unsubscribeUser($oUser->id, $sType);
+        //  All seems above board, action the request
+        if ($input->get('confirm')) {
+            $emailer->unsubscribeUser($user, $type);
+            $title   = 'Unsubscribed';
+            $body    = 'You have been succesfully unsubscribed from <strong>' . $type->name . '</strong> emails.';
+            $btnText = 'Re-subscribe';
+            $btnUrl  = 'email/unsubscribe?token=' . $token . '&undo=1';
+
+        } elseif ($input->get('undo')) {
+            $emailer->subscribeUser($user, $type);
+            $title   = 'Subscribed';
+            $body    = 'You have been succesfully re-subscribed to <strong>' . $type->name . '</strong> emails.';
+            $btnText = 'Unsubscribe';
+            $btnUrl  = 'email/unsubscribe?token=' . $token . '&confirm=1';
         }
 
         // --------------------------------------------------------------------------
 
         $this->loadStyles(NAILS_APP_PATH . 'application/modules/email/views/utilities/unsubscribe.php');
 
-        $oView
+        $viewService
+            ->setData([
+                'logo'    => logoDiscover(),
+                'title'   => $title,
+                'body'    => $body,
+                'btnText' => $btnText,
+                'btnUrl'  => $btnUrl,
+            ])
             ->load([
                 'structure/header/blank',
                 'email/utilities/unsubscribe',
