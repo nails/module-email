@@ -741,7 +741,6 @@ class Emailer
                 '<%s>',
                 $oEmail->data->url->unsubscribeOneClick
             ));
-            $this->oPhpMailer->addCustomHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
         }
 
         $this->oPhpMailer->Subject = $oEmail->subject;
