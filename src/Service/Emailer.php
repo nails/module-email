@@ -521,7 +521,7 @@ class Emailer
 
         $model = Factory::model('User', Auth\Constants::MODULE_SLUG);
         return (bool) $model->countAll([
-            new Where($oModel->getTableAlias() . '.id', $userId),
+            new Where($model->getTableAlias() . '.id', $userId),
             new Where('is_suspended', true),
         ]);
     }
