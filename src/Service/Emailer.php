@@ -311,13 +311,13 @@ class Emailer
      * @param bool         $bGraceful Whether to gracefully fail or not
      * @param bool         $bSendNow  Whether to send now, or soon via cron
      *
-     * @return stdClass|null
+     * @return bool
      * @throws EmailerException
      * @throws FactoryException
      * @throws ModelException
      * @throws PHPMailer\Exception
      */
-    public function send($mInput, bool $bGraceful = false, bool $bSendNow = true): ?stdClass
+    public function send($mInput, bool $bGraceful = false, bool $bSendNow = true): bool
     {
         //  We got something to work with?
         if (empty($mInput)) {
@@ -434,20 +434,14 @@ class Emailer
         } elseif ($bSendNow) {
 
             if ($this->doSend($oInput->id)) {
-                return (object) [
-                    'id'  => $oInput->id,
-                    'ref' => $oInput->ref,
-                ];
+                return true;
 
             } else {
                 return $this->sendError($this->lastError(), $bGraceful);
             }
 
         } else {
-            return (object) [
-                'id'  => $oInput->id,
-                'ref' => $oInput->ref,
-            ];
+            return true;
         }
     }
 
@@ -464,7 +458,7 @@ class Emailer
      * @throws PHPMailer\Exception
      * @todo This should probably create a new row
      */
-    public function resend($mEmailIdRef)
+    public function resend($mEmailIdRef): bool
     {
         if (is_numeric($mEmailIdRef)) {
             $oEmail = $this->getById($mEmailIdRef);
@@ -622,6 +616,7 @@ class Emailer
         // --------------------------------------------------------------------------
 
         $this->setEmailAsSending($oEmail);
+        $this->oLastEmail = null;
 
         // --------------------------------------------------------------------------
 
@@ -1991,17 +1986,18 @@ class Emailer
      * @param string $sError    The error
      * @param bool   $bGraceful Whether to be graceful or not
      *
-     * @return null
+     * @return bool
      * @throws EmailerException
      */
-    protected function sendError(string $sError, bool $bGraceful)
+    protected function sendError(string $sError, bool $bGraceful): bool
     {
         if (!$bGraceful) {
             throw new EmailerException($sError);
         }
 
+        $this->oLastEmail = null;
         $this->setError($sError);
-        return null;
+        return false;
     }
 
     // --------------------------------------------------------------------------
