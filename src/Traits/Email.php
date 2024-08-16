@@ -589,17 +589,18 @@ trait Email
         $this->aEmailsGenerated = [];
 
         foreach ($aEmails as $aData) {
-
             $this->bLastEmailDidSend = $oEmailer->send($aData, false, $bSendNow);
-            $oLastEmail              = $oEmailer->getLastEmail();
+            if ($this->bLastEmailDidSend) {
 
-            /**
-             * There might not always be an email generated:
-             * - unsubscribed users will not received an email, and send() will not fail
-             * - suspended users will not receive an email, and send() will not fail
-             */
-            if (!empty($oLastEmail)) {
-                $this->aEmailsGenerated[] = clone $oLastEmail;
+                /**
+                 * There might not always be an email generated:
+                 * - unsubscribed users will not received an email, and send() will not fail
+                 * - suspended users will not receive an email, and send() will not fail
+                 */
+                $oLastEmail = $oEmailer->getLastEmail();
+                if (!empty($oLastEmail)) {
+                    $this->aEmailsGenerated[] = clone $oLastEmail;
+                }
             }
         }
 
