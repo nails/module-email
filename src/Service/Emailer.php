@@ -1859,6 +1859,35 @@ class Emailer
             /** @var Mustache $oMustache */
             $oMustache = Factory::service('Mustache');
 
+            //  Parse config values
+            $sTemplate = preg_replace_callback(
+                '/{{\s*(.*)?config\\([\'"](.+)[\'"]\\)(.*)?\s*}}/',
+                function ($aMatches) {
+
+                    $sFuncOpen  = trim(getFromArray(1, $aMatches, ''));
+                    $sArgument  = trim(getFromArray(2, $aMatches, ''));
+                    $sFuncClose = trim(getFromArray(3, $aMatches, ''));
+
+                    if (!$sArgument || $sArgument === 'null') {
+                        return '';
+                    }
+
+                    $sConfigValue = call_user_func('config', $sArgument);
+
+                    if ($sFuncOpen && $sFuncClose) {
+                        return sprintf(
+                            '{{ %s\'%s\'%s }}',
+                            $sFuncOpen,
+                            $sConfigValue,
+                            $sFuncClose
+                        );
+                    } else {
+                        return $sConfigValue;
+                    }
+                },
+                $sTemplate
+            );
+
             //  Any function which takes a single argument
             $sTemplate = preg_replace_callback(
                 '/{{\s*([a-zA-Z0-9_]+)(\(([\'" ]*)?(.*?)([\'" ]*)?\))\s*}}/',
