@@ -1468,12 +1468,14 @@ class Emailer
 
         if (array_key_exists(md5($sUrl), $this->aTrackLinkCache)) {
 
-            //  Replace the URL and return the new tag
-            $sHtml = str_replace(
-                $sUrl,
-                $this->aTrackLinkCache[md5($sUrl)],
-                $sHtml
-            );
+            /**
+             * Replace the URL and return the new tag. $sUrl in quotes so we only replace
+             * hyperlinks and not something else, such as an image's URL
+             */
+
+            $sHtml = $bIsHtml
+                ? str_replace('"' . $sUrl . '"', $this->aTrackLinkCache[md5($sUrl)], $sHtml)
+                : str_replace($sUrl, $this->aTrackLinkCache[md5($sUrl)], $sHtml);
 
         } else {
 
