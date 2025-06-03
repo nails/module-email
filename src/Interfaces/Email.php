@@ -181,7 +181,7 @@ interface Email
      *
      * @return $this
      */
-    public function attach($sPath, string $sFileName = null): self;
+    public function attach($sPath, ?string $sFileName = null): self;
 
     // --------------------------------------------------------------------------
 

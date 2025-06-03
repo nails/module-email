@@ -830,7 +830,7 @@ class Emailer
      * @throws FactoryException
      * @throws ModelException
      */
-    public function setEmailAsFailed($oEmail, string $sFailReason = null): Emailer
+    public function setEmailAsFailed($oEmail, ?string $sFailReason = null): Emailer
     {
         $this->oEmailModel->update(
             $oEmail->id,
@@ -915,7 +915,7 @@ class Emailer
      * @throws FactoryException
      * @throws ModelException
      */
-    public function getAllRawQuery(int $page = null, int $perPage = null, array $data = []): \CI_DB_result
+    public function getAllRawQuery(?int $page = null, ?int $perPage = null, array $data = []): \CI_DB_result
     {
         /** @var Database $oDb */
         $oDb = Factory::service('Database');
@@ -983,7 +983,7 @@ class Emailer
      * @throws EmailerException
      * @throws NailsException
      */
-    public function getAll(int $iPage = null, int $iPerPage = null, array $aData = []): array
+    public function getAll(?int $iPage = null, ?int $iPerPage = null, array $aData = []): array
     {
         $oResults   = $this->getAllRawQuery($iPage, $iPerPage, $aData);
         $aResults   = $oResults->result();
@@ -1345,7 +1345,7 @@ class Emailer
      *
      * @return string
      */
-    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, array $aVerify = null)
+    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, ?array $aVerify = null)
     {
         //    Set the class variables for the ID and ref (need those in the callbacks)
         $this->iGenerateTrackingEmailId       = $iEmailId;
@@ -1468,12 +1468,14 @@ class Emailer
 
         if (array_key_exists(md5($sUrl), $this->aTrackLinkCache)) {
 
-            //  Replace the URL and return the new tag
-            $sHtml = str_replace(
-                $sUrl,
-                $this->aTrackLinkCache[md5($sUrl)],
-                $sHtml
-            );
+            /**
+             * Replace the URL and return the new tag. $sUrl in quotes so we only replace
+             * hyperlinks and not something else, such as an image's URL
+             */
+
+            $sHtml = $bIsHtml
+                ? str_replace('"' . $sUrl . '"', $this->aTrackLinkCache[md5($sUrl)], $sHtml)
+                : str_replace($sUrl, $this->aTrackLinkCache[md5($sUrl)], $sHtml);
 
         } else {
 
@@ -1858,6 +1860,35 @@ class Emailer
 
             /** @var Mustache $oMustache */
             $oMustache = Factory::service('Mustache');
+
+            //  Parse config values
+            $sTemplate = preg_replace_callback(
+                '/{{\s*(.*)?config\\([\'"](.+)[\'"]\\)(.*)?\s*}}/',
+                function ($aMatches) {
+
+                    $sFuncOpen  = trim(getFromArray(1, $aMatches, ''));
+                    $sArgument  = trim(getFromArray(2, $aMatches, ''));
+                    $sFuncClose = trim(getFromArray(3, $aMatches, ''));
+
+                    if (!$sArgument || $sArgument === 'null') {
+                        return '';
+                    }
+
+                    $sConfigValue = call_user_func('config', $sArgument);
+
+                    if ($sFuncOpen && $sFuncClose) {
+                        return sprintf(
+                            '{{ %s\'%s\'%s }}',
+                            $sFuncOpen,
+                            $sConfigValue,
+                            $sFuncClose
+                        );
+                    } else {
+                        return $sConfigValue;
+                    }
+                },
+                $sTemplate
+            );
 
             //  Any function which takes a single argument
             $sTemplate = preg_replace_callback(
