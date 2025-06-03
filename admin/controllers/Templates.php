@@ -225,6 +225,8 @@ class Templates extends Base
                 ],
             ],
             'MODEL_INSTANCE'        => (object) [],
+            'INDEX_HTML_HEADER'     => '',
+            'INDEX_HTML_FOOTER'     => '',
         ];
 
         // --------------------------------------------------------------------------
