@@ -322,7 +322,7 @@ trait Email
      *
      * @return $this
      */
-    public function attach($sPath, string $sFileName = null): self
+    public function attach($sPath, ?string $sFileName = null): self
     {
         if (is_array($sPath)) {
             foreach ($sPath as $datum) {

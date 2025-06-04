@@ -109,6 +109,9 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-normalizer" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-grapheme" />
       <path value="$PROJECT_DIR$/vendor/pleonasm/bloom-filter" />
+      <path value="$PROJECT_DIR$/vendor/nails/module-form-builder" />
+      <path value="$PROJECT_DIR$/vendor/nails/module-cron" />
+      <path value="$PROJECT_DIR$/vendor/dragonmantank/cron-expression" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.3">

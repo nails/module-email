@@ -830,7 +830,7 @@ class Emailer
      * @throws FactoryException
      * @throws ModelException
      */
-    public function setEmailAsFailed($oEmail, string $sFailReason = null): Emailer
+    public function setEmailAsFailed($oEmail, ?string $sFailReason = null): Emailer
     {
         $this->oEmailModel->update(
             $oEmail->id,
@@ -915,7 +915,7 @@ class Emailer
      * @throws FactoryException
      * @throws ModelException
      */
-    public function getAllRawQuery(int $page = null, int $perPage = null, array $data = []): \CI_DB_result
+    public function getAllRawQuery(?int $page = null, ?int $perPage = null, array $data = []): \CI_DB_result
     {
         /** @var Database $oDb */
         $oDb = Factory::service('Database');
@@ -983,7 +983,7 @@ class Emailer
      * @throws EmailerException
      * @throws NailsException
      */
-    public function getAll(int $iPage = null, int $iPerPage = null, array $aData = []): array
+    public function getAll(?int $iPage = null, ?int $iPerPage = null, array $aData = []): array
     {
         $oResults   = $this->getAllRawQuery($iPage, $iPerPage, $aData);
         $aResults   = $oResults->result();
@@ -1345,7 +1345,7 @@ class Emailer
      *
      * @return string
      */
-    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, array $aVerify = null)
+    protected function parseLinks(string $sBody, int $iEmailId, string $sEmailRef, bool $bIsHtml = true, ?array $aVerify = null)
     {
         //    Set the class variables for the ID and ref (need those in the callbacks)
         $this->iGenerateTrackingEmailId       = $iEmailId;
