@@ -13,6 +13,7 @@
 namespace Nails\Admin\Email;
 
 use Nails\Admin\Controller\Base;
+use Nails\Admin\Factory\Nav;
 use Nails\Admin\Helper;
 use Nails\Auth\Model\User;
 use Nails\Common\Exception\ValidationException;
@@ -30,12 +31,10 @@ class Utilities extends Base
 {
     /**
      * Announces this controller's navGroups
-     *
-     * @return stdClass
      */
-    public static function announce()
+    public static function announce(): Nav|array|null
     {
-        /** @var \Nails\Admin\Factory\Nav $oNavGroup */
+        /** @var Nav $oNavGroup */
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Utilities');
 
