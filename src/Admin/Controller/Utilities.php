@@ -21,6 +21,7 @@ use Nails\Common\Service\Input;
 use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Factory;
+use Nails\Admin\Factory\Nav;
 
 /**
  * Class Utilities
@@ -34,9 +35,9 @@ class Utilities extends Base
      *
      * @return stdClass
      */
-    public static function announce()
+    public static function announce(): Nav|array|null
     {
-        /** @var \Nails\Admin\Factory\Nav $oNavGroup */
+        /** @var Nav $oNavGroup */
         $oNavGroup = Factory::factory('Nav', \Nails\Admin\Constants::MODULE_SLUG);
         $oNavGroup->setLabel('Utilities');
 
