@@ -1861,39 +1861,47 @@ class Emailer
             /** @var Mustache $oMustache */
             $oMustache = Factory::service('Mustache');
 
-            //  Parse config values
+            //  Parse config values which are in the format {{ config('FOO') }}
             $sTemplate = preg_replace_callback(
-                '/{{\s*(.*)?config\\([\'"](.+)[\'"]\\)(.*)?\s*}}/',
+                '/{{\s*config\\([\'"](.+)[\'"]\\)\s*}}/',
                 function ($aMatches) {
 
-                    $sFuncOpen  = trim(getFromArray(1, $aMatches, ''));
-                    $sArgument  = trim(getFromArray(2, $aMatches, ''));
-                    $sFuncClose = trim(getFromArray(3, $aMatches, ''));
+                    $sArgument = $aMatches[1];
+                    if (!$sArgument || $sArgument === 'null') {
+                        return '';
+                    }
+
+                    return config($sArgument);
+                },
+                $sTemplate
+            );
+
+            //  Parse config values which are part of a function call {{ function(config('FOO)) }}
+            $sTemplate = preg_replace_callback(
+                '/{{\s*(.*)\(\s*config\\([\'"](.+)[\'"]\\)\s*\).*\s*}}/',
+                function ($aMatches) {
+
+                    $sFunction = trim(getFromArray(1, $aMatches, ''));
+                    $sArgument = trim(getFromArray(2, $aMatches, ''));
 
                     if (!$sArgument || $sArgument === 'null') {
                         return '';
                     }
 
-                    $sConfigValue = call_user_func('config', $sArgument);
-
-                    if ($sFuncOpen && $sFuncClose) {
-                        return sprintf(
-                            '{{ %s\'%s\'%s }}',
-                            $sFuncOpen,
-                            $sConfigValue,
-                            $sFuncClose
-                        );
-                    } else {
-                        return $sConfigValue;
-                    }
+                    return sprintf(
+                        '{{ %s(\'%s\') }}',
+                        $sFunction,
+                        config($sArgument)
+                    );
                 },
                 $sTemplate
             );
 
-            //  Any function which takes a single argument
+            //  Any function which takes a single argument {{ function('') }}
             $sTemplate = preg_replace_callback(
                 '/{{\s*([a-zA-Z0-9_]+)(\(([\'" ]*)?(.*?)([\'" ]*)?\))\s*}}/',
                 function ($aMatches) {
+
                     $sFunction = getFromArray(1, $aMatches);
                     $sArgument = getFromArray(4, $aMatches);
 
