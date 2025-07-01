@@ -13,53 +13,32 @@
 namespace Nails\Email\Controller;
 
 use Nails\Auth;
-use Nails\Common\Exception\NailsException;
+use Nails\Common\Constants;
+use Nails\Common\Exception\AssetException;
+use Nails\Common\Exception\FactoryException;
+use Nails\Common\Service\Asset;
 use Nails\Factory;
 
-/**
- * Allow the app to add functionality, if needed
- * Negative conditional helps with static analysis
- */
-if (!class_exists('\App\Email\Controller\Base')) {
-    abstract class BaseMiddle extends \App\Controller\Base
-    {
-    }
-} else {
-    abstract class BaseMiddle extends \App\Email\Controller\Base
-    {
-        public function __construct()
-        {
-            if (!classExtends(parent::class, \App\Controller\Base::class)) {
-                throw new NailsException(sprintf(
-                    'Class %s must extend %s',
-                    parent::class,
-                    \App\Controller\Base::class
-                ));
-            }
-            parent::__construct();
-        }
-    }
-}
-
-// --------------------------------------------------------------------------
-
-abstract class Base extends BaseMiddle
+abstract class Base extends \Nails\Common\Controller\Base
 {
     /**
-     * Loads Auth styles if supplied view does not exist
+     * Loads Auth styles if the supplied view does not exist
      *
      * @param string $sView The view to test
      *
-     * @throws \Nails\Common\Exception\FactoryException
+     * @throws FactoryException
+     * @throws AssetException
      */
-    protected function loadStyles($sView)
+    protected function loadStyles(string $sView)
     {
-        //  Test if a view has been provided by the app
+        //  Test if the app has provided a view
         if (!is_file($sView)) {
+            /** @var Asset $oAsset */
             $oAsset = Factory::service('Asset');
-            $oAsset->clear();
-            $oAsset->load('nails.min.css', \Nails\Common\Constants::MODULE_SLUG);
-            $oAsset->load('styles.min.css', Auth\Constants::MODULE_SLUG);
+            $oAsset
+                ->clear()
+                ->load('nails.min.css', Constants::MODULE_SLUG)
+                ->load('styles.min.css', Auth\Constants::MODULE_SLUG);
         }
     }
 }
