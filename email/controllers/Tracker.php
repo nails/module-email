@@ -108,7 +108,7 @@ class Tracker extends Base
         // --------------------------------------------------------------------------
 
         $sUrl = $oEmailer->trackLink($sRef, $iLinkId);
-        if ($sUrl === false) {
+        if (empty($sUrl)) {
             show404();
         }
 
