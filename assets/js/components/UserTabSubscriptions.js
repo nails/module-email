@@ -5,7 +5,6 @@ class UserTabSubscriptions {
      */
     constructor(adminController) {
         this.adminController = adminController;
-        console.log(adminController);
         this.init();
     }
 
