@@ -9,7 +9,7 @@
  */
 
 ?>
-<div class="nails-auth login u-center-screen">
+<div class="nails-email unsubscribe center-screen">
     <?php
 
     if ($logo) {
@@ -22,9 +22,11 @@
 
     ?>
     <div class="panel">
-        <h1 class="panel__header text-center">
-            <?=$title?>
-        </h1>
+        <div class="panel__header">
+            <h1 class="panel__title text-center">
+                <?=$title?>
+            </h1>
+        </div>
         <div class="panel__body">
             <p class="text-center">
                 <?=$body?>
