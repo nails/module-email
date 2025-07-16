@@ -9,18 +9,15 @@
 
 namespace Nails\Email\Resource\Email\Track;
 
-use Nails\Common\Resource;
+use Nails\Common\Resource\Entity;
 
 /**
  * Class Link
  *
  * @package Nails\Email\Resource\Email\Track
  */
-class Link extends Resource
+class Link extends Entity
 {
-    /** @var int */
-    public $id;
-
     /** @var int */
     public $email_id;
 
@@ -29,7 +26,4 @@ class Link extends Resource
 
     /** @var int|null */
     public $user_id;
-
-    /** @var \Nails\Common\Resource\DateTime */
-    public $created;
 }

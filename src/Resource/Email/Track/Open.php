@@ -9,24 +9,18 @@
 
 namespace Nails\Email\Resource\Email\Track;
 
-use Nails\Common\Resource;
+use Nails\Common\Resource\Entity;
 
 /**
  * Class Open
  *
  * @package Nails\Email\Resource\Email\Track
  */
-class Open extends Resource
+class Open extends Entity
 {
-    /** @var int */
-    public $id;
-
     /** @var int */
     public $email_id;
 
     /** @var int|null */
     public $user_id;
-
-    /** @var \Nails\Common\Resource\DateTime */
-    public $created;
 }
