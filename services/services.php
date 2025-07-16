@@ -53,46 +53,47 @@ return [
         },
     ],
     'resources' => [
-        'Email'            => function ($mObj): Resource\Email {
+        'Email'            => function ($resource, $model): Resource\Email {
             if (class_exists('\App\Email\Resource\Email')) {
-                return new \App\Email\Resource\Email($mObj);
+                return new \App\Email\Resource\Email($resource, $model);
             } else {
-                return new Resource\Email($mObj);
+                return new Resource\Email($resource, $model);
             }
         },
-        'EmailLink'        => function ($mObj): Resource\Email\Link {
+        'EmailLink'        => function ($resource, $model): Resource\Email\Link {
             if (class_exists('\App\Email\Resource\Email\Link')) {
-                return new \App\Email\Resource\Email\Link($mObj);
+                return new \App\Email\Resource\Email\Link($resource, $model);
             } else {
-                return new Resource\Email\Link($mObj);
+                return new Resource\Email\Link($resource, $model);
             }
         },
-        'EmailTrackLink'   => function ($mObj): Resource\Email\Track\Link {
+        'EmailTrackLink'   => function ($resource, $model): Resource\Email\Track\Link {
             if (class_exists('\App\Email\Resource\Email\Track\Link')) {
-                return new \App\Email\Resource\Email\Track\Link($mObj);
+                return new \App\Email\Resource\Email\Track\Link($resource, $model);
             } else {
-                return new Resource\Email\Track\Link($mObj);
+                return new Resource\Email\Track\Link($resource, $model);
             }
         },
-        'EmailTrackOpen'   => function ($mObj): Resource\Email\Track\Open {
+        'EmailTrackOpen'   => function ($resource, $model): Resource\Email\Track\Open {
             if (class_exists('\App\Email\Resource\Email\Track\Open')) {
-                return new \App\Email\Resource\Email\Track\Open($mObj);
+                return new \App\Email\Resource\Email\Track\Open($resource, $model);
             } else {
-                return new Resource\Email\Track\Open($mObj);
+                return new Resource\Email\Track\Open($resource, $model);
             }
         },
-        'TemplateOverride' => function ($mObj): Resource\Template\Override {
+        'TemplateOverride' => function ($resource, $model): Resource\Template\Override {
             if (class_exists('\App\Email\Resource\Template\Override')) {
-                return new \App\Email\Resource\Template\Override($mObj);
+                return new \App\Email\Resource\Template\Override($resource, $model);
             } else {
-                return new Resource\Template\Override($mObj);
+                return new Resource\Template\Override($resource, $model);
             }
         },
-        'Type'             => function ($mObj): Resource\Type {
+        'Type'             => function ($resource, $model = null): Resource\Type {
+            //  @todo (Pablo 2025-07-15) - this should be a factory
             if (class_exists('\App\Email\Resource\Type')) {
-                return new \App\Email\Resource\Type($mObj);
+                return new \App\Email\Resource\Type($resource);
             } else {
-                return new Resource\Type($mObj);
+                return new Resource\Type($resource);
             }
         },
     ],

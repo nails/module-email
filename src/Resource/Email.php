@@ -9,18 +9,15 @@
 
 namespace Nails\Email\Resource;
 
-use Nails\Common\Resource;
+use Nails\Common\Resource\Entity;
 
 /**
  * Class Email
  *
  * @package Nails\Email\Resource
  */
-class Email extends Resource
+class Email extends Resource\Entity
 {
-    /** @var int */
-    public $id;
-
     /** @var string */
     public $ref;
 
