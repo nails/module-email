@@ -1638,7 +1638,7 @@ class Emailer
         //  Template overrides
         if (!empty($oEmail->data->template_header)) {
             $oEmail->type->template_header = $oEmail->data->template_header;
-        } elseif (empty($oEmail->data->template_header)) {
+        } elseif (empty($oEmail->type->template_header)) {
             $oEmail->type->template_header = 'email/structure/email_header';
         }
 
@@ -1648,7 +1648,7 @@ class Emailer
 
         if (!empty($oEmail->data->template_footer)) {
             $oEmail->type->template_footer = $oEmail->data->template_footer;
-        } elseif (empty($oEmail->data->template_footer)) {
+        } elseif (empty($oEmail->type->template_footer)) {
             $oEmail->type->template_footer = 'email/structure/email_footer';
         }
 
