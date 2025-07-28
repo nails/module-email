@@ -16,7 +16,7 @@ use Nails\Common\Resource\Entity;
  *
  * @package Nails\Email\Resource
  */
-class Email extends Resource\Entity
+class Email extends Entity
 {
     /** @var string */
     public $ref;
