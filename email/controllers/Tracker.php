@@ -112,7 +112,7 @@ class Tracker extends Base
             show404();
         }
 
-        redirect($sUrl);
+        redirect(sUrl: $sUrl, bAllowExternal: true);
     }
 
     // --------------------------------------------------------------------------
