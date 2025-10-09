@@ -2,13 +2,12 @@
 
 namespace Nails\Email\Settings;
 
-use Nails\Common\Service\FormValidation;
-use Nails\Email\Model\Page;
-use Nails\Email\Service\Driver;
 use Nails\Common\Helper\Form;
 use Nails\Common\Interfaces;
+use Nails\Common\Service\FormValidation;
 use Nails\Components\Setting;
-use Nails\Email\Constants;
+use Nails\Email\Model\Page;
+use Nails\Email\Service\Driver;
 use Nails\Factory;
 
 /**
@@ -20,6 +19,7 @@ class General implements Interfaces\Component\Settings
 {
     const KEY_FROM_NAME        = 'from_name';
     const KEY_FROM_EMAIL       = 'from_email';
+    const KEY_REPLY_TO_EMAIL   = 'reply_to_email';
     const KEY_RETENTION_PERIOD = 'retention_period';
 
     // --------------------------------------------------------------------------
@@ -56,6 +56,14 @@ class General implements Interfaces\Component\Settings
             ->setLabel('From Name')
             ->setFieldset('Sender');
 
+        /** @var Setting $oReplyToEmail */
+        $oReplyToEmail = Factory::factory('ComponentSetting');
+        $oReplyToEmail
+            ->setKey(static::KEY_REPLY_TO_EMAIL)
+            ->setLabel('Reply-To Email')
+            ->setFieldset('Sender')
+            ->setInfo('Set a default reply-to address, if different from the sender.');
+
         /** @var Setting $oFromEmail */
         $oFromEmail = Factory::factory('ComponentSetting');
         $oFromEmail
@@ -77,7 +85,8 @@ class General implements Interfaces\Component\Settings
         return [
             $oFromName,
             $oFromEmail,
-            $oRetentionPeriod
+            $oReplyToEmail,
+            $oRetentionPeriod,
         ];
     }
 }
