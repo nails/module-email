@@ -127,8 +127,9 @@ class Emailer
 
         //  Set email related settings
         $this->from = (object) [
-            'name'  => $this->getFromName(),
-            'email' => $this->getFromEmail(),
+            'name'    => $this->getFromName(),
+            'email'   => $this->getFromEmail(),
+            'replyTo' => $this->getReplyToEmail(),
         ];
 
         // --------------------------------------------------------------------------
@@ -721,12 +722,23 @@ class Emailer
         $this->oPhpMailer->clearAttachments();
         $this->oPhpMailer->clearCustomHeaders();
 
-        $aReplyTos = preg_split('/[,;]/', $oEmail->from->email);
+        $this->oPhpMailer->setFrom($this->from->email, $oEmail->from->name);
+        /**
+         * If the email has a defined from address, set that as the reply to, otherwise
+         * fall back to global default (which might be 'none').
+         */
+        $aReplyTos = array_filter(
+            array_unique(
+                preg_split(
+                    '/[,;]/',
+                    (string) ($oEmail->from->email ?: $this->getReplyToEmail())
+                )
+            )
+        );
         foreach ($aReplyTos as $sReplyTo) {
             $this->oPhpMailer->addReplyTo($sReplyTo, $oEmail->from->name);
         }
 
-        $this->oPhpMailer->setFrom($this->from->email, $oEmail->from->name);
         $this->oPhpMailer->addAddress($oEmail->to->email);
         $this->oPhpMailer->isHTML(true);
 
@@ -2015,6 +2027,19 @@ class Emailer
             throw new EmailerException('nobody@' . $sDomain . ' is not a valid from email');
         }
         return 'nobody@' . $sDomain;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the default 'Reply-To' value for all emails
+     *
+     * @return string|null
+     * @throws FactoryException
+     */
+    public function getReplyToEmail(): ?string
+    {
+        return trim(appSetting('reply_to_email', Constants::MODULE_SLUG)) ?: null;
     }
 
     // --------------------------------------------------------------------------
