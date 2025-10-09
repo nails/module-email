@@ -731,10 +731,16 @@ class Emailer
             array_unique(
                 preg_split(
                     '/[,;]/',
-                    (string) ($oEmail->from->email ?: $this->getReplyToEmail())
+                    (string) $oEmail->from->email
                 )
-            )
+            ),
+            fn(string $sEmail) => !empty($sEmail) && trim($sEmail) !== $this->from->email
         );
+
+        if (empty($aReplyTos) && $this->getReplyToEmail()) {
+            $aReplyTos[] = $this->getReplyToEmail();
+        }
+
         foreach ($aReplyTos as $sReplyTo) {
             $this->oPhpMailer->addReplyTo($sReplyTo, $oEmail->from->name);
         }
@@ -2039,7 +2045,7 @@ class Emailer
      */
     public function getReplyToEmail(): ?string
     {
-        return trim(appSetting('reply_to_email', Constants::MODULE_SLUG)) ?: null;
+        return trim((string) appSetting('reply_to_email', Constants::MODULE_SLUG)) ?: null;
     }
 
     // --------------------------------------------------------------------------
