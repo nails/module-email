@@ -63,9 +63,9 @@ class Clean extends Base
 
                 $oOutput->write('Cleaning items older than <comment>' . $oNow->format('Y-m-d H:i:s') . '</comment>... ');
 
-                $oDb->where('sent <', $oNow->format('Y-m-d H:i:s'));
+                $oDb->where('created <', $oNow->format('Y-m-d H:i:s'));
                 $oDb->from($oEmailer->getTableName());
-                $oResult = $oDb->delete();
+                $oDb->delete();
 
                 $oOutput->writeln('<comment>done</comment>');
                 $oOutput->writeln('<comment>' . $oDb->affected_rows() . '</comment> items deleted');
