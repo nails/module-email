@@ -43,7 +43,24 @@ class Migration15 extends Migration14
             $this->query('ALTER TABLE `{{NAILS_DB_PREFIX}}email_archive` ADD FOREIGN KEY(`created_by`) REFERENCES `{{NAILS_DB_PREFIX}}user` (`id`) ON DELETE SET null;');
             $this->query('ALTER TABLE `{{NAILS_DB_PREFIX}}email_archive` ADD FOREIGN KEY(`modified_by`) REFERENCES `{{NAILS_DB_PREFIX}}user` (`id`) ON DELETE SET null;');
             //  Set timestamps, with fallback
+            //  Where a queued date is known
             $this->query('UPDATE `{{NAILS_DB_PREFIX}}email_archive` SET `created` = `queued` WHERE `created` IS null;');
+            //  Where a queued date is not known, attempt to match with link.created
+            $this->query(
+                <<<EOT
+                UPDATE `{{NAILS_DB_PREFIX}}email_archive` AS e
+                JOIN (
+                    SELECT
+                        email_id,
+                        MIN(created) AS min_created
+                    FROM `{{NAILS_DB_PREFIX}}email_archive_link`
+                    GROUP BY email_id
+                ) AS l ON l.email_id = e.id
+                SET e.created = l.min_created
+                WHERE e.created IS NULL;
+                EOT
+            );
+            //  Cannot infer, so use NOW() so something is set
             $this->query('UPDATE `{{NAILS_DB_PREFIX}}email_archive` SET `created` = NOW() WHERE `created` IS null;');
             $this->query('UPDATE `{{NAILS_DB_PREFIX}}email_archive` SET `modified` = `created` WHERE `modified` IS null;');
             //  Make not-nullable
