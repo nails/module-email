@@ -1269,8 +1269,6 @@ class Emailer
             $oEvent = Factory::service('Event');
             /** @var Email\Track\Open $oTrackModel */
             $oTrackModel = Factory::model('EmailTrackOpen', Constants::MODULE_SLUG);
-            /** @var \DateTime $oNow */
-            $oNow = Factory::factory('DateTime');
 
             $oDb
                 ->set('read_count', 'read_count + 1', false)
@@ -1280,7 +1278,6 @@ class Emailer
             $oTrackModel->create([
                 'email_id' => $oEmail->id,
                 'user_id'  => activeUser('id') ?: null,
-                'created'  => $oNow->format('Y-m-d H:i:s'),
             ]);
 
             $oEvent->trigger(
@@ -1319,8 +1316,6 @@ class Emailer
             $oLinkModel = Factory::model('EmailLink', Constants::MODULE_SLUG);
             /** @var Email\Track\Link $oTrackModel */
             $oTrackModel = Factory::model('EmailTrackLink', Constants::MODULE_SLUG);
-            /** @var \DateTime $oNow */
-            $oNow = Factory::factory('DateTime');
 
             /** @var \Nails\Email\Resource\Email\Link $oLink */
             $oLink = $oLinkModel->getById($iLinkId);
@@ -1336,7 +1331,6 @@ class Emailer
                     'email_id' => $oEmail->id,
                     'link_id'  => $oLink->id,
                     'user_id'  => activeUser('id') ?: null,
-                    'created'  => $oNow->format('Y-m-d H:i:s'),
                 ]);
 
                 $oEvent->trigger(
@@ -1520,15 +1514,12 @@ class Emailer
                 }
             }
 
-            /** @var \DateTime $oNow */
-            $oNow       = Factory::factory('DateTime');
             $oLinkModel = Factory::model('EmailLink', Constants::MODULE_SLUG);
 
             $iLinkId = $oLinkModel->create([
                 'email_id' => $this->iGenerateTrackingEmailId,
                 'url'      => $sUrlWithVerification ?? $sUrl,
                 'title'    => $sTitle,
-                'created'  => $oNow->format('Y-m-d H:i:s'),
                 'is_html'  => $bIsHtml,
             ]);
 

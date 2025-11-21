@@ -32,18 +32,4 @@ class Open extends Base
      * @var string
      */
     const RESOURCE_PROVIDER = Constants::MODULE_SLUG;
-
-    /**
-     * Whether to automatically set timestamps or not
-     *
-     * @var bool
-     */
-    const AUTO_SET_TIMESTAMP = false;
-
-    /**
-     * Whether to automatically set created/modified users or not
-     *
-     * @var bool
-     */
-    const AUTO_SET_USER = false;
 }
