@@ -15,6 +15,7 @@ use Nails\Admin\Controller\DefaultController;
 use Nails\Admin\Factory\IndexFilter;
 use Nails\Admin\Factory\IndexFilter\Option;
 use Nails\Auth;
+use Nails\Email\Admin\Permission;
 use Nails\Email\Constants;
 use Nails\Email\Resource\Type;
 use Nails\Email\Service\Emailer;
@@ -27,23 +28,25 @@ use Nails\Factory;
  */
 class Blocks extends DefaultController
 {
-    const CONFIG_MODEL_NAME     = 'UserEmailBlocker';
-    const CONFIG_MODEL_PROVIDER = Auth\Constants::MODULE_SLUG;
-    const CONFIG_SIDEBAR_GROUP  = 'Email';
-    const CONFIG_TITLE_SINGLE   = 'Block';
-    const CONFIG_INDEX_FIELDS   = [
+    const CONFIG_MODEL_NAME        = 'UserEmailBlocker';
+    const CONFIG_MODEL_PROVIDER    = Auth\Constants::MODULE_SLUG;
+    const CONFIG_SIDEBAR_GROUP     = 'Email';
+    const CONFIG_TITLE_SINGLE      = 'Block';
+    const CONFIG_INDEX_FIELDS      = [
         'User'    => 'user_id',
         'Type'    => null,
         'Created' => 'created',
     ];
-    const CONFIG_SORT_OPTIONS   = [
+    const CONFIG_SORT_OPTIONS      = [
         'Created' => 'created',
         'Type'    => 'type',
     ];
-    const CONFIG_SORT_DIRECTION = self::SORT_DESCENDING;
-    const CONFIG_CAN_EDIT       = false;
-    const CONFIG_PERMISSION     = 'email:blocks';
-    const CHANGELOG_ENABLED     = false;
+    const CONFIG_SORT_DIRECTION    = self::SORT_DESCENDING;
+    const CONFIG_CAN_EDIT          = false;
+    const CONFIG_PERMISSION_BROWSE = Permission\Blocks\Browse::class;
+    const CONFIG_PERMISSION_CREATE = Permission\Blocks\Create::class;
+    const CONFIG_PERMISSION_DELETE = Permission\Blocks\Delete::class;
+    const CHANGELOG_ENABLED        = false;
 
     // --------------------------------------------------------------------------
 
