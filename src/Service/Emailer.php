@@ -1872,7 +1872,7 @@ class Emailer
 
             //  Parse config values which are in the format {{ config('FOO') }}
             $sTemplate = preg_replace_callback(
-                '/{{\s*config\\([\'"](.+)[\'"]\\)\s*}}/',
+                '/{{\s*config\\([\'"](.+?)[\'"]\\)\s*}}/',
                 function ($aMatches) {
 
                     $sArgument = $aMatches[1];
@@ -1887,7 +1887,7 @@ class Emailer
 
             //  Parse config values which are part of a function call {{ function(config('FOO)) }}
             $sTemplate = preg_replace_callback(
-                '/{{\s*(.*)\(\s*config\\([\'"](.+)[\'"]\\)\s*\).*\s*}}/',
+                '/{{\s*(.*)\(\s*config\\([\'"](.+?)[\'"]\\)\s*\).*\s*}}/',
                 function ($aMatches) {
 
                     $sFunction = trim(getFromArray(1, $aMatches, ''));
