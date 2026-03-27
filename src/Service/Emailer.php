@@ -789,11 +789,23 @@ class Emailer
 
         //  Add any CC/BCC's
         if (!empty($oEmail->data->cc)) {
-            $this->oPhpMailer->addCC($oEmail->data->cc);
+            if (is_array($oEmail->data->cc)) {
+                foreach ($oEmail->data->cc as $cc) {
+                    $this->oPhpMailer->addCC($cc);
+                }
+            } else {
+                $this->oPhpMailer->addCC($oEmail->data->cc);
+            }
         }
 
         if (!empty($oEmail->data->bcc)) {
-            $this->oPhpMailer->addBCC($oEmail->data->bcc);
+            if (is_array($oEmail->data->bcc)) {
+                foreach ($oEmail->data->bcc as $bcc) {
+                    $this->oPhpMailer->addBCC($bcc);
+                }
+            } else {
+                $this->oPhpMailer->addBCC($oEmail->data->bcc);
+            }
         }
 
         // --------------------------------------------------------------------------
