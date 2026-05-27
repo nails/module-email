@@ -1128,15 +1128,19 @@ class Emailer
     /**
      * Get en email from the archive by its ID
      *
-     * @param int   $iId   The email's ID
-     * @param array $aData The data array
+     * @param int|null $iId   The email's ID
+     * @param array    $aData The data array
      *
      * @return object|null
      * @throws FactoryException
      * @throws ModelException
      */
-    public function getById(int $iId, array $aData = []): ?object
+    public function getById(?int $iId, array $aData = []): ?object
     {
+        if (empty($iId)) {
+            return null;
+        }
+
         if (empty($aData['where'])) {
             $aData['where'] = [];
         }
