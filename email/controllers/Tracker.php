@@ -101,7 +101,7 @@ class Tracker extends Base
 
         // --------------------------------------------------------------------------
 
-        if (!$sRef || !$oEmailer->validateHash($sRef, $sGuid, $sHash)) {
+        if (!$sRef || !$iLinkId || !$oEmailer->validateHash($sRef, $sGuid, $sHash)) {
             show404();
         }
 
