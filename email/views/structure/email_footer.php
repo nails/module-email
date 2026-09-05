@@ -1,27 +1,76 @@
+<?php
+
+/**
+ * The framework email footer
+ *
+ * The other half of `email_header.php`; closes everything it left open, in
+ * order. See that file for the conventions this one follows.
+ *
+ * The tracker pixel keeps its inline dimensions deliberately: it has to
+ * collapse even in a client which has stripped the `<style>` block, or it
+ * shows up as a broken image.
+ *
+ * @var \stdClass|null $emailObject
+ */
+
+/** @var \Nails\Common\Service\View $oView */
+$oView = \Nails\Factory::service('View');
+
+$aSlotData = ['emailObject' => $emailObject ?? null];
+
+$fRenderSlot = function (string $sSlot) use ($oView, $aSlotData): string {
+    return trim($oView->load('email/structure/slots/' . $sSlot, $aSlotData, true));
+};
+
+$sSignOff = $fRenderSlot('signoff');
+$sLinks   = $fRenderSlot('footer_links');
+$sAddress = $fRenderSlot('footer_address');
+
+//  Rendered inside the content well, immediately after the body view
+if ($sSignOff !== '') {
+    echo $sSignOff . "\n";
+}
+
+?>
+                        </td>
+                    </tr>
+                </table>
+                <div class="footer">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <?php
+                        if ($sLinks !== '') {
+                            ?><tr>
+                            <td class="aligncenter content-block" align="center" valign="top">
+                                <?php echo $sLinks . PHP_EOL; ?>
+                            </td>
+                        </tr>
+                        <?php
+                        }
+                        if ($sAddress !== '') {
+                            ?><tr>
+                            <td class="aligncenter content-block content-block--address" align="center" valign="top">
+                                <?php echo $sAddress . PHP_EOL; ?>
+                            </td>
+                        </tr>
+                        <?php
+                        }
+                        ?><tr>
+                            <td class="aligncenter content-block content-block--reference" align="center" valign="top">
+                                Email Ref: {{emailRef}}
                             </td>
                         </tr>
                     </table>
-                    <div class="footer" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;">
-                        <table width="100%" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                <td class="aligncenter content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; color: #999; text-align: center; margin: 0; padding: 0 0 20px;" align="center" valign="top">
-                                        {{#url.viewOnline}}
-                                            <a href="{{url.viewOnline}}">View this E-mail Online</a>
-                                        {{/url.viewOnline}}
-                                        {{#url.unsubscribe}}
-                                            <a href="{{{url.unsubscribe}}}">Unsubscribe</a>
-                                        {{/url.unsubscribe}}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
                 </div>
-            </td>
-            <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
-        </tr>
-    </table>
-    {{#url.trackerImg}}
-        <img src="{{url.trackerImg}}" width="0" height="0" style="width:0px;height:0px;" alt="" />
-    {{/url.trackerImg}}
+            </div>
+            <!--[if mso]>
+            </td></tr></table>
+            <![endif]-->
+        </td>
+        <td class="gutter" width="20" valign="top">&nbsp;</td>
+    </tr>
+</table>
+{{#url.trackerImg}}
+<img src="{{url.trackerImg}}" width="1" height="1" border="0" alt="" style="display:block;width:1px;height:1px;max-height:1px;max-width:1px;border:0;overflow:hidden;"/>
+{{/url.trackerImg}}
 </body>
 </html>

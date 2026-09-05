@@ -1,0 +1,60 @@
+/*
+ * Nails Email Framework - Badge
+ *
+ * A small inline label. Pill radii are dropped in Outlook, which leaves a
+ * rectangle rather than something broken, so no fallback is needed.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    font-family: $email-font-family;
+    font-size: $email-font-size-tiny;
+    font-weight: $email-font-weight-bold;
+    line-height: 18px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    border-radius: $email-radius-pill;
+    color: $email-color-brand-text;
+    background-color: $email-color-brand;
+
+    @include email-dark {
+        color: $email-dark-color-brand-text;
+        background-color: $email-dark-color-brand;
+    }
+
+    &--neutral {
+        color: $email-color-text-muted;
+        background-color: $email-color-card-alt;
+
+        @include email-dark {
+            color: $email-dark-color-text-muted;
+            background-color: $email-dark-color-card-alt;
+        }
+    }
+
+    &--success {
+        color: $email-color-fixed-light;
+        background-color: $email-color-success-solid;
+    }
+
+    &--warning {
+        color: $email-color-fixed-dark;
+        background-color: $email-color-warning-solid;
+    }
+
+    &--danger {
+        color: $email-color-fixed-light;
+        background-color: $email-color-danger-solid;
+    }
+
+    &--info {
+        color: $email-color-fixed-light;
+        background-color: $email-color-info-solid;
+    }
+}

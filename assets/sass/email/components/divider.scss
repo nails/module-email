@@ -1,0 +1,47 @@
+/*
+ * Nails Email Framework - Divider
+ *
+ * A rule between blocks of content. `<hr>` is styled by `base/typography.scss`
+ * and is fine in most clients, but Outlook gives it a shadow and a stubborn
+ * default height, so a bordered element is the version to reach for when it
+ * has to be exact.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.divider {
+    width: 100%;
+    height: 1px;
+    margin: $email-spacing-card 0;
+    font-size: 0;
+    line-height: 0;
+    border: 0;
+    border-top: 1px solid $email-color-border;
+    @include email-mso-line-height;
+
+    @include email-dark {
+        border-top-color: $email-dark-color-border;
+    }
+
+    &--tight {
+        margin: $email-spacing 0;
+    }
+
+    &--loose {
+        margin: 48px 0;
+    }
+
+    &--strong {
+        border-top-color: $email-color-border-strong;
+
+        @include email-dark {
+            border-top-color: $email-dark-color-border-strong;
+        }
+    }
+
+    //  Vertical space with no rule
+    &--blank {
+        border-top: 0;
+    }
+}

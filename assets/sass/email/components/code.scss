@@ -1,0 +1,77 @@
+/*
+ * Nails Email Framework - Code
+ *
+ * Monospaced output: `<pre>` blocks, inline `<code>`, and `.heads-up` — the
+ * prominent centred value used for one-time credentials
+ * (`module-auth`'s `new_user` email being the case it exists for).
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+pre,
+.code {
+    display: block;
+    margin: 0 0 $email-spacing;
+    padding: 14px 16px;
+    font-family: $email-font-family-mono;
+    font-size: $email-font-size-tiny;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: $email-color-text;
+    background-color: $email-color-code-bg;
+    border: 1px solid $email-color-code-border;
+    border-radius: $email-radius-control;
+    @include email-mso-line-height;
+
+    @include email-dark {
+        color: $email-dark-color-text;
+        background-color: $email-dark-color-code-bg;
+        border-color: $email-dark-color-code-border;
+    }
+}
+
+code {
+    font-family: $email-font-family-mono;
+    font-size: 0.9em;
+    color: $email-color-code-text;
+
+    @include email-dark {
+        color: $email-dark-color-code-text;
+    }
+}
+
+//  A `<code>` inside a `<pre>` is not a second box
+pre code,
+.code code {
+    font-size: inherit;
+    color: inherit;
+}
+
+//  A value the recipient has to read off the screen and use — a temporary
+//  password, a verification code — so it is set large, centred and
+//  monospaced, in a well of its own
+.heads-up {
+    display: block;
+    margin: 0 0 $email-spacing;
+    padding: 18px 16px;
+    font-family: $email-font-family-mono;
+    font-size: 22px;
+    font-weight: $email-font-weight-bold;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    text-align: center;
+    word-break: break-word;
+    color: $email-color-text;
+    background-color: $email-color-code-bg;
+    border: 1px dashed $email-color-border-strong;
+    border-radius: $email-radius-control;
+    @include email-mso-line-height;
+
+    @include email-dark {
+        color: $email-dark-color-text;
+        background-color: $email-dark-color-code-bg;
+        border-color: $email-dark-color-border-strong;
+    }
+}

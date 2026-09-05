@@ -1,0 +1,110 @@
+/*
+ * Nails Email Framework - Reset
+ *
+ * Normalisation, plus the handful of client-specific workarounds which every
+ * HTML email needs. The MSO properties are read only by Word's rendering
+ * engine; the `.ExternalClass` rules are Outlook.com's wrapper.
+ */
+
+@import 'variables';
+@import 'mixins';
+
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100% !important;
+    min-width: 100%;
+    height: 100%;
+    font-family: $email-font-family;
+    font-size: $email-font-size;
+    line-height: $email-line-height;
+    color: $email-color-text;
+    background-color: $email-color-page;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    @include email-mso-line-height;
+
+    @include email-dark {
+        color: $email-dark-color-text;
+        background-color: $email-dark-color-page;
+    }
+}
+
+table {
+    @include email-mso;
+    border-spacing: 0;
+}
+
+td,
+th {
+    @include email-mso-line-height;
+}
+
+img {
+    max-width: 100%;
+    border: 0;
+    outline: none;
+    text-decoration: none;
+    line-height: 100%;
+    -ms-interpolation-mode: bicubic;
+}
+
+a {
+    color: $email-color-link;
+    text-decoration: underline;
+
+    @include email-dark {
+        color: $email-dark-color-link;
+    }
+}
+
+//  Outlook adds padding to links which have been auto-detected as addresses or
+//  phone numbers
+#outlook a {
+    padding: 0;
+}
+
+//  Outlook.com wraps the message in `.ExternalClass` and imposes its own line
+//  height on everything inside it
+.ExternalClass {
+    width: 100%;
+
+    &,
+    p,
+    span,
+    font,
+    td,
+    div {
+        line-height: $email-line-height;
+    }
+}
+
+//  iOS and Windows Mail auto-link dates, addresses and phone numbers and then
+//  restyle them; this at least keeps them looking like the surrounding text
+a[x-apple-data-detectors],
+.unstyle-auto-detected-links a,
+.aBn {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    border-bottom: 0 !important;
+    cursor: default !important;
+}
+
+//  Gmail's "clip message" affordance
+.im {
+    color: inherit !important;
+}

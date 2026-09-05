@@ -1,0 +1,75 @@
+/*
+ * Nails Email Framework - Mixins
+ *
+ * Shared tooling. This partial emits nothing, so importing it more than once
+ * is free — which is what lets every other partial import its own
+ * dependencies and therefore be imported on its own.
+ */
+
+@import 'variables';
+
+//  ---------------------------------------------------------------------------
+//  Responsive
+//  ---------------------------------------------------------------------------
+//  Email is single-breakpoint and mobile-last: the desktop layout is the base
+//  and the narrow layout is the override, because the clients which do not
+//  support media queries are all desktop clients.
+//
+//  Rules go in the partial they belong to rather than a trailing
+//  `responsive.scss`, so that an application importing only
+//  `components/button` gets the button's narrow-viewport rules with it.
+
+@mixin email-mobile {
+    @media only screen and (max-width: $email-breakpoint-mobile) {
+        @content;
+    }
+}
+
+//  ---------------------------------------------------------------------------
+//  Dark mode
+//  ---------------------------------------------------------------------------
+//  Paired with `<meta name="color-scheme">` and
+//  `<meta name="supported-color-schemes">` in `email_header.php`.
+//
+//  Honoured by Apple Mail, Mail on iOS and Outlook.com. Gmail ignores it and
+//  applies its own inversion, so do not spend time debugging why these rules
+//  appear not to apply there.
+
+@mixin email-dark {
+    @media (prefers-color-scheme: dark) {
+        @content;
+    }
+}
+
+//  ---------------------------------------------------------------------------
+//  Outlook (MSO) hardening
+//  ---------------------------------------------------------------------------
+//  The `mso-*` properties are read only by Word's rendering engine and ignored
+//  everywhere else, so they are safe to emit unconditionally.
+
+//  The classic Outlook table-gap bug: Word adds a few pixels of space either
+//  side of a table unless told not to. Include on every layout table.
+@mixin email-mso {
+    border-collapse: collapse;
+    mso-table-lspace: 0pt;
+    mso-table-rspace: 0pt;
+}
+
+//  Word rounds line heights up to the nearest whole point unless told to take
+//  the declared value literally, which is what makes tightly-spaced text drift
+//  in Outlook but nowhere else.
+@mixin email-mso-line-height {
+    mso-line-height-rule: exactly;
+}
+
+//  ---------------------------------------------------------------------------
+//  Helpers
+//  ---------------------------------------------------------------------------
+
+//  A cell which exists only to hold space; zeroing the font stops clients
+//  which insert a non-breaking space into an empty cell from growing it.
+@mixin email-spacer {
+    font-size: 0;
+    line-height: 0;
+    mso-line-height-rule: exactly;
+}

@@ -1,0 +1,71 @@
+/*
+ * Nails Email Framework - Header
+ *
+ * The masthead which sits above the card, the subject banner at the top of it,
+ * and the hidden preheader.
+ *
+ * The subject banner is `.alert-header`, and it is authored in
+ * `components/alert.scss` rather than here: it is a variant of the alert
+ * block, which is what keeps it and any in-body alert visually related, and it
+ * has to come after `.alert` in the cascade to win against it. Import
+ * `components/alert` if you want the banner without the rest of the shell.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+//  ---------------------------------------------------------------------------
+//  Masthead
+//  ---------------------------------------------------------------------------
+//  Sits on the page background above the card. The default slot renders the
+//  application's logo if one can be discovered and its name as text if not.
+
+.masthead {
+    padding: 8px 0 20px;
+    text-align: center;
+
+    &__logo {
+        max-height: 48px;
+        max-width: 280px;
+        margin: 0 auto;
+        border: 0;
+    }
+
+    &__name {
+        font-family: $email-font-family;
+        font-size: 20px;
+        font-weight: $email-font-weight-bold;
+        line-height: 1.2;
+        text-decoration: none;
+        color: $email-color-brand;
+
+        @include email-dark {
+            color: $email-dark-color-brand-light;
+        }
+    }
+}
+
+//  ---------------------------------------------------------------------------
+//  Preheader
+//  ---------------------------------------------------------------------------
+//  The snippet a client shows next to the subject in the message list. Fed by
+//  `{{preheader}}`, so it is empty unless the sender sets it.
+//
+//  The same rules are repeated inline on the element: a preheader which
+//  becomes visible because the `<style>` block was stripped is worse than no
+//  preheader at all.
+
+.preheader {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    color: transparent;
+    height: 0;
+    width: 0;
+    max-height: 0;
+    max-width: 0;
+    overflow: hidden;
+    font-size: 1px;
+    line-height: 1px;
+    mso-hide: all;
+}

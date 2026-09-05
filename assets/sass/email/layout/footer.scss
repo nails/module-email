@@ -1,0 +1,65 @@
+/*
+ * Nails Email Framework - Footer
+ *
+ * Sits below the card, on the page background. The text used to be `#999` on
+ * `#f6f6f6`, roughly 2.8:1 and short of WCAG AA; it now uses the palette's
+ * muted ink, which clears it.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.footer {
+    width: 100%;
+    clear: both;
+    padding: 8px 0 24px;
+    color: $email-color-text-muted;
+
+    @include email-dark {
+        color: $email-dark-color-text-muted;
+    }
+}
+
+//  One line of footer furniture. `.content-block` is the historic name.
+.content-block {
+    padding: 0 0 12px;
+    font-family: $email-font-family;
+    font-size: $email-font-size-small;
+    line-height: 1.5;
+    color: $email-color-text-muted;
+    text-align: center;
+    @include email-mso-line-height;
+
+    a {
+        color: $email-color-text-muted;
+        text-decoration: underline;
+        white-space: nowrap;
+    }
+
+    //  Separates the footer links, which used to run together
+    &__separator {
+        padding: 0 6px;
+        color: $email-color-border-strong;
+    }
+
+    &--address {
+        font-size: $email-font-size-tiny;
+    }
+
+    &--reference {
+        padding-bottom: 0;
+        font-size: $email-font-size-tiny;
+    }
+
+    @include email-dark {
+        color: $email-dark-color-text-muted;
+
+        a {
+            color: $email-dark-color-text-muted;
+        }
+
+        &__separator {
+            color: $email-dark-color-border-strong;
+        }
+    }
+}

@@ -1,0 +1,245 @@
+/*
+ * Nails Email Framework - Button
+ *
+ * Two mechanisms, and both are here on purpose:
+ *
+ *  1. `.btn` / `.button` — an `<a>` which fakes its padding with a border.
+ *     Outlook ignores padding on an anchor but honours a border, so a border
+ *     is what gives the link its hit area. This is the everyday button and is
+ *     what every downstream module already uses.
+ *
+ *     The consequence, and it is not obvious: the padding ring is painted with
+ *     the *border* colour, not the background, so `border-color` has to equal
+ *     the fill on every variant. A variant which sets a contrasting
+ *     `border-color` renders as a button in the border's colour with a patch
+ *     of the background around the label — which is exactly what
+ *     `.btn-secondary` and `.btn-default` used to do. An outline variant
+ *     therefore draws its rule with a (non-inset) `box-shadow`, which sits
+ *     outside the border box, and falls back to a tinted fill in the clients
+ *     which drop it.
+ *
+ *  2. `.btn-table` — a one-cell table with the anchor inside it. Verbose, but
+ *     it is the only version which is reliably clickable across its whole
+ *     area in Outlook, and it takes a VML fallback for rounded corners. Use it
+ *     for a single primary call to action. Markup is in the README.
+ *
+ * Historic single-dash names and BEM modifiers are both emitted.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.btn,
+.button {
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 0;
+    font-family: $email-font-family;
+    font-size: $email-font-size;
+    font-weight: $email-font-weight-bold;
+    line-height: 20px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: $email-radius-control;
+    color: $email-color-brand-text;
+    background-color: $email-color-brand;
+    border-color: $email-color-brand;
+    border-style: solid;
+
+    //  Padding-via-border; see the note at the top of the file
+    border-width: 12px 24px;
+
+    @include email-dark {
+        color: $email-dark-color-brand-text;
+        background-color: $email-dark-color-brand;
+        border-color: $email-dark-color-brand;
+    }
+}
+
+.btn-block,
+.button-block,
+.btn--block {
+    display: block;
+    width: 100%;
+}
+
+//  ---------------------------------------------------------------------------
+//  Variants
+//  ---------------------------------------------------------------------------
+
+.btn-primary,
+.button-primary,
+.btn--primary {
+    color: $email-color-brand-text;
+    background-color: $email-color-brand;
+    border-color: $email-color-brand;
+
+    @include email-dark {
+        color: $email-dark-color-brand-text;
+        background-color: $email-dark-color-brand;
+        border-color: $email-dark-color-brand;
+    }
+}
+
+//  A first-class variant rather than an afterthought: an all-but-white fill,
+//  a rule around the outside and brand ink
+.btn-secondary,
+.button-secondary,
+.btn--secondary {
+    color: $email-color-brand;
+    background-color: $email-color-card-alt;
+    border-color: $email-color-card-alt;
+    box-shadow: 0 0 0 1px $email-color-border-strong;
+
+    @include email-dark {
+        color: $email-dark-color-brand-light;
+        background-color: $email-dark-color-card-alt;
+        border-color: $email-dark-color-card-alt;
+        box-shadow: 0 0 0 1px $email-dark-color-border-strong;
+    }
+}
+
+//  The neutral button
+.btn-default,
+.button-default,
+.btn--default {
+    color: $email-color-btn-text;
+    background-color: $email-color-card-alt;
+    border-color: $email-color-card-alt;
+    box-shadow: 0 0 0 1px $email-color-btn-border;
+
+    @include email-dark {
+        color: $email-dark-color-btn-text;
+        background-color: $email-dark-color-btn-bg;
+        border-color: $email-dark-color-btn-bg;
+        box-shadow: 0 0 0 1px $email-dark-color-btn-border;
+    }
+}
+
+.btn-success,
+.btn--success {
+    color: $email-color-fixed-light;
+    background-color: $email-color-success-solid;
+    border-color: $email-color-success-solid;
+}
+
+.btn-danger,
+.btn--danger {
+    color: $email-color-fixed-light;
+    background-color: $email-color-danger-solid;
+    border-color: $email-color-danger-solid;
+}
+
+.btn-warning,
+.btn--warning {
+    color: $email-color-fixed-dark;
+    background-color: $email-color-warning-solid;
+    border-color: $email-color-warning-solid;
+}
+
+.btn-info,
+.btn--info {
+    color: $email-color-fixed-light;
+    background-color: $email-color-info-solid;
+    border-color: $email-color-info-solid;
+}
+
+//  A quieter option for a secondary action which should not compete
+.btn-link,
+.btn--link {
+    color: $email-color-link;
+    background-color: transparent;
+    border-color: transparent;
+    border-width: 12px 0;
+    font-weight: $email-font-weight-medium;
+    text-decoration: underline;
+
+    @include email-dark {
+        color: $email-dark-color-link;
+    }
+}
+
+//  ---------------------------------------------------------------------------
+//  Table button
+//  ---------------------------------------------------------------------------
+//  The Outlook-hardened option. The cell paints the button and the anchor
+//  fills it, so the whole area is clickable in clients which do not honour
+//  padding on an inline element.
+
+.btn-table {
+    margin: 0 0 $email-spacing;
+    @include email-mso;
+
+    &--center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    &--block {
+        width: 100%;
+    }
+
+    &__cell {
+        border-radius: $email-radius-control;
+        background-color: $email-color-brand;
+        text-align: center;
+
+        a {
+            display: inline-block;
+            padding: 14px 28px;
+            font-family: $email-font-family;
+            font-size: $email-font-size;
+            font-weight: $email-font-weight-bold;
+            line-height: 20px;
+            text-decoration: none;
+            color: $email-color-brand-text;
+        }
+
+        &--secondary {
+            background-color: $email-color-card;
+            border: 1px solid $email-color-border-strong;
+
+            a {
+                color: $email-color-brand;
+            }
+        }
+
+        @include email-dark {
+            background-color: $email-dark-color-brand;
+
+            a {
+                color: $email-dark-color-brand-text;
+            }
+
+            &--secondary {
+                background-color: $email-dark-color-card;
+                border-color: $email-dark-color-border-strong;
+
+                a {
+                    color: $email-dark-color-brand-light;
+                }
+            }
+        }
+    }
+}
+
+//  ---------------------------------------------------------------------------
+//  Narrow viewports
+//  ---------------------------------------------------------------------------
+//  A button is the thing most likely to be tapped, so it goes full width and
+//  gains a little height where there is no room for it to sit inline.
+
+@include email-mobile {
+
+    .btn,
+    .button {
+        display: block !important;
+        width: 100% !important;
+        border-width: 14px 20px !important;
+    }
+
+    .btn-table {
+        width: 100% !important;
+    }
+}

@@ -1,0 +1,109 @@
+/*
+ * Nails Email Framework - Typography
+ *
+ * Headings are one rule plus the `$email-heading-sizes` map, rather than the
+ * six near-identical blocks this replaced. Nothing here carries `!important`:
+ * that only existed to out-specify the inline styles the structure views used
+ * to carry, and those are gone.
+ */
+
+@import 'variables';
+@import 'mixins';
+
+p {
+    margin: 0 0 $email-spacing;
+    font-family: $email-font-family;
+    font-size: $email-font-size;
+    line-height: $email-line-height;
+    color: inherit;
+    @include email-mso-line-height;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: $email-spacing 0 8px;
+    font-family: $email-font-family;
+    font-weight: $email-heading-weight;
+    line-height: $email-heading-line-height;
+    color: $email-color-text;
+
+    //  A heading which opens the content should not push it down
+    &:first-child {
+        margin-top: 0;
+    }
+
+    @include email-dark {
+        color: $email-dark-color-text;
+    }
+}
+
+@each $iLevel, $sSize in $email-heading-sizes {
+    h#{$iLevel} {
+        font-size: $sSize;
+    }
+}
+
+strong,
+b {
+    font-weight: $email-font-weight-bold;
+}
+
+em,
+i {
+    font-style: italic;
+}
+
+small {
+    font-size: $email-font-size-small;
+    color: $email-color-text-muted;
+
+    @include email-dark {
+        color: $email-dark-color-text-muted;
+    }
+}
+
+hr {
+    height: 1px;
+    border: 0;
+    border-top: 1px solid $email-color-border;
+    margin: $email-spacing-card 0;
+
+    @include email-dark {
+        border-top-color: $email-dark-color-border;
+    }
+}
+
+ul,
+ol {
+    margin: 0 0 $email-spacing;
+    padding: 0 0 0 24px;
+
+    li {
+        margin: 0 0 6px;
+        line-height: $email-line-height;
+        @include email-mso-line-height;
+    }
+}
+
+blockquote {
+    margin: 0 0 $email-spacing;
+    padding: 12px 20px;
+    border-left: 4px solid $email-color-border-strong;
+    background-color: $email-color-card-alt;
+    color: $email-color-text-muted;
+    font-style: italic;
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+
+    @include email-dark {
+        border-left-color: $email-dark-color-border-strong;
+        background-color: $email-dark-color-card-alt;
+        color: $email-dark-color-text-muted;
+    }
+}

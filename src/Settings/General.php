@@ -21,6 +21,8 @@ class General implements Interfaces\Component\Settings
     const KEY_FROM_EMAIL       = 'from_email';
     const KEY_REPLY_TO_EMAIL   = 'reply_to_email';
     const KEY_RETENTION_PERIOD = 'retention_period';
+    const KEY_SIGN_OFF         = 'sign_off';
+    const KEY_FOOTER_ADDRESS   = 'footer_address';
 
     // --------------------------------------------------------------------------
 
@@ -72,6 +74,24 @@ class General implements Interfaces\Component\Settings
             ->setFieldset('Sender')
             ->setInfo('<strong>Note:</strong> If sending using SMTP to send email ensure this email is a valid account on the mail server. If it\'s not valid, some services will junk the email.');
 
+        /** @var Setting $oSignOff */
+        $oSignOff = Factory::factory('ComponentSetting');
+        $oSignOff
+            ->setKey(static::KEY_SIGN_OFF)
+            ->setType(Form::FIELD_TEXTAREA)
+            ->setLabel('Sign Off')
+            ->setFieldset('Content')
+            ->setInfo('Rendered below the body of every email. Mustache variables are available, so <code>The {{appName}} Team</code> and <code>{{sentTo.first_name}}</code> both work. Leave blank to omit it entirely.');
+
+        /** @var Setting $oFooterAddress */
+        $oFooterAddress = Factory::factory('ComponentSetting');
+        $oFooterAddress
+            ->setKey(static::KEY_FOOTER_ADDRESS)
+            ->setType(Form::FIELD_TEXTAREA)
+            ->setLabel('Footer Address')
+            ->setFieldset('Content')
+            ->setInfo('A postal address to show in the footer of every email. Leave blank to omit it entirely.');
+
         /** @var Setting $oRetentionPeriod */
         $oRetentionPeriod = Factory::factory('ComponentSetting');
         $oRetentionPeriod
@@ -86,6 +106,8 @@ class General implements Interfaces\Component\Settings
             $oFromName,
             $oFromEmail,
             $oReplyToEmail,
+            $oSignOff,
+            $oFooterAddress,
             $oRetentionPeriod,
         ];
     }
