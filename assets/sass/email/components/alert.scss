@@ -1,0 +1,213 @@
+/*
+ * Nails Email Framework - Alert
+ *
+ * In-body status messages, plus `.alert-header` — the subject banner across
+ * the top of the card, which is the same block in a full-bleed variant so the
+ * banner and any in-body alert stay visually related.
+ *
+ * Each status uses the four-way split from `nails/common`'s palette: the
+ * accent for the rule, the tint for the background, the tint ink for text,
+ * and the solid fill only where something has to sit on top of it.
+ *
+ * Both the historic single-dash names (`.alert-success`) and BEM modifiers
+ * (`.alert--success`) are emitted; the single-dash names are what the
+ * structure views and downstream modules use.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+//  Geometry shared by the two full-bleed banners at the top of the card
+@mixin email-alert-band {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 20px 24px;
+    font-size: 17px;
+    font-weight: $email-font-weight-medium;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.alert {
+    margin: 0 0 $email-spacing;
+    padding: 14px 18px;
+    border: 1px solid $email-color-border;
+    border-left: 4px solid $email-color-border-strong;
+    border-radius: $email-radius-control;
+    font-family: $email-font-family;
+    font-size: $email-font-size-small + 1px;
+    line-height: 1.5;
+    color: $email-color-text;
+    background-color: $email-color-card-alt;
+    @include email-mso-line-height;
+
+    a {
+        color: inherit;
+        font-weight: $email-font-weight-bold;
+        text-decoration: underline;
+    }
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+
+    @include email-dark {
+        border-color: $email-dark-color-border;
+        border-left-color: $email-dark-color-border-strong;
+        color: $email-dark-color-text;
+        background-color: $email-dark-color-card-alt;
+    }
+}
+
+//  A full-bleed band; colour comes from whichever status class sits alongside
+.alert-band,
+.alert--band {
+    @include email-alert-band;
+}
+
+//  ---------------------------------------------------------------------------
+//  Statuses
+//  ---------------------------------------------------------------------------
+
+.alert-success,
+.alert--success {
+    border-color: $email-color-success-border;
+    border-left-color: $email-color-success-accent;
+    color: $email-color-success-text;
+    background-color: $email-color-success-light;
+
+    @include email-dark {
+        border-color: $email-dark-color-success-border;
+        border-left-color: $email-dark-color-success-accent;
+        color: $email-dark-color-success-text;
+        background-color: $email-dark-color-success-light;
+    }
+}
+
+.alert-warning,
+.alert--warning {
+    border-color: $email-color-warning-border;
+    border-left-color: $email-color-warning-accent;
+    color: $email-color-warning-text;
+    background-color: $email-color-warning-light;
+
+    @include email-dark {
+        border-color: $email-dark-color-warning-border;
+        border-left-color: $email-dark-color-warning-accent;
+        color: $email-dark-color-warning-text;
+        background-color: $email-dark-color-warning-light;
+    }
+}
+
+.alert-danger,
+.alert--danger {
+    border-color: $email-color-danger-border;
+    border-left-color: $email-color-danger-accent;
+    color: $email-color-danger-text;
+    background-color: $email-color-danger-light;
+
+    @include email-dark {
+        border-color: $email-dark-color-danger-border;
+        border-left-color: $email-dark-color-danger-accent;
+        color: $email-dark-color-danger-text;
+        background-color: $email-dark-color-danger-light;
+    }
+}
+
+.alert-info,
+.alert--info {
+    border-color: $email-color-info-border;
+    border-left-color: $email-color-info-accent;
+    color: $email-color-info-text;
+    background-color: $email-color-info-light;
+
+    @include email-dark {
+        border-color: $email-dark-color-info-border;
+        border-left-color: $email-dark-color-info-accent;
+        color: $email-dark-color-info-text;
+        background-color: $email-dark-color-info-light;
+    }
+}
+
+//  ---------------------------------------------------------------------------
+//  Banners
+//  ---------------------------------------------------------------------------
+//  These come last so that they win over a status class on the same element,
+//  which is what makes `class="alert alert-header alert-header--warning"`
+//  resolve to a solid band rather than a tinted one.
+
+//  The subject banner; the top row of the card, so it carries the top corners
+.alert-header {
+    @include email-alert-band;
+    color: $email-color-brand-text;
+    background-color: $email-color-brand;
+    border-radius: $email-radius-card $email-radius-card 0 0;
+
+    a {
+        color: $email-color-brand-text;
+    }
+
+    @include email-dark {
+        color: $email-dark-color-brand-text;
+        background-color: $email-dark-color-brand;
+
+        a {
+            color: $email-dark-color-brand-text;
+        }
+    }
+
+    //  The non-production warning band, which sits directly beneath the
+    //  subject banner and so is square
+    &--warning {
+        color: $email-color-fixed-dark;
+        background-color: $email-color-warning-solid;
+        border-radius: 0;
+        font-size: $email-font-size-small + 1px;
+        font-weight: $email-font-weight-bold;
+        padding: 12px 24px;
+
+        a {
+            color: $email-color-fixed-dark;
+        }
+
+        @include email-dark {
+            color: $email-color-fixed-dark;
+            background-color: $email-dark-color-warning-solid;
+
+            a {
+                color: $email-color-fixed-dark;
+            }
+        }
+    }
+
+    &--danger {
+        color: $email-color-fixed-light;
+        background-color: $email-color-danger-solid;
+        border-radius: 0;
+
+        @include email-dark {
+            background-color: $email-dark-color-danger-solid;
+        }
+    }
+
+    &--success {
+        color: $email-color-fixed-light;
+        background-color: $email-color-success-solid;
+        border-radius: 0;
+
+        @include email-dark {
+            background-color: $email-dark-color-success-solid;
+        }
+    }
+
+    &--info {
+        color: $email-color-fixed-light;
+        background-color: $email-color-info-solid;
+        border-radius: 0;
+
+        @include email-dark {
+            background-color: $email-dark-color-info-solid;
+        }
+    }
+}

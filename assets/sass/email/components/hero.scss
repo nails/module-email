@@ -1,0 +1,53 @@
+/*
+ * Nails Email Framework - Hero
+ *
+ * A full-width image at the top of the content well, with an optional caption.
+ *
+ * `display: block` on the image matters: a client which treats it as inline
+ * leaves a few pixels of descender space beneath it, which reads as a gap
+ * between the image and whatever it is sitting on.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.hero {
+    width: 100%;
+    margin: 0 0 $email-spacing;
+    @include email-mso;
+
+    img {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        border: 0;
+        outline: none;
+        text-decoration: none;
+        -ms-interpolation-mode: bicubic;
+    }
+
+    //  Sits flush in the content well, ignoring its padding. Requires the
+    //  image to be in a cell of its own rather than inside `.content-wrap`.
+    &--bleed {
+        margin-bottom: 0;
+
+        img {
+            border-radius: 0;
+        }
+    }
+
+    &__caption {
+        padding: 8px 0 0;
+        font-family: $email-font-family;
+        font-size: $email-font-size-small;
+        line-height: 1.5;
+        color: $email-color-text-muted;
+        text-align: center;
+        @include email-mso-line-height;
+
+        @include email-dark {
+            color: $email-dark-color-text-muted;
+        }
+    }
+}

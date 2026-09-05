@@ -1,0 +1,111 @@
+/*
+ * Nails Email Framework - Shell
+ *
+ * The page furniture: grey page, centred 600px card, padded content well.
+ * These class names are the contract between the stylesheet and
+ * `email/views/structure/email_header.php` / `email_footer.php`, which carry
+ * the classes and the HTML presentational attributes but no inline CSS.
+ *
+ * Note the narrow-viewport overrides are inside `email-mobile`. They used to
+ * be unconditional, which meant the mobile layout applied at every width.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+//  The outermost table; paints the page behind the card
+.body-wrap {
+    width: 100%;
+    background-color: $email-color-page;
+    @include email-mso;
+
+    @include email-dark {
+        background-color: $email-dark-color-page;
+    }
+}
+
+//  The two empty cells either side of the card. They absorb whatever is left
+//  of the viewport on desktop and collapse entirely on mobile.
+.gutter {
+    width: $email-gutter;
+    @include email-spacer;
+
+    @include email-mobile {
+        width: 0 !important;
+        display: none !important;
+    }
+}
+
+//  Deliberately a `max-width` and no `width`. The card's 600px comes from this
+//  ceiling plus `margin: 0 auto`, and from the `width="600"` attribute on the
+//  cell for the clients which ignore CSS widths.
+//
+//  A fixed `width` here would be circular: `module-invoice`'s invoice view
+//  reuses `.container` *inside* the content well, and a 600px width on a
+//  nested container becomes the well's min-content width, which forces the
+//  whole card open to ~670px. An `auto` width simply fills whatever it is in.
+//
+//  For the same reason the `width="600"` fallback attribute is on the card
+//  table rather than this cell: an attribute width on the cell survives every
+//  CSS override (it sizes the cell, and this is a block inside it), so it
+//  pushed the layout past the viewport once the gutters had collapsed.
+.container {
+    display: block !important;
+    max-width: $email-width !important;
+    clear: both !important;
+    margin: 0 auto;
+    vertical-align: top;
+
+    @include email-mobile {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+}
+
+.content {
+    display: block;
+    max-width: $email-width;
+    margin: 0 auto;
+    padding: 24px 0;
+
+    @include email-mobile {
+        max-width: 100% !important;
+        padding: 12px !important;
+    }
+}
+
+//  The card itself
+.main {
+    width: 100%;
+    background-color: $email-color-card;
+    border: 1px solid $email-color-border;
+    border-radius: $email-radius-card;
+    @include email-mso;
+
+    @include email-dark {
+        background-color: $email-dark-color-card;
+        border-color: $email-dark-color-border;
+    }
+}
+
+//  The content well inside the card; the body view is rendered into this cell,
+//  and it is the last row of the card, so it carries the bottom corners
+.content-wrap {
+    padding: $email-spacing-card;
+    color: $email-color-text;
+    border-radius: 0 0 $email-radius-card $email-radius-card;
+
+    @include email-dark {
+        color: $email-dark-color-text;
+    }
+
+    @include email-mobile {
+        padding: $email-spacing-card-mobile !important;
+    }
+}
+
+//  The paragraph rendered by the sign-off slot, at the very bottom of the
+//  content well; set apart from the body copy above it
+.signoff {
+    margin-top: 24px;
+}

@@ -1,0 +1,184 @@
+/*
+ * Nails Email Framework - Utilities
+ *
+ * Alignment, text and spacing helpers. The spacing utilities are generated
+ * from `$email-spacing-steps`, so overriding that map changes the whole set.
+ *
+ * `.alignleft`, `.aligncenter` and `.alignright` are the historic names and
+ * are kept: the structure views and several downstream modules use them.
+ */
+
+@import 'variables';
+@import 'mixins';
+
+//  ---------------------------------------------------------------------------
+//  Alignment
+//  ---------------------------------------------------------------------------
+
+.alignleft,
+.text-left {
+    text-align: left;
+}
+
+.aligncenter,
+.text-center {
+    text-align: center;
+}
+
+.alignright,
+.text-right {
+    text-align: right;
+}
+
+.valign-top {
+    vertical-align: top;
+}
+
+.valign-middle {
+    vertical-align: middle;
+}
+
+.valign-bottom {
+    vertical-align: bottom;
+}
+
+//  ---------------------------------------------------------------------------
+//  Text
+//  ---------------------------------------------------------------------------
+
+.text-muted {
+    color: $email-color-text-muted;
+
+    @include email-dark {
+        color: $email-dark-color-text-muted;
+    }
+}
+
+.text-brand {
+    color: $email-color-brand;
+
+    @include email-dark {
+        color: $email-dark-color-brand-light;
+    }
+}
+
+.text-small {
+    font-size: $email-font-size-small;
+}
+
+.text-tiny {
+    font-size: $email-font-size-tiny;
+}
+
+.text-large {
+    font-size: 18px;
+}
+
+.text-bold {
+    font-weight: $email-font-weight-bold;
+}
+
+.text-normal {
+    font-weight: $email-font-weight-normal;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.text-break {
+    word-break: break-word;
+}
+
+//  ---------------------------------------------------------------------------
+//  Spacing
+//  ---------------------------------------------------------------------------
+//  `.m{side}-{step}` and `.p{side}-{step}`, e.g. `.mb-5`, `.pt-0`, `.mx-4`.
+
+$email-spacing-sides: (
+    '': null,
+    't': top,
+    'r': right,
+    'b': bottom,
+    'l': left,
+);
+
+@each $sStep, $sValue in $email-spacing-steps {
+
+    @each $sSuffix, $sSide in $email-spacing-sides {
+
+        .m#{$sSuffix}-#{$sStep} {
+            @if $sSide == null {
+                margin: $sValue;
+            } @else {
+                margin-#{$sSide}: $sValue;
+            }
+        }
+
+        .p#{$sSuffix}-#{$sStep} {
+            @if $sSide == null {
+                padding: $sValue;
+            } @else {
+                padding-#{$sSide}: $sValue;
+            }
+        }
+    }
+
+    .mx-#{$sStep} {
+        margin-left: $sValue;
+        margin-right: $sValue;
+    }
+
+    .my-#{$sStep} {
+        margin-top: $sValue;
+        margin-bottom: $sValue;
+    }
+
+    .px-#{$sStep} {
+        padding-left: $sValue;
+        padding-right: $sValue;
+    }
+
+    .py-#{$sStep} {
+        padding-top: $sValue;
+        padding-bottom: $sValue;
+    }
+}
+
+//  The last block in a run; drops the trailing margin so the content does not
+//  sit unevenly inside its padding
+.last {
+    margin-bottom: 0 !important;
+}
+
+//  ---------------------------------------------------------------------------
+//  Visibility
+//  ---------------------------------------------------------------------------
+
+.mobile-only {
+    display: none;
+    font-size: 0;
+    line-height: 0;
+    max-height: 0;
+    overflow: hidden;
+    mso-hide: all;
+
+    @include email-mobile {
+        display: block !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
+
+.desktop-only {
+    @include email-mobile {
+        display: none !important;
+    }
+}

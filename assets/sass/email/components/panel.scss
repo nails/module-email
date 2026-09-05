@@ -1,0 +1,97 @@
+/*
+ * Nails Email Framework - Panel
+ *
+ * A card within the card: a bordered block for setting a chunk of content
+ * apart from the copy around it. Built to work as either a `<div>` or a
+ * single-cell `<table>`.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.panel {
+    width: 100%;
+    margin: 0 0 $email-spacing;
+    border: 1px solid $email-color-border;
+    border-radius: $email-radius-control;
+    background-color: $email-color-card-alt;
+    @include email-mso;
+
+    @include email-dark {
+        border-color: $email-dark-color-border;
+        background-color: $email-dark-color-card-alt;
+    }
+
+    &__header {
+        padding: 12px 20px;
+        font-family: $email-font-family;
+        font-size: $email-font-size-small + 1px;
+        font-weight: $email-font-weight-bold;
+        line-height: 1.4;
+        color: $email-color-text;
+        border-bottom: 1px solid $email-color-border;
+
+        @include email-dark {
+            color: $email-dark-color-text;
+            border-bottom-color: $email-dark-color-border;
+        }
+    }
+
+    &__body {
+        padding: 20px;
+        font-family: $email-font-family;
+        font-size: $email-font-size;
+        line-height: $email-line-height;
+        color: $email-color-text;
+        @include email-mso-line-height;
+
+        > :last-child {
+            margin-bottom: 0;
+        }
+
+        @include email-dark {
+            color: $email-dark-color-text;
+        }
+    }
+
+    &__footer {
+        padding: 12px 20px;
+        font-size: $email-font-size-small;
+        color: $email-color-text-muted;
+        border-top: 1px solid $email-color-border;
+
+        @include email-dark {
+            color: $email-dark-color-text-muted;
+            border-top-color: $email-dark-color-border;
+        }
+    }
+
+    //  Sits on the card rather than being tinted by it
+    &--plain {
+        background-color: $email-color-card;
+
+        @include email-dark {
+            background-color: $email-dark-color-card;
+        }
+    }
+
+    &--brand {
+        border-color: $email-color-brand;
+        border-left-width: 4px;
+    }
+}
+
+@include email-mobile {
+
+    .panel {
+
+        &__header,
+        &__footer {
+            padding: 10px 14px !important;
+        }
+
+        &__body {
+            padding: 14px !important;
+        }
+    }
+}

@@ -1,0 +1,120 @@
+/*
+ * Nails Email Framework - Table
+ *
+ * Data tables, as distinct from the layout tables the shell is built from.
+ *
+ * These rules used to be scoped to `.content-wrap .table`; they are now
+ * unscoped, which is a superset of the old behaviour, so existing markup
+ * inside the content well is unaffected and a table works outside it too.
+ */
+
+@import '../base/variables';
+@import '../base/mixins';
+
+.table {
+    width: 100%;
+    margin: 0 0 $email-spacing;
+    padding: 0;
+    border: 1px solid $email-color-border;
+    border-spacing: 0;
+    @include email-mso;
+
+    th,
+    td {
+        padding: 10px 12px;
+        font-size: $email-font-size-small + 1px;
+        line-height: 1.5;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid $email-color-border-subtle;
+        @include email-mso-line-height;
+    }
+
+    th {
+        font-weight: $email-font-weight-bold;
+        color: $email-color-text;
+        background-color: $email-color-card-alt;
+        border-bottom-color: $email-color-border;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    @include email-dark {
+        border-color: $email-dark-color-border;
+
+        th,
+        td {
+            border-bottom-color: $email-dark-color-border-subtle;
+        }
+
+        th {
+            color: $email-dark-color-text;
+            background-color: $email-dark-color-card-alt;
+            border-bottom-color: $email-dark-color-border;
+        }
+    }
+
+    //  ---------------------------------------------------------------------
+    //  A two-column label/value list
+    //  ---------------------------------------------------------------------
+    //  The label column used to be a solid `#ccc` block with a 3px rule down
+    //  its right-hand side; it is now a tint with a hairline
+
+    &--list {
+
+        tbody td:first-child {
+            width: 1%;
+            white-space: nowrap;
+            padding-right: 20px;
+            font-weight: $email-font-weight-bold;
+            color: $email-color-text-muted;
+            background-color: $email-color-card-alt;
+            border-right: 1px solid $email-color-border;
+        }
+
+        @include email-dark {
+            tbody td:first-child {
+                color: $email-dark-color-text-muted;
+                background-color: $email-dark-color-card-alt;
+                border-right-color: $email-dark-color-border;
+            }
+        }
+    }
+
+    //  Every column after the first holds a figure
+    &--numeric {
+        tbody td + td {
+            text-align: center;
+        }
+    }
+
+    //  No outer border and no tinting; for laying out content rather than
+    //  presenting data
+    &--plain {
+        border: 0;
+
+        th,
+        td {
+            padding-left: 0;
+            border-bottom: 0;
+            background-color: transparent;
+        }
+    }
+}
+
+@include email-mobile {
+
+    .table {
+
+        th,
+        td {
+            padding: 8px 10px !important;
+        }
+
+        &--list tbody td:first-child {
+            padding-right: 10px !important;
+        }
+    }
+}

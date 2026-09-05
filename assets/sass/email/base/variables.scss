@@ -1,0 +1,237 @@
+/*
+ * Nails Email Framework - Variables
+ *
+ * Every token is `!default`, so a consuming application can set its own value
+ * before importing anything from this framework and have it win.
+ *
+ * These are Sass variables rather than custom properties, which is a
+ * deliberate divergence from `nails/common`: Outlook renders with the Word
+ * engine, which has no support for `var()` and no cascade fallback which can
+ * recover a missing colour. Tokens have to compile down to literals.
+ *
+ * Dark mode is a second, parallel set of tokens (`$email-dark-*`) rather than
+ * a re-declaration, for the same reason — see `base/mixins.scss`.
+ */
+
+//  ---------------------------------------------------------------------------
+//  Metrics
+//  ---------------------------------------------------------------------------
+
+//  The card is 600px with a 20px gutter either side, so 640px is the width at
+//  which the desktop layout stops fitting
+$email-width: 600px !default;
+$email-gutter: 20px !default;
+$email-breakpoint-mobile: 640px !default;
+
+//  ---------------------------------------------------------------------------
+//  Typography
+//  ---------------------------------------------------------------------------
+
+//  The system-font portion of `nails/common`'s stack; a webfont cannot be
+//  relied upon in email, and Word ignores the stack entirely (see the MSO
+//  block in `email_header.php`)
+$email-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Helvetica, Arial, sans-serif !default;
+$email-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace !default;
+
+$email-font-size: 16px !default;
+$email-font-size-small: 13px !default;
+$email-font-size-tiny: 12px !default;
+$email-line-height: 1.6 !default;
+
+$email-font-weight-normal: 400 !default;
+$email-font-weight-medium: 500 !default;
+$email-font-weight-bold: 700 !default;
+
+//  Heading type scale; consumed as a map by `base/typography.scss` so that the
+//  six levels are one rule rather than six near-identical ones
+$email-heading-sizes: (
+    1: 26px,
+    2: 21px,
+    3: 18px,
+    4: 16px,
+    5: 15px,
+    6: 14px,
+) !default;
+
+$email-heading-weight: 700 !default;
+$email-heading-line-height: 1.3 !default;
+
+//  ---------------------------------------------------------------------------
+//  Spacing
+//  ---------------------------------------------------------------------------
+//  A 4px scale. The keys are also emitted as utilities (`.mb-4`, `.pt-2`, …)
+//  by `base/utilities.scss`.
+
+$email-spacing-steps: (
+    0: 0,
+    1: 4px,
+    2: 8px,
+    3: 12px,
+    4: 16px,
+    5: 24px,
+    6: 32px,
+    7: 48px,
+) !default;
+
+$email-spacing: 16px !default;
+$email-spacing-card: 32px !default;
+$email-spacing-card-mobile: 20px !default;
+
+//  ---------------------------------------------------------------------------
+//  Radii
+//  ---------------------------------------------------------------------------
+
+$email-radius-card: 8px !default;
+$email-radius-control: 6px !default;
+$email-radius-pill: 100px !default;
+
+//  ---------------------------------------------------------------------------
+//  Colour - light
+//  ---------------------------------------------------------------------------
+//  Aligned with `nails/common`'s palette so that an email looks like the
+//  application it was sent by.
+
+//  Brand
+$email-color-brand: #d53354 !default;
+$email-color-brand-dark: #b02a46 !default;
+$email-color-brand-light: #e05e79 !default;
+$email-color-brand-text: #ffffff !default;
+
+//  Links; a shade off the brand, which on its own does not clear AA against
+//  the card
+$email-color-link: #cb2f4f !default;
+
+//  Surfaces
+$email-color-page: #f1f3f6 !default;
+$email-color-card: #ffffff !default;
+$email-color-card-alt: #f7f8fa !default;
+$email-color-sunken: #f4f6f8 !default;
+
+//  Borders
+$email-color-border: #e2e6eb !default;
+$email-color-border-strong: #cfd6de !default;
+$email-color-border-subtle: #edf0f3 !default;
+
+//  Text
+$email-color-text: #1d2229 !default;
+$email-color-text-muted: #646e7a !default;
+$email-color-text-inverse: #ffffff !default;
+
+//  Inks which deliberately do not invert, for use on top of a colour which is
+//  the same in both schemes (a warning band, for example)
+$email-color-fixed-light: #ffffff !default;
+$email-color-fixed-dark: #1d2229 !default;
+
+//  Neutral button
+$email-color-btn-bg: #ffffff !default;
+$email-color-btn-border: #d3dae2 !default;
+$email-color-btn-text: $email-color-text !default;
+
+//  Status
+//  Each status has four jobs and one colour cannot do all of them, so they are
+//  split the same four ways `nails/common` splits them:
+//
+//      -accent   borders and rules
+//      -solid    a fill which has to carry text on top of it
+//      -light    a tint, for alert backgrounds
+//      -border   the tint's border
+//      -text     ink on the tint
+
+$email-color-success-accent: #2c9c52 !default;
+$email-color-success-solid: #1f7a3e !default;
+$email-color-success-light: #e6f4ea !default;
+$email-color-success-border: #b7dfc4 !default;
+$email-color-success-text: #14622f !default;
+
+//  Yellow cannot carry white text at any usable saturation, so a warning fill
+//  takes the fixed dark ink instead
+$email-color-warning-accent: #f0ad00 !default;
+$email-color-warning-solid: #f0ad00 !default;
+$email-color-warning-light: #fdf4dd !default;
+$email-color-warning-border: #f3dfa4 !default;
+$email-color-warning-text: #6b4d00 !default;
+
+$email-color-danger-accent: #d63b47 !default;
+$email-color-danger-solid: #c9333f !default;
+$email-color-danger-light: #fbeaec !default;
+$email-color-danger-border: #f2c2c7 !default;
+$email-color-danger-text: #8a1f28 !default;
+
+$email-color-info-accent: #1a8fa8 !default;
+$email-color-info-solid: #177e94 !default;
+$email-color-info-light: #e3f3f7 !default;
+$email-color-info-border: #b3dde7 !default;
+$email-color-info-text: #10586a !default;
+
+//  Code
+$email-color-code-bg: #f4f6f8 !default;
+$email-color-code-border: #e2e6eb !default;
+$email-color-code-text: #a8306a !default;
+
+//  ---------------------------------------------------------------------------
+//  Colour - dark
+//  ---------------------------------------------------------------------------
+//  Emitted inside `prefers-color-scheme: dark` by the `email-dark` mixin.
+//  Honoured by Apple Mail, Mail on iOS and Outlook.com. Gmail ignores it and
+//  force-inverts on its own terms regardless — see the README.
+
+//  Brand; the brand itself is unchanged, but it is too heavy to read as link
+//  text against a dark surface
+$email-dark-color-brand: #d53354 !default;
+$email-dark-color-brand-dark: #b02a46 !default;
+$email-dark-color-brand-light: #ef7a92 !default;
+$email-dark-color-brand-text: #ffffff !default;
+$email-dark-color-link: #ef7a92 !default;
+
+//  Surfaces
+$email-dark-color-page: #0f1116 !default;
+$email-dark-color-card: #191c22 !default;
+$email-dark-color-card-alt: #21252d !default;
+$email-dark-color-sunken: #12151a !default;
+
+//  Borders
+$email-dark-color-border: #2d323b !default;
+$email-dark-color-border-strong: #3c434e !default;
+$email-dark-color-border-subtle: #23272f !default;
+
+//  Text
+$email-dark-color-text: #e5e8ee !default;
+$email-dark-color-text-muted: #9aa4b2 !default;
+$email-dark-color-text-inverse: #0f1116 !default;
+
+//  Neutral button
+$email-dark-color-btn-bg: #262b34 !default;
+$email-dark-color-btn-border: #3c434e !default;
+$email-dark-color-btn-text: $email-dark-color-text !default;
+
+//  Status; accents brighten so they carry against a dark surface, and the
+//  tints are mixed towards the surface rather than towards black so that they
+//  do not read as holes in the card
+$email-dark-color-success-accent: #35b062 !default;
+$email-dark-color-success-solid: #238644 !default;
+$email-dark-color-success-light: #14291d !default;
+$email-dark-color-success-border: #245c39 !default;
+$email-dark-color-success-text: #7fd7a0 !default;
+
+$email-dark-color-warning-accent: #f0ad00 !default;
+$email-dark-color-warning-solid: #f0ad00 !default;
+$email-dark-color-warning-light: #2b2210 !default;
+$email-dark-color-warning-border: #5b4712 !default;
+$email-dark-color-warning-text: #f2c66b !default;
+
+$email-dark-color-danger-accent: #e04b58 !default;
+$email-dark-color-danger-solid: #cf3b49 !default;
+$email-dark-color-danger-light: #2b171b !default;
+$email-dark-color-danger-border: #5e2b31 !default;
+$email-dark-color-danger-text: #f09aa2 !default;
+
+$email-dark-color-info-accent: #2aa7c0 !default;
+$email-dark-color-info-solid: #19758a !default;
+$email-dark-color-info-light: #10262c !default;
+$email-dark-color-info-border: #1f4d59 !default;
+$email-dark-color-info-text: #6dd0e2 !default;
+
+//  Code
+$email-dark-color-code-bg: #12151a !default;
+$email-dark-color-code-border: #2d323b !default;
+$email-dark-color-code-text: #f0a2bb !default;
