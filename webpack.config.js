@@ -5,7 +5,8 @@ const path = require('path');
 module.exports = {
     entry: {
         'admin': './assets/js/admin.js',
-        'debugger': './assets/js/debugger.js'
+        'debugger': './assets/js/debugger.js',
+        'email': './assets/js/email.js'
     },
     output: {
         filename: '[name].min.js',
