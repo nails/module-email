@@ -239,7 +239,10 @@ list. Set `preheader` in the email's data to fill it.
   iOS and Outlook.com. **Gmail ignores it and force-inverts on its own terms**
   — do not spend an afternoon working out why the dark rules appear not to
   apply there. Nothing in the framework depends on dark mode being honoured;
-  the light palette is the one that has to work.
+  the light palette is the one that has to work. The email debugger's
+  Light/Dark switcher is how you exercise these rules — but a good-looking dark
+  pane is not evidence that Gmail dark is fine. See
+  [Previewing and testing](#previewing-and-testing).
 - **Outlook** gets a `<!--[if mso]>` block which swaps the font stack for Arial
   and removes every radius, plus a ghost table which holds the card at 600px.
   The footer closes the ghost table the header opens.
@@ -252,6 +255,18 @@ list. Set `preheader` in the email's data to fill it.
 In a development environment the *view online* link in the footer renders the
 email debugger, which shows the Mustache context, the HTML part in an
 `<iframe>` and the plain text part side by side.
+
+The HTML pane has a **System / Light / Dark** switcher. *System* is the default
+and renders the email untouched, so it follows your desktop appearance and is
+the only pane that exercises the real `prefers-color-scheme` query. *Light* and
+*Dark* render copies with that query rewritten to always or never match, which
+is what lets you see both palettes without changing your OS appearance or
+reaching for DevTools. The pane is 680px wide so the 600px card previews its
+desktop layout; narrow the window to fall below the 640px breakpoint and see
+the mobile one.
+
+The dark panes show what Apple Mail, Mail on iOS and Outlook.com do. They say
+nothing about Gmail — see the dark mode note under [Client caveats](#client-caveats).
 
 To send real mail:
 

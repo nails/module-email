@@ -25,14 +25,26 @@ body {
     .header {
         background: $color-orange;
         color: $color-white;
-        height: 60px;
-        line-height: 30px;
+        //  `min-height` rather than `height`: the note below wraps on a narrow
+        //  window, and growing the band is better than clipping the warning
+        min-height: 60px;
+        //  Two lines inside the 34px 1em-padded content box; 30px does not fit
+        line-height: 18px;
         padding: 1em;
         box-sizing: border-box;
 
         img {
             float: right;
             max-height: 100%;
+        }
+
+        //  Which clients the Dark pane actually represents. Without this the
+        //  switcher implies a good-looking dark pane says something about Gmail
+        .note {
+            display: block;
+            font-size: 11px;
+            line-height: 14px;
+            opacity: 0.85;
         }
     }
 
@@ -41,12 +53,29 @@ body {
         display: flex;
 
         .column {
-            width: calc(100% / 3);
+            //  Shared by both rows, which is what keeps the sub-header labels
+            //  aligned with the panes below them
+            flex: 1;
+            //  Else the wide <pre> in .variables blows out the flex basis
+            //  instead of scrolling; a non-issue while the width was fixed
+            min-width: 0;
             border-right: 1px solid darken($color-grey, 7%);
             display: inline-block;
             box-sizing: border-box;
             min-height: calc(100vh - 100px);
             overflow: auto;
+
+            //  The email's mobile breakpoint is `max-width: 640px`, so the
+            //  iframe has to be wider than that or every pane previews the
+            //  narrow layout. 680px clears it and leaves the 600px card its
+            //  gutters, which is what the desktop layout is supposed to show.
+            //
+            //  Shrink but do not grow: it holds 680px at any sensible window
+            //  size, and on a narrow one it gives way rather than overflowing
+            //  the page - which is also how the mobile layout stays reachable.
+            &.html {
+                flex: 0 1 680px;
+            }
         }
     }
 
@@ -74,11 +103,87 @@ body {
                 width: 100%;
                 height: 100%;
                 border: 0;
+
+                //  All three schemes are rendered; the toggle in the sub-header
+                //  decides which is shown. Separate documents rather than one
+                //  because the scheme is baked into each iframe's `srcdoc`.
+                display: none;
             }
         }
 
         .text {
             padding: 1rem;
         }
+    }
+
+    /* ----------------------------------------------------------------
+       Colour scheme toggle
+       ----------------------------------------------------------------
+       The radios sit at the top of the component, ahead of both the
+       sub-header which labels them and the body which holds the panes: a
+       sibling selector cannot look upwards, and the toggle drives markup
+       in each. Visually hidden rather than `display: none`, so the
+       control keeps its place in the tab order. */
+
+    > .scheme-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    .scheme-toggle {
+        float: right;
+        font-weight: normal;
+
+        label {
+            display: inline-block;
+            padding: 0 0.5rem;
+            border: 1px solid darken($color-grey, 20%);
+            //  Dropped here and restored on the last label, so the three
+            //  segments share single borders rather than doubling them up
+            border-right: 0;
+            //  11px + 16px + two 1px borders = 18px, which clears the
+            //  sub-header's 19px content box; the inherited 1.5em does not
+            font-size: 11px;
+            line-height: 16px;
+            text-transform: uppercase;
+            background: $color-light-grey;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        label:first-of-type {
+            border-radius: 3px 0 0 3px;
+        }
+
+        label:last-of-type {
+            border-radius: 0 3px 3px 0;
+            border-right: 1px solid darken($color-grey, 20%);
+        }
+    }
+
+    //  The selected label and the pane it belongs to, both written from the
+    //  input because that is the only element which knows the state
+    > #scheme-system:checked ~ .sub-header label[for='scheme-system'],
+    > #scheme-light:checked ~ .sub-header label[for='scheme-light'],
+    > #scheme-dark:checked ~ .sub-header label[for='scheme-dark'] {
+        border-color: $color-orange;
+        background: $color-orange;
+        color: $color-white;
+    }
+
+    > #scheme-system:checked ~ .body .html .pane--system,
+    > #scheme-light:checked ~ .body .html .pane--light,
+    > #scheme-dark:checked ~ .body .html .pane--dark {
+        display: block;
+    }
+
+    > .scheme-input:focus-visible ~ .sub-header .scheme-toggle {
+        outline: 2px solid $color-orange;
+        outline-offset: 2px;
     }
 }

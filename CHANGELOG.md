@@ -77,6 +77,15 @@ The default email template has been rebuilt. Existing body views keep working
 - README documentation: the class reference, the slot list, the three
   customisation layers, the token-override and cherry-pick recipes, the
   header/footer tag-balance contract and the client caveats.
+- A **System / Light / Dark** switcher on the email debugger's HTML pane.
+  `prefers-color-scheme` follows the browser, and so the desktop, which left
+  flipping the OS appearance or DevTools emulation as the only ways to see the
+  dark palette. The Light and Dark panes render copies of the email with that
+  query rewritten to `all` or `not all`, so neither can be wrong about which
+  palette it is showing; System renders the email untouched and remains the
+  default. The HTML pane is also 680px wide now, clearing the 640px mobile
+  breakpoint so the 600px card previews its desktop layout rather than its
+  narrow one.
 
 
 ## Version 0.1.0
