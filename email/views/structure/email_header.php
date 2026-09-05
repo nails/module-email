@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>{{email_subject}}</title>
     <style type="text/css">
-        <?php require_once(__DIR__ . '/../../../assets/css/email.min.css'); ?>
+        <?php require __DIR__ . '/../../../assets/css/email.min.css'; ?>
     </style>
 </head>
 
