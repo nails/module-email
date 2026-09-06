@@ -49,8 +49,18 @@
 
 //  The classic Outlook table-gap bug: Word adds a few pixels of space either
 //  side of a table unless told not to. Include on every layout table.
+//
+//  Deliberately no `border-collapse: collapse`, which this mixin used to carry
+//  as email boilerplate. Collapsed borders void `border-radius` on a table and
+//  its cells, and the framework's card, alert headers, panels and table
+//  buttons are all rounded tables or cells - so every radius the mixin touched
+//  was dead. It was never the table-gap fix either; the two `mso-table-*`
+//  properties below are. Dropping it is safe for spacing because `reset.scss`
+//  sets `border-spacing: 0` on every table and every layout table in
+//  `email_header.php` / `email_footer.php` also carries `cellspacing="0"`.
+//  Word keeps collapsed borders and square corners via the `mso` block in
+//  `email_header.php`, whose `border-spacing` support is too poor to rely on.
 @mixin email-mso {
-    border-collapse: collapse;
     mso-table-lspace: 0pt;
     mso-table-rspace: 0pt;
 }
