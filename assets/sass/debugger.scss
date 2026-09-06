@@ -2,6 +2,10 @@
    Nails Email Module Debugger Styles
 -------------------------------------------------------------- */
 
+//  Tokens only, and every one of them `!default`, so this emits no CSS of its
+//  own; imported for the metrics the panes below are derived from
+@import 'email/base/variables';
+
 $color-white: #fff;
 $color-orange: #d55600;
 $color-grey: #d5d5d5;
@@ -9,6 +13,21 @@ $color-light-grey: #efefef;
 
 //  Shared by the band and the logo inside it, so the two cannot drift apart
 $header-height: 60px;
+
+//  Wider than the email's own mobile breakpoint, or every pane previews the
+//  narrow layout; the gutter either side is what the desktop layout is meant to
+//  show. Derived from the framework's tokens rather than restated, so an app
+//  which moves the breakpoint moves this with it.
+$pane-width: $email-breakpoint-mobile + ($email-gutter * 2);
+
+//  Below this the side panes are too narrow to read, so the row stacks
+$pane-side-min: 200px;
+$breakpoint-stack: $pane-width + ($pane-side-min * 2);
+
+$pane-label-height: 35px;
+
+//  Stacked, each pane is a bounded scroll box rather than the whole document
+$pane-stacked-height: 60vh;
 
 
 html,
@@ -22,12 +41,17 @@ body {
 }
 
 .email-debugger {
-    min-height: 100vh;
+    //  A fixed shell: the header takes what it needs and the panes take the
+    //  rest, so nothing has to restate the header's height in a calc
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     background: $color-white;
 
     .header {
         background: $color-orange;
         color: $color-white;
+        flex: 0 0 auto;
         display: flex;
         align-items: center;
         gap: 1em;
@@ -69,82 +93,118 @@ body {
         }
     }
 
-    .sub-header,
-    .body {
-        display: flex;
+    .panes {
+        flex: 1 1 auto;
+        //  Else the panes' content floor stops them shrinking into what is left
+        min-height: 0;
+        //  One grid for both rows rather than a flex row each: the labels and
+        //  the panes share a single set of column tracks, so they cannot drift
+        //  the way two independent containers could
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, $pane-width) minmax(0, 1fr);
+        grid-template-rows: $pane-label-height minmax(0, 1fr);
+    }
 
-        .column {
-            //  Shared by both rows, which is what keeps the sub-header labels
-            //  aligned with the panes below them
-            flex: 1;
-            //  Else the wide <pre> in .variables blows out the flex basis
-            //  instead of scrolling; a non-issue while the width was fixed
-            min-width: 0;
-            border-right: 1px solid darken($color-grey, 7%);
-            display: inline-block;
-            box-sizing: border-box;
-            min-height: calc(100vh - 100px);
-            overflow: auto;
+    .pane-group {
+        //  Spans both parent rows and adopts them as its own, so every label
+        //  lines up with every pane by construction rather than by matching
+        //  declarations in two places
+        grid-row: span 2;
+        display: grid;
+        grid-template-rows: subgrid;
+        //  Else a wide <pre> sets the track's floor instead of scrolling
+        min-width: 0;
+        border-right: 1px solid darken($color-grey, 7%);
 
-            //  The email's mobile breakpoint is `max-width: 640px`, so the
-            //  iframe has to be wider than that or every pane previews the
-            //  narrow layout. 680px clears it and leaves the 600px card its
-            //  gutters, which is what the desktop layout is supposed to show.
-            //
-            //  Shrink but do not grow: it holds 680px at any sensible window
-            //  size, and on a narrow one it gives way rather than overflowing
-            //  the page - which is also how the mobile layout stays reachable.
-            &.html {
-                flex: 0 1 680px;
-            }
+        &:last-child {
+            border-right: 0;
         }
     }
 
-    .sub-header {
+    .pane-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0 0.5rem;
         background: $color-grey;
         font-weight: bold;
-        height: 35px;
+        box-sizing: border-box;
+    }
 
-        .column {
-            padding: 0.5rem;
+    .pane-content {
+        overflow: auto;
+        min-height: 0;
+    }
+
+    .variables .pane-content {
+        font-family: monospace;
+        background: $color-light-grey;
+        padding: 0.5rem;
+    }
+
+    .html .pane-content {
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+
+            //  All three schemes are rendered; the toggle in the label decides
+            //  which is shown. Separate documents rather than one because the
+            //  scheme is baked into each iframe's `srcdoc`.
+            display: none;
         }
     }
 
-    .body {
-        min-height: calc(100vh - 100px);
+    .text .pane-content {
+        padding: 1rem;
 
-        .variables {
-            font-family: monospace;
-            background: $color-light-grey;
-            padding: 0.5rem;
+        pre {
+            white-space: pre-wrap;
+        }
+    }
+
+    /* ----------------------------------------------------------------
+       Stacked
+       ----------------------------------------------------------------
+       `max-width` rather than mobile-first, matching the sibling email
+       framework's mobile-last convention; see `email/base/mixins.scss`. */
+
+    @media (max-width: $breakpoint-stack) {
+        //  Three panes cannot share one viewport height; the document scrolls
+        height: auto;
+        min-height: 100vh;
+
+        .panes {
+            grid-template-columns: minmax(0, 1fr);
+            //  The groups size their own rows now
+            grid-template-rows: none;
         }
 
-        .html {
-            iframe {
-                width: 100%;
-                height: 100%;
-                border: 0;
-
-                //  All three schemes are rendered; the toggle in the sub-header
-                //  decides which is shown. Separate documents rather than one
-                //  because the scheme is baked into each iframe's `srcdoc`.
-                display: none;
-            }
+        .pane-group {
+            grid-row: auto;
+            //  Subgrid needs a spanned parent row, and there is none here
+            grid-template-rows: $pane-label-height auto;
+            border-right: 0;
+            border-bottom: 1px solid darken($color-grey, 7%);
         }
 
-        .text {
-            padding: 1rem;
+        .pane-content {
+            //  A definite height, not a max: the iframe's `height: 100%` has
+            //  nothing to resolve against in an `auto` row and would collapse
+            //  to nothing - the same trap as the header logo
+            height: $pane-stacked-height;
         }
     }
 
     /* ----------------------------------------------------------------
        Colour scheme toggle
        ----------------------------------------------------------------
-       The radios sit at the top of the component, ahead of both the
-       sub-header which labels them and the body which holds the panes: a
-       sibling selector cannot look upwards, and the toggle drives markup
-       in each. Visually hidden rather than `display: none`, so the
-       control keeps its place in the tab order. */
+       The radios sit at the top of the component, ahead of the panes
+       which hold both the labels and the iframes: a sibling selector
+       cannot look upwards, and the toggle drives markup in each.
+       Visually hidden rather than `display: none`, so the control keeps
+       its place in the tab order. */
 
     > .scheme-input {
         position: absolute;
@@ -157,7 +217,6 @@ body {
     }
 
     .scheme-toggle {
-        float: right;
         font-weight: normal;
 
         label {
@@ -167,8 +226,8 @@ body {
             //  Dropped here and restored on the last label, so the three
             //  segments share single borders rather than doubling them up
             border-right: 0;
-            //  11px + 16px + two 1px borders = 18px, which clears the
-            //  sub-header's 19px content box; the inherited 1.5em does not
+            //  Sized against the 35px label row it is centred in; the inherited
+            //  1.5em would make the segments taller than the copy beside them
             font-size: 11px;
             line-height: 16px;
             text-transform: uppercase;
@@ -189,21 +248,21 @@ body {
 
     //  The selected label and the pane it belongs to, both written from the
     //  input because that is the only element which knows the state
-    > #scheme-system:checked ~ .sub-header label[for='scheme-system'],
-    > #scheme-light:checked ~ .sub-header label[for='scheme-light'],
-    > #scheme-dark:checked ~ .sub-header label[for='scheme-dark'] {
+    > #scheme-system:checked ~ .panes .pane-label label[for='scheme-system'],
+    > #scheme-light:checked ~ .panes .pane-label label[for='scheme-light'],
+    > #scheme-dark:checked ~ .panes .pane-label label[for='scheme-dark'] {
         border-color: $color-orange;
         background: $color-orange;
         color: $color-white;
     }
 
-    > #scheme-system:checked ~ .body .html .pane--system,
-    > #scheme-light:checked ~ .body .html .pane--light,
-    > #scheme-dark:checked ~ .body .html .pane--dark {
+    > #scheme-system:checked ~ .panes .html .pane--system,
+    > #scheme-light:checked ~ .panes .html .pane--light,
+    > #scheme-dark:checked ~ .panes .html .pane--dark {
         display: block;
     }
 
-    > .scheme-input:focus-visible ~ .sub-header .scheme-toggle {
+    > .scheme-input:focus-visible ~ .panes .scheme-toggle {
         outline: 2px solid $color-orange;
         outline-offset: 2px;
     }

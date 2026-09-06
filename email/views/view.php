@@ -47,9 +47,8 @@ $fForceScheme = function (string $sHtml, bool $bDark): string {
 <div class="email-debugger">
     <?php
     /**
-     * Ahead of both the sub-header which labels them and the body which holds
-     * the panes: a sibling selector cannot look upwards, and the toggle drives
-     * markup in each.
+     * Ahead of the panes, which hold both the labels the radios drive and the
+     * iframes they choose between: a sibling selector cannot look upwards.
      */
     ?>
     <input type="radio" name="scheme" id="scheme-system" class="scheme-input" checked/>
@@ -75,32 +74,44 @@ $fForceScheme = function (string $sHtml, bool $bDark): string {
             </span>
         </div>
     </div>
-    <div class="sub-header">
-        <div class="column variables">Variables</div>
-        <div class="column html">
-            HTML
-            <span class="scheme-toggle">
-                <label for="scheme-system">System</label>
-                <label for="scheme-light">Light</label>
-                <label for="scheme-dark">Dark</label>
-            </span>
+    <?php
+    /**
+     * One grid rather than a row of labels and a row of panes: each group
+     * spans both of its rows, so a label cannot drift away from the pane it
+     * belongs to. Pairing the two in the markup is also what gives the
+     * stacked layout its order - label, pane, label, pane - for free.
+     */
+    ?>
+    <div class="panes">
+        <div class="pane-group variables">
+            <div class="pane-label">Variables</div>
+            <div class="pane-content">
+                <pre><?=htmlentities(json_encode($oEmail->data, JSON_PRETTY_PRINT), ENT_QUOTES);?></pre>
+            </div>
         </div>
-        <div class="column text">TEXT</div>
-    </div>
-    <div class="body">
-        <div class="column variables">
-            <pre><?=htmlentities(json_encode($oEmail->data, JSON_PRETTY_PRINT), ENT_QUOTES);?></pre>
+        <div class="pane-group html">
+            <div class="pane-label">
+                HTML
+                <span class="scheme-toggle">
+                    <label for="scheme-system">System</label>
+                    <label for="scheme-light">Light</label>
+                    <label for="scheme-dark">Dark</label>
+                </span>
+            </div>
+            <div class="pane-content">
+                <?php
+                //  Unmodified: the only pane which exercises the real media query
+                ?>
+                <iframe class="pane pane--system" srcdoc="<?=htmlentities($oEmail->body->html, ENT_QUOTES)?>"></iframe>
+                <iframe class="pane pane--light" srcdoc="<?=htmlentities($fForceScheme($oEmail->body->html, false), ENT_QUOTES)?>"></iframe>
+                <iframe class="pane pane--dark" srcdoc="<?=htmlentities($fForceScheme($oEmail->body->html, true), ENT_QUOTES)?>"></iframe>
+            </div>
         </div>
-        <div class="column html">
-            <?php
-            //  Unmodified: the only pane which exercises the real media query
-            ?>
-            <iframe class="pane pane--system" srcdoc="<?=htmlentities($oEmail->body->html, ENT_QUOTES)?>"></iframe>
-            <iframe class="pane pane--light" srcdoc="<?=htmlentities($fForceScheme($oEmail->body->html, false), ENT_QUOTES)?>"></iframe>
-            <iframe class="pane pane--dark" srcdoc="<?=htmlentities($fForceScheme($oEmail->body->html, true), ENT_QUOTES)?>"></iframe>
-        </div>
-        <div class="column text">
-            <pre style="white-space: pre-wrap;"><?=$oEmail->body->text?></pre>
+        <div class="pane-group text">
+            <div class="pane-label">Text</div>
+            <div class="pane-content">
+                <pre><?=$oEmail->body->text?></pre>
+            </div>
         </div>
     </div>
 </div>
