@@ -25,9 +25,13 @@ body {
     .header {
         background: $color-orange;
         color: $color-white;
-        //  `min-height` rather than `height`: the note below wraps on a narrow
-        //  window, and growing the band is better than clipping the warning
-        min-height: 60px;
+        //  Must stay a fixed height, not `min-height`: the logo below is sized
+        //  by `max-height: 100%`, and a percentage `max-height` resolves to
+        //  `none` when the containing block's height is not definite (CSS 2.1
+        //  §10.7). With `min-height` the logo renders at its intrinsic size,
+        //  overflows the band, and - being floated - pushes the panes below it
+        //  leftwards into a phantom fourth column.
+        height: 60px;
         //  Two lines inside the 34px 1em-padded content box; 30px does not fit
         line-height: 18px;
         padding: 1em;
