@@ -56,23 +56,24 @@ $fForceScheme = function (string $sHtml, bool $bDark): string {
     <input type="radio" name="scheme" id="scheme-light" class="scheme-input"/>
     <input type="radio" name="scheme" id="scheme-dark" class="scheme-input"/>
     <div class="header">
+        <a href="http://docs.nailsapp.co.uk" class="logo">
+            <img src="<?=\Nails\Common\Helper\Logo::nails()?>" id="nailsLogo" alt="Nails"/>
+        </a>
         <?php
         /**
-         * Ahead of the copy, not after it: the logo is floated, and a float is
-         * placed at the block position it appears in rather than at the top of
-         * its container. Below the `.note`, which is `display: block`, it would
-         * start two lines down, hang out of the 60px band and narrow the
-         * sub-header - which would knock its labels out of line with the panes.
+         * Wrapped rather than left as a bare text node: the header is a flex
+         * row, and a bare text node becomes an anonymous flex item - which
+         * would sit the warning and the `.note` side by side in the row rather
+         * than stacked to the right of the logo.
          */
         ?>
-        <a href="http://docs.nailsapp.co.uk">
-            <img src="<?=\Nails\Common\Helper\Logo::nails()?>" id="nailsLogo"/>
-        </a>
-        This page is viewable in development environments only.
-        <span class="note">
-            Middle pane: Dark shows Apple Mail, Mail on iOS and Outlook.com — Gmail
-            ignores the colour scheme and force-inverts on its own terms.
-        </span>
+        <div class="copy">
+            This page is viewable in development environments only.
+            <span class="note">
+                Middle pane: Dark shows Apple Mail, Mail on iOS and Outlook.com — Gmail
+                ignores the colour scheme and force-inverts on its own terms.
+            </span>
+        </div>
     </div>
     <div class="sub-header">
         <div class="column variables">Variables</div>
