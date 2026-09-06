@@ -7,6 +7,9 @@ $color-orange: #d55600;
 $color-grey: #d5d5d5;
 $color-light-grey: #efefef;
 
+//  Shared by the band and the logo inside it, so the two cannot drift apart
+$header-height: 60px;
+
 
 html,
 body {
@@ -25,21 +28,35 @@ body {
     .header {
         background: $color-orange;
         color: $color-white;
-        //  Must stay a fixed height, not `min-height`: the logo below is sized
-        //  by `max-height: 100%`, and a percentage `max-height` resolves to
-        //  `none` when the containing block's height is not definite (CSS 2.1
-        //  §10.7). With `min-height` the logo renders at its intrinsic size,
-        //  overflows the band, and - being floated - pushes the panes below it
-        //  leftwards into a phantom fourth column.
-        height: 60px;
-        //  Two lines inside the 34px 1em-padded content box; 30px does not fit
-        line-height: 18px;
-        padding: 1em;
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        //  `min-height` rather than `height`: the note wraps on a narrow window,
+        //  and growing the band is better than clipping the warning. Safe now
+        //  the logo is sized in px - a percentage height has nothing definite to
+        //  resolve against here and would fall back to the intrinsic 250px.
+        min-height: $header-height;
+        //  No vertical padding: the logo spans the full band, and the copy is
+        //  centred against it rather than inset from the edges
+        padding: 0 1em;
         box-sizing: border-box;
 
-        img {
-            float: right;
-            max-height: 100%;
+        .logo {
+            //  Neither grow nor shrink; the copy beside it gives way instead
+            flex: 0 0 auto;
+
+            img {
+                height: $header-height;
+                width: auto;
+                display: block;
+            }
+        }
+
+        .copy {
+            //  Two lines inside the band; 30px does not fit
+            line-height: 18px;
+            //  Else long copy sets the flex basis and squeezes the logo
+            min-width: 0;
         }
 
         //  Which clients the Dark pane actually represents. Without this the
