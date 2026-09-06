@@ -72,6 +72,13 @@ $fRenderSlot = function (string $sSlot) use ($oView, $aSlotData): string {
         .panel, .badge, .code, .heads-up, pre {
             border-radius: 0 !important;
         }
+        /* The framework dropped `border-collapse: collapse` so the radii above
+           can render in clients which do rounded corners; Word gets it back
+           here, because it squares them off anyway and its `border-spacing`
+           support is too poor to trust for the table-gap it prevents */
+        table {
+            border-collapse: collapse;
+        }
     </style>
     <![endif]-->
     <?php echo $fRenderSlot('styles'); ?>
