@@ -7,13 +7,18 @@
 
 namespace Nails\Email\Database\Migration;
 
+use Nails\Common\Interfaces;
+use Nails\Common\Traits;
+
 /**
  * Class Migration15
  *
- * @package Nails\Cms\Database\Migration
+ * @package Nails\Email\Database\Migration
  */
-class Migration15 extends Migration14
+class Migration15 implements Interfaces\Database\Migration
 {
+    use Traits\Database\Migration;
+
     /**
      * Execute the migration
      *
@@ -21,17 +26,8 @@ class Migration15 extends Migration14
      */
     public function execute(): void
     {
-        /**
-         * Apps upgrading from feature/pre-new-admin will be on 14 so the permission migration won't happen. Execute it
-         * again here (safe to do) so that it definitely runs
-         */
-        parent::execute();
-
-        //  And continue onto desired changes if they haven't been run already (sniff for new columns on email_archive)
-        $oResult    = $this->query('SHOW COLUMNS FROM `{{NAILS_DB_PREFIX}}email_archive` LIKE "created";');
-        $hasBeenRun = $oResult->rowCount() > 0;
-
-        if (!$hasBeenRun) {
+        //  This is migration 14 on `feature/pre-new-admin`, so it may already have been run
+        if (!$this->columnExists('{{NAILS_DB_PREFIX}}email_archive', 'created')) {
             //  main archive
             //  Add timestamp columns
             $this->query('ALTER TABLE `{{NAILS_DB_PREFIX}}email_archive` ADD `created` DATETIME null AFTER `fail_reason`;');
