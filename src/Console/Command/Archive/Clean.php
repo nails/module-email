@@ -2,20 +2,16 @@
 
 namespace Nails\Email\Console\Command\Archive;
 
-use DateTime;
-use Nails\Common\Service\Database;
+use Nails\Components;
 use Nails\Console\Command\Base;
-use Nails\Console\Exception\ConsoleException;
-use Nails\Email\Constants;
-use Nails\Email\Service\Emailer;
+use Nails\Email\Housekeeping\Archive;
 use Nails\Factory;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class Clean
- *
- * @package Nails\Email\Console\Command\Archive
+ * @deprecated Use housekeeping:run --routine=Nails\Email\Housekeeping\Archive
  */
 class Clean extends Base
 {
@@ -26,10 +22,14 @@ class Clean extends Base
     {
         $this
             ->setName('email:archive:clean')
-            ->setDescription('Cleans the archive according to data retention rules');
+            ->setDescription('[DEPRECATED] Cleans the archive according to data retention rules')
+            ->addOption(
+                'dry-run',
+                null,
+                InputOption::VALUE_NONE,
+                'Log what would be deleted without deleting'
+            );
     }
-
-    // --------------------------------------------------------------------------
 
     /**
      * Executes the command
@@ -43,50 +43,25 @@ class Clean extends Base
     {
         parent::execute($oInput, $oOutput);
 
-        try {
+        $this->banner('Email: Archive Clean (deprecated)');
 
-            $this->banner('Email: Archive Clean');
+        if (!Components::exists('nails/module-housekeeping')) {
+            $oOutput->writeln('<error>This command now requires nails/module-housekeeping.</error>');
+            $oOutput->writeln('Install it with <comment>composer require nails/module-housekeeping</comment>');
+            $oOutput->writeln('then run <comment>nails housekeeping:run --routine=' . Archive::class . '</comment>');
 
-            $iRetention = (int) appSetting('retention_period', Constants::MODULE_SLUG);
-            if ($iRetention) {
-
-                $oOutput->writeln('Retention policy: <info>' . $iRetention . ' days</info>');
-
-                /** @var Database $oDb */
-                $oDb = Factory::service('Database');
-                /** @var DateTime $oNow */
-                $oNow = Factory::factory('DateTime');
-                /** @var Emailer $oEmailer */
-                $oEmailer = Factory::service('Emailer', Constants::MODULE_SLUG);
-
-                $oNow->sub(new \DateInterval('P' . $iRetention . 'D'));
-
-                $oOutput->write('Cleaning items older than <comment>' . $oNow->format('Y-m-d H:i:s') . '</comment>... ');
-
-                $oDb->where('created <', $oNow->format('Y-m-d H:i:s'));
-                $oDb->from($oEmailer->getTableName());
-                $oDb->delete();
-
-                $oOutput->writeln('<comment>done</comment>');
-                $oOutput->writeln('<comment>' . $oDb->affected_rows() . '</comment> items deleted');
-
-            } else {
-                $oOutput->writeln('Archive cleanup disabled');
-            }
-
-        } catch (ConsoleException $e) {
-            return $this->abort(
-                self::EXIT_CODE_FAILURE,
-                [$e->getMessage()]
-            );
+            return static::EXIT_CODE_FAILURE;
         }
 
-        // --------------------------------------------------------------------------
+        /** @var \Nails\Housekeeping\Service\Orchestrator $oOrchestrator */
+        $oOrchestrator = Factory::service('Orchestrator', 'nails/module-housekeeping');
+        $oResult       = $oOrchestrator->runRoutine(
+            Archive::class,
+            (bool) $oInput->getOption('dry-run'),
+            true,
+            $oOutput
+        );
 
-        //  And we're done
-        $oOutput->writeln('');
-        $oOutput->writeln('Complete!');
-
-        return self::EXIT_CODE_SUCCESS;
+        return $oResult->isSuccess() ? static::EXIT_CODE_SUCCESS : static::EXIT_CODE_FAILURE;
     }
 }
