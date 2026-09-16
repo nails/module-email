@@ -21,8 +21,8 @@ class Archive extends Base
     const LABEL                 = 'Email archive';
     const DESCRIPTION           = 'Deletes archived emails older than EMAIL_ARCHIVE_RETENTION_DAYS';
     const CRON_EXPRESSION       = '15 2 * * *';
-    const CONFIG_RETENTION_DAYS = 'EMAIL_ARCHIVE_RETENTION_DAYS';
-    const RETENTION_DAYS        = 0;
+    const CONFIG_RETENTION_DAYS  = 'EMAIL_ARCHIVE_RETENTION_DAYS';
+    const DEFAULT_RETENTION_DAYS = 0;
 
     private ?int $iRetentionDays = null;
     private string $sRetentionSource = 'default';
@@ -110,7 +110,7 @@ class Archive extends Base
             return $this->iRetentionDays = (int) $mLegacy;
         }
 
-        return $this->iRetentionDays = static::RETENTION_DAYS;
+        return $this->iRetentionDays = static::DEFAULT_RETENTION_DAYS;
     }
 
     protected function retentionSource(): string
