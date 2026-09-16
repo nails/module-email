@@ -4,7 +4,6 @@ namespace Nails\Email\Settings;
 
 use Nails\Common\Helper\Form;
 use Nails\Common\Interfaces;
-use Nails\Common\Service\FormValidation;
 use Nails\Components\Setting;
 use Nails\Email\Model\Page;
 use Nails\Email\Service\Driver;
@@ -20,6 +19,9 @@ class General implements Interfaces\Component\Settings
     const KEY_FROM_NAME        = 'from_name';
     const KEY_FROM_EMAIL       = 'from_email';
     const KEY_REPLY_TO_EMAIL   = 'reply_to_email';
+    /**
+     * @deprecated Use EMAIL_ARCHIVE_RETENTION_DAYS instead
+     */
     const KEY_RETENTION_PERIOD = 'retention_period';
     const KEY_SIGN_OFF         = 'sign_off';
     const KEY_FOOTER_ADDRESS   = 'footer_address';
@@ -92,23 +94,12 @@ class General implements Interfaces\Component\Settings
             ->setFieldset('Content')
             ->setInfo('A postal address to show in the footer of every email. Leave blank to omit it entirely.');
 
-        /** @var Setting $oRetentionPeriod */
-        $oRetentionPeriod = Factory::factory('ComponentSetting');
-        $oRetentionPeriod
-            ->setKey(static::KEY_RETENTION_PERIOD)
-            ->setType(Form::FIELD_NUMBER)
-            ->setLabel('Days')
-            ->setFieldset('Data Retention')
-            ->setInfo('This number defines how long emails should be kept in the archive, set to 0 to disable archive cleanup')
-            ->addValidation(FormValidation::RULE_IS_NATURAL);
-
         return [
             $oFromName,
             $oFromEmail,
             $oReplyToEmail,
             $oSignOff,
             $oFooterAddress,
-            $oRetentionPeriod,
         ];
     }
 }
