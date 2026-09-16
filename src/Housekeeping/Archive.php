@@ -3,6 +3,7 @@
 namespace Nails\Email\Housekeeping;
 
 use Nails\Common\Model\Base as ModelBase;
+use Nails\Config;
 use Nails\Email\Constants;
 use Nails\Email\Settings\General;
 use Nails\Factory;
@@ -17,9 +18,14 @@ class Archive extends Base
         execute as deleteModelRows;
     }
 
-    const LABEL           = 'Email archive';
-    const DESCRIPTION     = 'Deletes archived emails older than the configured retention period';
-    const CRON_EXPRESSION = '15 2 * * *';
+    const LABEL                 = 'Email archive';
+    const DESCRIPTION           = 'Deletes archived emails older than EMAIL_ARCHIVE_RETENTION_DAYS';
+    const CRON_EXPRESSION       = '15 2 * * *';
+    const CONFIG_RETENTION_DAYS = 'EMAIL_ARCHIVE_RETENTION_DAYS';
+    const RETENTION_DAYS        = 0;
+
+    private ?int $iRetentionDays = null;
+    private string $sRetentionSource = 'default';
 
     protected function model(): ModelBase
     {
@@ -61,10 +67,16 @@ class Archive extends Base
     public function execute(Context $oContext): Result
     {
         $iDays = $this->retentionDays();
+        $oContext->log(sprintf(
+            'RETENTION days=%d source=%s',
+            $iDays,
+            $this->retentionSource()
+        ));
+
         if ($iDays < 1) {
             $oContext
                 ->writeln('Archive cleanup disabled')
-                ->log('DISABLED retention_period=0');
+                ->log('DISABLED ' . static::CONFIG_RETENTION_DAYS . '=0');
 
             return Result::ok(0, 'Archive cleanup disabled');
         }
@@ -76,6 +88,39 @@ class Archive extends Base
 
     protected function retentionDays(): int
     {
-        return (int) appSetting(General::KEY_RETENTION_PERIOD, Constants::MODULE_SLUG);
+        if ($this->iRetentionDays !== null) {
+            return $this->iRetentionDays;
+        }
+
+        $mLegacy = $this->legacyRetentionPeriod();
+
+        if ($mLegacy !== null) {
+            deprecatedError(
+                sprintf('The "%s" app setting', General::KEY_RETENTION_PERIOD),
+                static::CONFIG_RETENTION_DAYS
+            );
+        }
+
+        if (Config::isSet(static::CONFIG_RETENTION_DAYS)) {
+            $this->sRetentionSource = 'config';
+            return $this->iRetentionDays = (int) Config::get(static::CONFIG_RETENTION_DAYS);
+
+        } elseif ($mLegacy !== null) {
+            $this->sRetentionSource = 'app_setting';
+            return $this->iRetentionDays = (int) $mLegacy;
+        }
+
+        return $this->iRetentionDays = static::RETENTION_DAYS;
+    }
+
+    protected function retentionSource(): string
+    {
+        $this->retentionDays();
+        return $this->sRetentionSource;
+    }
+
+    protected function legacyRetentionPeriod(): mixed
+    {
+        return appSetting(General::KEY_RETENTION_PERIOD, Constants::MODULE_SLUG);
     }
 }
