@@ -495,8 +495,12 @@ class Templates extends Base
 
             if (count($aGeneratedEmails) === 1) {
                 $this->oUserFeedback->success(sprintf(
-                    'Preview email sent successfully. View it in your browser <a href="%s" style="text-decoration: underline" target="_blank:">here</a>.',
-                    reset($aGeneratedEmails)->data->url->viewOnline
+                    'Preview email sent successfully. View it in your browser <a href="%s" target="_blank" rel="noopener noreferrer">here</a>.',
+                    htmlspecialchars(
+                        (string) reset($aGeneratedEmails)->data->url->viewOnline,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    )
                 ));
             } else {
                 $this->oUserFeedback->success(sprintf(
