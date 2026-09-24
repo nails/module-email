@@ -10,7 +10,7 @@ $oInput = \Nails\Factory::service('Input');
 <div class="group-email archive">
     <?=Helper::loadSearch($oSearch)?>
     <?=Helper::loadPagination($oPagination)?>
-    <table class="table table-striped table-hover table-bordered table-responsive">
+    <table class="table table-striped table-hover table-responsive">
         <thead class="table-dark">
             <tr>
                 <th class="id">ID</th>
