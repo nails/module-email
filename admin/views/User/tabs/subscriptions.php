@@ -8,7 +8,7 @@
 use Nails\Email\Admin\Permission;
 
 ?>
-<table class="table table-hover table-bordered table-responsive js-email-subscriptions align-middle" data-user-id="<?=$user->id?>">
+<table class="table table-hover table-responsive js-email-subscriptions align-middle" data-user-id="<?=$user->id?>">
     <thead class="table-dark">
         <tr>
             <th>Email Type</th>
