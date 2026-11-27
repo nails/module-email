@@ -2,6 +2,7 @@
 
 namespace Nails\Email\Settings;
 
+use Nails\Email\Admin\Permission;
 use Nails\Common\Helper\Form;
 use Nails\Common\Interfaces;
 use Nails\Components\Setting;
@@ -41,9 +42,9 @@ class General implements Interfaces\Component\Settings
     /**
      * @inheritDoc
      */
-    public function getPermissions(): array
+    public function getPermission(): string
     {
-        return [];
+        return Permission\Settings\General::class;
     }
 
     // --------------------------------------------------------------------------
